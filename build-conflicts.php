@@ -39,8 +39,7 @@ set_error_handler(
 
 $advisoriesRepository = 'https://github.com/FriendsOfPHP/security-advisories.git';
 $advisoriesExtension  = 'yaml';
-$rootDir              = realpath(__DIR__ . '/..');
-$buildDir             = $rootDir . '/build';
+$buildDir             = __DIR__ . '/build';
 $baseComposerJson     = [
     'name' => 'roave/security-advisories',
     'type' => 'metapackage',

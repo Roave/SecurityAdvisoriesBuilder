@@ -91,7 +91,7 @@ use ErrorException;
 
     $runInPath(
         function () use ($execute) : void {
-            $execute('php build-advisories/build-conflicts.php');
+            $execute('php build-conflicts.php');
             $execute('git push origin master');
         },
         realpath(__DIR__ . '/..')

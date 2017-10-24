@@ -226,12 +226,12 @@ $writeJson(
             )
         )
     ),
-    $rootDir . '/composer.json'
+    __DIR__ . '/build/composer.json'
 );
 
-$getComposerPhar($rootDir);
-$validateComposerJson($rootDir . '/composer.json');
+$getComposerPhar(__DIR__);
+$validateComposerJson(__DIR__ . '/build/composer.json');
 
-$commitComposerJson($rootDir . '/composer.json');
+//$commitComposerJson(__DIR__ . '/composer.json');
 
 echo 'Completed!' . PHP_EOL;

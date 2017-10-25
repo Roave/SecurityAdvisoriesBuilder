@@ -15,5 +15,5 @@ before_script:
   - git config --global user.name "Marco Pivetta (via Travis-CI)"
 
 script:
-  - vendor/bin/phpunit -c build-advisories
+  - vendor/bin/phpunit
   - php build-conflicts.php

@@ -75,6 +75,12 @@ $cloneRoaveAdvisories = function () use ($roaveAdvisoriesRepository, $buildDir) 
         . escapeshellarg($roaveAdvisoriesRepository)
         . ' ' . escapeshellarg($buildDir . '/roave-security-advisories')
     );
+
+    system(\sprintf(
+        'cp -r %s %s',
+        escapeshellarg($buildDir . '/roave-security-advisories'),
+        escapeshellarg($buildDir . '/roave-security-advisories-original')
+    ));
 };
 
 /**

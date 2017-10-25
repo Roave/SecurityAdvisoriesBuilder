@@ -167,11 +167,13 @@ $runInPath = function (callable $function, string $path) {
 
 $getComposerPhar = function (string $targetDir) use ($runInPath) : void {
     $runInPath(
-        function () : void {
+        function () use ($targetDir) : void {
+            $installerPath = escapeshellarg($targetDir . '/composer-installer.php');
+
             system(sprintf(
-                'curl -sS https://getcomposer.org/installer -o %s/composer-installer.php && php %s/composer-installer.php',
-                escapeshellarg(__DIR__ . '/build'),
-                escapeshellarg(__DIR__ . '/build')
+                'curl -sS https://getcomposer.org/installer -o %s && php %s/composer-installer.php',
+                $installerPath,
+                $installerPath
             ));
         },
         $targetDir

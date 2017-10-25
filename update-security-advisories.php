@@ -69,14 +69,6 @@ use ErrorException;
         );
     };
 
-    $runInPath(
-        function () use ($execute) : void {
-            $execute('git fetch origin');
-            $execute('git reset --hard origin/master');
-        },
-        realpath(__DIR__ . '/..')
-    );
-
     $previousSha1 = $getCurrentSha1(\realpath(__DIR__ . '/build/roave-security-advisories-original'));
 
     $runInPath(

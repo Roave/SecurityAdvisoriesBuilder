@@ -60,46 +60,32 @@ use ErrorException;
         return $output;
     };
 
-    $getCurrentSha1 = function () use ($runInPath, $execute) : string {
+    $getCurrentSha1 = function (string $directory) use ($runInPath, $execute) : string {
         return $runInPath(
             function () use ($execute) : string {
                 return $execute('git rev-parse --verify HEAD')[0];
             },
-            realpath(__DIR__ . '/..')
+            $directory
         );
     };
 
-    $runInPath(
-        function () use ($execute) : void {
-            $execute('git fetch origin');
-            $execute('git reset --hard origin/master');
-        },
-        realpath(__DIR__ . '/..')
-    );
+    (function () {
+        require  __DIR__ . '/build-conflicts.php';
+    })();
 
-    $previousSha1 = $getCurrentSha1();
+    $previousSha1 = $getCurrentSha1(\realpath(__DIR__ . '/build/roave-security-advisories-original'));
+    $newSha1      = $getCurrentSha1(\realpath(__DIR__ . '/build/roave-security-advisories'));
 
     $runInPath(
         function () use ($execute) : void {
-            $execute(
-                'curl -sS https://getcomposer.org/installer -o composer-installer.php && php composer-installer.php'
-            );
-            $execute('php composer.phar install');
-        },
-        realpath(__DIR__)
-    );
-
-    $runInPath(
-        function () use ($execute) : void {
-            $execute('php build-advisories/build-conflicts.php');
             $execute('git push origin master');
         },
-        realpath(__DIR__ . '/..')
+        realpath(__DIR__ . '/build/roave-security-advisories')
     );
-
+    
     header('Content-Type: application/json');
     echo json_encode([
         'before' => $previousSha1,
-        'after'  => $getCurrentSha1(),
+        'after'  => $newSha1,
     ]);
 })();

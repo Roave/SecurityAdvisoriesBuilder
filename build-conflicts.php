@@ -30,244 +30,246 @@ use SplFileInfo;
 use Symfony\Component\Yaml\Yaml;
 use UnexpectedValueException;
 
-require_once __DIR__ . '/vendor/autoload.php';
+(function () {
+    require_once __DIR__ . '/vendor/autoload.php';
 
-set_error_handler(
-    function ($errorCode, $message = '', $file = '', $line = 0) {
-        throw new ErrorException($message, 0, $errorCode, $file, $line);
-    },
-    E_STRICT | E_NOTICE | E_WARNING
-);
-
-$advisoriesRepository      = 'https://github.com/FriendsOfPHP/security-advisories.git';
-$roaveAdvisoriesRepository = 'git@github.com:Roave/SecurityAdvisories.git';
-$advisoriesExtension       = 'yaml';
-$buildDir                  = __DIR__ . '/build';
-$baseComposerJson          = [
-    'name' => 'roave/security-advisories',
-    'type' => 'metapackage',
-    'description' => 'Prevents installation of composer packages with known security vulnerabilities: '
-        . 'no API, simply require it',
-    'license' => 'MIT',
-    'authors' => [[
-        'name'  => 'Marco Pivetta',
-        'role'  => 'maintainer',
-        'email' => 'ocramius@gmail.com',
-    ]],
-];
-
-$cleanBuildDir = function () use ($buildDir) : void {
-    system('rm -rf ' . escapeshellarg($buildDir));
-    system('mkdir ' . escapeshellarg($buildDir));
-};
-
-$cloneAdvisories = function () use ($advisoriesRepository, $buildDir) : void {
-    system(
-        'git clone '
-        . escapeshellarg($advisoriesRepository)
-        . ' ' . escapeshellarg($buildDir . '/security-advisories')
-    );
-};
-
-$cloneRoaveAdvisories = function () use ($roaveAdvisoriesRepository, $buildDir) : void {
-    system(
-        'git clone '
-        . escapeshellarg($roaveAdvisoriesRepository)
-        . ' ' . escapeshellarg($buildDir . '/roave-security-advisories')
-    );
-
-    system(\sprintf(
-        'cp -r %s %s',
-        escapeshellarg($buildDir . '/roave-security-advisories'),
-        escapeshellarg($buildDir . '/roave-security-advisories-original')
-    ));
-};
-
-/**
- * @param string $path
- *
- * @return Advisory[]
- */
-$findAdvisories = function (string $path) use ($advisoriesExtension) : array {
-    $yaml = new Yaml();
-
-    return array_map(
-        function (SplFileInfo $advisoryFile) use ($yaml) {
-            return Advisory::fromArrayData(
-                $yaml->parse(file_get_contents($advisoryFile->getRealPath()), true)
-            );
+    set_error_handler(
+        function ($errorCode, $message = '', $file = '', $line = 0) {
+            throw new ErrorException($message, 0, $errorCode, $file, $line);
         },
-        iterator_to_array(new \CallbackFilterIterator(
-            new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
-                RecursiveIteratorIterator::SELF_FIRST
-            ),
-            function (SplFileInfo $advisoryFile) use ($advisoriesExtension) {
-                // @todo skip `vendor` dir
-                return $advisoryFile->isFile() && $advisoryFile->getExtension() === $advisoriesExtension;
-            }
-        ))
+        E_STRICT | E_NOTICE | E_WARNING
     );
-};
 
-/**
- * @param Advisory[] $advisories
- *
- * @return Component[]
- */
-$buildComponents = function (array $advisories) : array {
-    // @todo need a functional way to do this, somehow
-    $indexedAdvisories = [];
-    $components        = [];
+    $advisoriesRepository      = 'https://github.com/FriendsOfPHP/security-advisories.git';
+    $roaveAdvisoriesRepository = 'git@github.com:Roave/SecurityAdvisories.git';
+    $advisoriesExtension       = 'yaml';
+    $buildDir                  = __DIR__ . '/build';
+    $baseComposerJson          = [
+        'name'        => 'roave/security-advisories',
+        'type'        => 'metapackage',
+        'description' => 'Prevents installation of composer packages with known security vulnerabilities: '
+            . 'no API, simply require it',
+        'license'     => 'MIT',
+        'authors'     => [[
+                              'name'  => 'Marco Pivetta',
+                              'role'  => 'maintainer',
+                              'email' => 'ocramius@gmail.com',
+                          ]],
+    ];
 
-    foreach ($advisories as $advisory) {
-        if (! isset($indexedAdvisories[$advisory->getComponentName()])) {
-            $indexedAdvisories[$advisory->getComponentName()] = [];
+    $execute = function (string $commandString) : array {
+        // may the gods forgive me for this in-lined command addendum, but I CBA to fix proc_open's handling
+        // of exit codes.
+        exec($commandString . ' 2>&1', $output, $result);
+
+        if (0 !== $result) {
+            throw new \UnexpectedValueException(sprintf(
+                'Command failed: "%s" "%s"',
+                $commandString,
+                implode(PHP_EOL, $output)
+            ));
         }
 
-        $indexedAdvisories[$advisory->getComponentName()][] = $advisory;
-    }
+        return $output;
+    };
 
-    foreach ($indexedAdvisories as $componentName => $advisories) {
-        $components[$componentName] = new Component($componentName, $advisories);
-    }
+    $cleanBuildDir = function () use ($buildDir, $execute) : void {
+        $execute('rm -rf ' . escapeshellarg($buildDir));
+        $execute('mkdir ' . escapeshellarg($buildDir));
+    };
 
-    return $components;
-};
+    $cloneAdvisories = function () use ($advisoriesRepository, $buildDir, $execute) : void {
+        $execute(
+            'git clone '
+            . escapeshellarg($advisoriesRepository)
+            . ' ' . escapeshellarg($buildDir . '/security-advisories')
+        );
+    };
 
-/**
- * @param Component[] $components
- *
- * @return string[]
- */
-$buildConflicts = function (array $components) : array {
-    $conflicts = [];
+    $cloneRoaveAdvisories = function () use ($roaveAdvisoriesRepository, $buildDir, $execute) : void {
+        $execute(
+            'git clone '
+            . escapeshellarg($roaveAdvisoriesRepository)
+            . ' ' . escapeshellarg($buildDir . '/roave-security-advisories')
+        );
 
-    foreach ($components as $component) {
-        $conflicts[$component->getName()] = $component->getConflictConstraint();
-    }
+        $execute(\sprintf(
+            'cp -r %s %s',
+            escapeshellarg($buildDir . '/roave-security-advisories'),
+            escapeshellarg($buildDir . '/roave-security-advisories-original')
+        ));
+    };
 
-    ksort($conflicts);
+    /**
+     * @param string $path
+     *
+     * @return Advisory[]
+     */
+    $findAdvisories = function (string $path) use ($advisoriesExtension) : array {
+        $yaml = new Yaml();
 
-    return array_filter($conflicts);
-};
+        return array_map(
+            function (SplFileInfo $advisoryFile) use ($yaml) {
+                return Advisory::fromArrayData(
+                    $yaml->parse(file_get_contents($advisoryFile->getRealPath()), true)
+                );
+            },
+            iterator_to_array(new \CallbackFilterIterator(
+                new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+                    RecursiveIteratorIterator::SELF_FIRST
+                ),
+                function (SplFileInfo $advisoryFile) use ($advisoriesExtension) {
+                    // @todo skip `vendor` dir
+                    return $advisoryFile->isFile() && $advisoryFile->getExtension() === $advisoriesExtension;
+                }
+            ))
+        );
+    };
 
-$buildConflictsJson = function (array $baseConfig, array $conflicts) : string {
-    return json_encode(
-        array_merge(
-            $baseConfig,
-            ['conflict' => $conflicts]
-        ),
-        JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-    );
-};
+    /**
+     * @param Advisory[] $advisories
+     *
+     * @return Component[]
+     */
+    $buildComponents = function (array $advisories) : array {
+        // @todo need a functional way to do this, somehow
+        $indexedAdvisories = [];
+        $components        = [];
 
-$writeJson = function (string $jsonString, string $path) : void {
-    file_put_contents($path, $jsonString . "\n");
-};
-
-$runInPath = function (callable $function, string $path) {
-    $originalPath = getcwd();
-
-    chdir($path);
-
-    try {
-        $returnValue = $function();
-    } finally {
-        chdir($originalPath);
-    }
-
-    return $returnValue;
-};
-
-$getComposerPhar = function (string $targetDir) use ($runInPath) : void {
-    $runInPath(
-        function () use ($targetDir) : void {
-            $installerPath = escapeshellarg($targetDir . '/composer-installer.php');
-
-            system(sprintf(
-                'curl -sS https://getcomposer.org/installer -o %s && php %s',
-                $installerPath,
-                $installerPath
-            ));
-        },
-        $targetDir
-    );
-};
-
-$execute = function (string $commandString) : bool {
-    exec($commandString, $ignored, $result);
-
-    return $result === 0;
-};
-
-$validateComposerJson = function (string $composerJsonPath) use ($runInPath, $execute) : void {
-    $runInPath(
-        function () use ($execute) {
-            if (! $execute('php composer.phar validate')) {
-                throw new UnexpectedValueException('Composer file validation failed');
+        foreach ($advisories as $advisory) {
+            if (! isset($indexedAdvisories[$advisory->getComponentName()])) {
+                $indexedAdvisories[$advisory->getComponentName()] = [];
             }
-        },
-        dirname($composerJsonPath)
-    );
-};
 
-$copyGeneratedComposerJson = function (string $sourceComposerJsonPath, string $targetComposerJsonPath) use ($execute) : void {
-    if (! $execute(\sprintf(
-        'cp %s %s',
-        \escapeshellarg($sourceComposerJsonPath),
-        \escapeshellarg($targetComposerJsonPath)
-    ))) {
-        throw new UnexpectedValueException('Composer file could not be copied');
-    }
-};
+            $indexedAdvisories[$advisory->getComponentName()][] = $advisory;
+        }
 
-$commitComposerJson = function (string $composerJsonPath) use ($runInPath, $execute) : void {
-    $runInPath(
-        function () use ($composerJsonPath, $execute) {
-            if (! $execute('git add ' . escapeshellarg(realpath($composerJsonPath)))) {
-                throw new UnexpectedValueException(sprintf(
-                    'Could not add file "%s" to staged commit',
-                    $composerJsonPath
+        foreach ($indexedAdvisories as $componentName => $advisories) {
+            $components[$componentName] = new Component($componentName, $advisories);
+        }
+
+        return $components;
+    };
+
+    /**
+     * @param Component[] $components
+     *
+     * @return string[]
+     */
+    $buildConflicts = function (array $components) : array {
+        $conflicts = [];
+
+        foreach ($components as $component) {
+            $conflicts[$component->getName()] = $component->getConflictConstraint();
+        }
+
+        ksort($conflicts);
+
+        return array_filter($conflicts);
+    };
+
+    $buildConflictsJson = function (array $baseConfig, array $conflicts) : string {
+        return json_encode(
+            array_merge(
+                $baseConfig,
+                ['conflict' => $conflicts]
+            ),
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+        );
+    };
+
+    $writeJson = function (string $jsonString, string $path) : void {
+        file_put_contents($path, $jsonString . "\n");
+    };
+
+    $runInPath = function (callable $function, string $path) {
+        $originalPath = getcwd();
+
+        chdir($path);
+
+        try {
+            $returnValue = $function();
+        } finally {
+            chdir($originalPath);
+        }
+
+        return $returnValue;
+    };
+
+    $getComposerPhar = function (string $targetDir) use ($runInPath, $execute) : void {
+        $runInPath(
+            function () use ($targetDir, $execute) : void {
+                $installerPath = escapeshellarg($targetDir . '/composer-installer.php');
+
+                $execute(sprintf(
+                    'curl -sS https://getcomposer.org/installer -o %s && php %s',
+                    $installerPath,
+                    $installerPath
                 ));
-            }
+            },
+            $targetDir
+        );
+    };
 
-            $message = sprintf(
-                'Committing generated "composer.json" file as per "%s"',
-                (new DateTime('now', new DateTimeZone('UTC')))->format(DateTime::W3C)
-            );
+    $validateComposerJson = function (string $composerJsonPath) use ($runInPath, $execute) : void {
+        $runInPath(
+            function () use ($execute) {
+                $execute('php composer.phar validate');
+            },
+            dirname($composerJsonPath)
+        );
+    };
 
-            $execute('git diff-index --quiet HEAD || git commit -m ' . escapeshellarg($message));
-        },
-        dirname($composerJsonPath)
-    );
-};
+    $copyGeneratedComposerJson = function (string $sourceComposerJsonPath, string $targetComposerJsonPath) use ($execute
+    ) : void {
+        $execute(\sprintf(
+            'cp %s %s',
+            \escapeshellarg($sourceComposerJsonPath),
+            \escapeshellarg($targetComposerJsonPath)
+        ));
+    };
+
+    $commitComposerJson = function (string $composerJsonPath) use ($runInPath, $execute) : void {
+        $runInPath(
+            function () use ($composerJsonPath, $execute) {
+                $execute('git add ' . escapeshellarg(realpath($composerJsonPath)));
+
+                $message = sprintf(
+                    'Committing generated "composer.json" file as per "%s"',
+                    (new DateTime('now', new DateTimeZone('UTC')))->format(DateTime::W3C)
+                );
+
+                $execute('git diff-index --quiet HEAD || git commit -m ' . escapeshellarg($message));
+            },
+            dirname($composerJsonPath)
+        );
+    };
 
 // cleanup:
-$cleanBuildDir();
-$cloneAdvisories();
-$cloneRoaveAdvisories();
+    $cleanBuildDir();
+    $cloneAdvisories();
+    $cloneRoaveAdvisories();
 
 // actual work:
-$writeJson(
-    $buildConflictsJson(
-        $baseComposerJson,
-        $buildConflicts(
-            $buildComponents(
-                $findAdvisories($buildDir . '/security-advisories')
+    $writeJson(
+        $buildConflictsJson(
+            $baseComposerJson,
+            $buildConflicts(
+                $buildComponents(
+                    $findAdvisories($buildDir . '/security-advisories')
+                )
             )
-        )
-    ),
-    __DIR__ . '/build/composer.json'
-);
+        ),
+        __DIR__ . '/build/composer.json'
+    );
 
-$getComposerPhar(__DIR__ . '/build');
-$validateComposerJson(__DIR__ . '/build/composer.json');
+    $getComposerPhar(__DIR__ . '/build');
+    $validateComposerJson(__DIR__ . '/build/composer.json');
 
-$copyGeneratedComposerJson(
-    __DIR__ . '/build/composer.json',
-    __DIR__ . '/build/roave-security-advisories/composer.json'
-);
-$commitComposerJson(__DIR__ . '/build/roave-security-advisories/composer.json');
-
-echo 'Completed!' . PHP_EOL;
+    $copyGeneratedComposerJson(
+        __DIR__ . '/build/composer.json',
+        __DIR__ . '/build/roave-security-advisories/composer.json'
+    );
+    $commitComposerJson(__DIR__ . '/build/roave-security-advisories/composer.json');
+})();

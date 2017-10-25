@@ -25,5 +25,11 @@
         "psr-0": {
             "RoaveTest\\SecurityAdvisories\\": "test"
         }
+    },
+    "extra": {
+        "heroku": {
+            "document-root": "public",
+            "index-document": "index.php"
+        }
     }
 }

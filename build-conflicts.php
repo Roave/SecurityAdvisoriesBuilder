@@ -39,10 +39,11 @@ set_error_handler(
     E_STRICT | E_NOTICE | E_WARNING
 );
 
-$advisoriesRepository = 'https://github.com/FriendsOfPHP/security-advisories.git';
-$advisoriesExtension  = 'yaml';
-$buildDir             = __DIR__ . '/build';
-$baseComposerJson     = [
+$advisoriesRepository      = 'https://github.com/FriendsOfPHP/security-advisories.git';
+$roaveAdvisoriesRepository = 'git@github.com:Roave/SecurityAdvisories.git';
+$advisoriesExtension       = 'yaml';
+$buildDir                  = __DIR__ . '/build';
+$baseComposerJson          = [
     'name' => 'roave/security-advisories',
     'type' => 'metapackage',
     'description' => 'Prevents installation of composer packages with known security vulnerabilities: '
@@ -65,6 +66,14 @@ $cloneAdvisories = function () use ($advisoriesRepository, $buildDir) : void {
         'git clone '
         . escapeshellarg($advisoriesRepository)
         . ' ' . escapeshellarg($buildDir . '/security-advisories')
+    );
+};
+
+$cloneRoaveAdvisories = function () use ($roaveAdvisoriesRepository, $buildDir) : void {
+    system(
+        'git clone '
+        . escapeshellarg($roaveAdvisoriesRepository)
+        . ' ' . escapeshellarg($buildDir . '/roave-security-advisories')
     );
 };
 
@@ -197,6 +206,16 @@ $validateComposerJson = function (string $composerJsonPath) use ($runInPath, $ex
     );
 };
 
+$copyGeneratedComposerJson = function (string $sourceComposerJsonPath, string $targetComposerJsonPath) use ($execute) : void {
+    if (! $execute(\sprintf(
+        'cp %s %s',
+        \escapeshellarg($sourceComposerJsonPath),
+        \escapeshellarg($targetComposerJsonPath)
+    ))) {
+        throw new UnexpectedValueException('Composer file could not be copied');
+    }
+};
+
 $commitComposerJson = function (string $composerJsonPath) use ($runInPath, $execute) : void {
     $runInPath(
         function () use ($composerJsonPath, $execute) {
@@ -221,6 +240,7 @@ $commitComposerJson = function (string $composerJsonPath) use ($runInPath, $exec
 // cleanup:
 $cleanBuildDir();
 $cloneAdvisories();
+$cloneRoaveAdvisories();
 
 // actual work:
 $writeJson(
@@ -238,6 +258,10 @@ $writeJson(
 $getComposerPhar(__DIR__ . '/build');
 $validateComposerJson(__DIR__ . '/build/composer.json');
 
-//$commitComposerJson(__DIR__ . '/composer.json');
+$copyGeneratedComposerJson(
+    __DIR__ . '/build/composer.json',
+    __DIR__ . '/build/roave-security-advisories/composer.json'
+);
+$commitComposerJson(__DIR__ . '/build/roave-security-advisories/composer.json');
 
 echo 'Completed!' . PHP_EOL;

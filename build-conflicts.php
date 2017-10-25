@@ -28,7 +28,6 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 use Symfony\Component\Yaml\Yaml;
-use UnexpectedValueException;
 
 (function () {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -40,8 +39,10 @@ use UnexpectedValueException;
         E_STRICT | E_NOTICE | E_WARNING
     );
 
-    $advisoriesRepository      = 'https://github.com/FriendsOfPHP/security-advisories.git';
-    $roaveAdvisoriesRepository = 'git@github.com:Roave/SecurityAdvisories.git';
+    $token                     = \getenv('GITHUB_TOKEN');
+    $authentication            = $token ? $token . ':x-oauth-basic@' : '';
+    $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
+    $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';
     $advisoriesExtension       = 'yaml';
     $buildDir                  = __DIR__ . '/build';
     $baseComposerJson          = [

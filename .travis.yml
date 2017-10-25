@@ -10,8 +10,7 @@ php:
   - 7.1
 
 before_script:
-  - composer self-update
-  - composer update
+  - composer install
   - git config --global user.email "ocramius+travis-ci@gmail.com"
   - git config --global user.name "Marco Pivetta (via Travis-CI)"
 

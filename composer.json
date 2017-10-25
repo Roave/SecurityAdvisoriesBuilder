@@ -25,5 +25,13 @@
         "psr-0": {
             "RoaveTest\\SecurityAdvisories\\": "test"
         }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "which git",
+            "which bash",
+            "which curl",
+            "which cp"
+        ]
     }
 }

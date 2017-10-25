@@ -69,8 +69,6 @@ use ErrorException;
         );
     };
 
-    $previousSha1 = $getCurrentSha1(\realpath(__DIR__ . '/build/roave-security-advisories-original'));
-
     $runInPath(
         function () use ($execute) : void {
             $execute('php build-conflicts.php');
@@ -78,7 +76,8 @@ use ErrorException;
         __DIR__
     );
 
-    $newSha1 = $getCurrentSha1(\realpath(__DIR__ . '/build/roave-security-advisories'));
+    $previousSha1 = $getCurrentSha1(\realpath(__DIR__ . '/build/roave-security-advisories-original'));
+    $newSha1      = $getCurrentSha1(\realpath(__DIR__ . '/build/roave-security-advisories'));
 
     $runInPath(
         function () use ($execute) : void {
@@ -90,6 +89,6 @@ use ErrorException;
     header('Content-Type: application/json');
     echo json_encode([
         'before' => $previousSha1,
-        'after'  => $getCurrentSha1(\realpath(__DIR__ . '/build/roave-security-advisories')),
+        'after'  => $newSha1,
     ]);
 })();

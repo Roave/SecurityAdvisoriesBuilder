@@ -69,12 +69,9 @@ use ErrorException;
         );
     };
 
-    $runInPath(
-        function () use ($execute) : void {
-            $execute('php build-conflicts.php');
-        },
-        __DIR__
-    );
+    (function () {
+        require  __DIR__ . '/build-conflicts.php';
+    })();
 
     $previousSha1 = $getCurrentSha1(\realpath(__DIR__ . '/build/roave-security-advisories-original'));
     $newSha1      = $getCurrentSha1(\realpath(__DIR__ . '/build/roave-security-advisories'));

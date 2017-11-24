@@ -98,12 +98,6 @@ final class AdvisoryTest extends PHPUnit_Framework_TestCase
                 ['>=2.0', '<2.1'],
                 '<1.1|>=2,<2.1',
             ],
-            // real case: silverstripe cms
-            [
-                ['>=3.1,<3.1.11', '>=3,<=3.0.11'],
-                ['>=2.0', '<2.1'],
-                '>=2,<2.1|>=3,<=3.0.11|>=3.1,<3.1.11',
-            ]
         ];
     }
 }

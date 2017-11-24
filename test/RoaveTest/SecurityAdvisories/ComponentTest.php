@@ -111,4 +111,32 @@ final class ComponentTest extends PHPUnit_Framework_TestCase
         self::assertSame('>=1,<1.1|>=2,<2.1|>=3,<3.1', $component->getConflictConstraint());
         self::assertSame('foo/bar', $component->getName());
     }
+
+    public function testSortAdvisoriesWithRealCase() : void
+    {
+        $advisory1 = Advisory::fromArrayData([
+            'reference' => 'composer://silverstripe/cms',
+            'branches' => [
+                '3.1.x' => [
+                    'versions' => ['>=3.1.0', '<=3.1.9'],
+                ],
+            ],
+        ]);
+        $advisory2 = clone $advisory1;
+        $advisory3 = Advisory::fromArrayData([
+            'reference' => 'composer://silverstripe/cms',
+            'branches' => [
+                '3.0.x' => [
+                    'versions' => ['>=3.0.0', '<=3.0.11'],
+                ],
+                '3.1.x' => [
+                    'versions' => ['>=3.1.0', '<3.1.11'],
+                ],
+            ],
+        ]);
+
+        $component = new Component('foo/bar', [$advisory1, $advisory2, $advisory3]);
+
+        self::assertSame('>=3,<=3.0.11|>=3.1,<3.1.11', $component->getConflictConstraint());
+    }
 }

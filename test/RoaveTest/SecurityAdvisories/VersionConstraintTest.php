@@ -253,11 +253,6 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
         $this->callMergeWithOverlapping($constraint1, $constraint2);
     }
 
-    public function testGetConstraintStringIsSorted(): void
-    {
-        $this->markTestIncomplete();
-    }
-
     /**
      * @return string[][]
      */

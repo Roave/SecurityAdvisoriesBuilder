@@ -102,16 +102,7 @@ final class Advisory
      */
     private function sortVersionConstraints(array $versionConstraints): array
     {
-        usort($versionConstraints, function(VersionConstraint $a, VersionConstraint $b) {
-            $versionA = $a->getLowerBound() ?? $a->getUpperBound();
-            $versionB = $b->getLowerBound() ?? $b->getUpperBound();
-
-            if ($versionA && $versionB) {
-                return $versionA->isGreaterOrEqualThan($versionB) ? 1 : -1;
-            }
-
-            return 0;
-        });
+        usort($versionConstraints, [VersionConstraint::class, 'sort']);
 
         return $versionConstraints;
     }

@@ -103,7 +103,7 @@ final class Component
             }
         }
 
-        usort($constraints, [VersionConstraint::class, 'sort']);
+        usort($constraints, new VersionConstraintSort());
 
         return $constraints;
     }

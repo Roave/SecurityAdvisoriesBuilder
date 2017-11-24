@@ -159,18 +159,6 @@ final class VersionConstraint
         ));
     }
 
-    public static function sort(self $a, self $b): int
-    {
-        $versionA = $a->getLowerBound() ?? $a->getUpperBound();
-        $versionB = $b->getLowerBound() ?? $b->getUpperBound();
-
-        if ($versionA && $versionB) {
-            return $versionA->isGreaterOrEqualThan($versionB) ? 1 : -1;
-        }
-
-        return 0;
-    }
-
     private function contains(self $other) : bool
     {
         return $this->isSimpleRangeString()  // cannot compare - too complex :-(

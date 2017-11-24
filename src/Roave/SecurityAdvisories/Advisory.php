@@ -102,7 +102,7 @@ final class Advisory
      */
     private function sortVersionConstraints(array $versionConstraints): array
     {
-        usort($versionConstraints, [VersionConstraint::class, 'sort']);
+        usort($versionConstraints, new VersionConstraintSort());
 
         return $versionConstraints;
     }

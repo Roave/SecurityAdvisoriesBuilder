@@ -44,8 +44,8 @@ final class Advisory
             return $versionConstraints;
         };
 
-        $this->componentName     = (string) $componentName;
-        $this->branchConstraints = $checkType(...$branchConstraints);
+        $this->componentName     = $componentName;
+        $this->branchConstraints = $this->sortVersionConstraints($checkType(...$branchConstraints));
     }
 
     /**
@@ -94,5 +94,16 @@ final class Advisory
                 $this->branchConstraints
             )
         ) ?: null;
+    }
+
+    /**
+     * @param VersionConstraint[] $versionConstraints
+     * @return VersionConstraint[]
+     */
+    private function sortVersionConstraints(array $versionConstraints): array
+    {
+        usort($versionConstraints, new VersionConstraintSort());
+
+        return $versionConstraints;
     }
 }

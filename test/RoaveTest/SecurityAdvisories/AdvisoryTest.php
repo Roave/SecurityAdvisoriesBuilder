@@ -59,4 +59,45 @@ final class AdvisoryTest extends PHPUnit_Framework_TestCase
         self::assertSame('>=1,<1.1', $constraints[0]->getConstraintString());
         self::assertSame('>=2,<2.1', $constraints[1]->getConstraintString());
     }
+
+    /**
+     * @dataProvider unsortedBranchesProvider
+     */
+    public function testFromArrayGeneratesSortedResult(array $versionConstraint1, array $versionConstraint2, string $expected) : void
+    {
+        $advisory = Advisory::fromArrayData([
+            'reference' => 'composer://foo/bar',
+            'branches' => [
+                '2.0.x' => [
+                    'versions' => $versionConstraint2,
+                ],
+                '1.0.x' => [
+                    'versions' => $versionConstraint1,
+                ],
+            ],
+        ]);
+
+        self::assertSame($expected, $advisory->getConstraint());
+    }
+
+    public function unsortedBranchesProvider()
+    {
+        return [
+            [
+                ['>=1.0', '<1.1'],
+                ['>=2.0', '<2.1'],
+                '>=1,<1.1|>=2,<2.1',
+            ],
+            [
+                ['>=1.0', '<1.1'],
+                ['>=2.0'],
+                '>=1,<1.1|>=2',
+            ],
+            [
+                ['<1.1'],
+                ['>=2.0', '<2.1'],
+                '<1.1|>=2,<2.1',
+            ],
+        ];
+    }
 }

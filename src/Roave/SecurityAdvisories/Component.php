@@ -103,6 +103,8 @@ final class Component
             }
         }
 
+        usort($constraints, new VersionConstraintSort());
+
         return $constraints;
     }
 }

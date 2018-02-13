@@ -232,14 +232,23 @@ use Symfony\Component\Yaml\Yaml;
     };
 
     $commitComposerJson = function (string $composerJsonPath) use ($runInPath, $execute) : void {
+        $originalHash = $runInPath(
+            function () use ($execute) {
+               return $execute('git rev-parse HEAD');
+            },
+            dirname($composerJsonPath) . '/../security-advisories'
+        );
+
         $runInPath(
-            function () use ($composerJsonPath, $execute) {
+            function () use ($composerJsonPath, $originalHash, $execute) {
                 $execute('git add ' . escapeshellarg(realpath($composerJsonPath)));
 
                 $message = sprintf(
                     'Committing generated "composer.json" file as per "%s"',
                     (new DateTime('now', new DateTimeZone('UTC')))->format(DateTime::W3C)
                 );
+                $message .= "\n" . sprintf('Original commit: "%s"',
+                        'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash[0]);
 
                 $execute('git diff-index --quiet HEAD || git commit -m ' . escapeshellarg($message));
             },

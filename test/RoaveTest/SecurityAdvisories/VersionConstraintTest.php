@@ -42,7 +42,6 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
         $constraint = VersionConstraint::fromString($stringConstraint);
 
         self::assertInstanceOf(VersionConstraint::class, $constraint);
-        self::assertTrue($constraint->isSimpleRangeString());
         self::assertInstanceOf(Version::class, $constraint->getLowerBound());
         self::assertInstanceOf(Version::class, $constraint->getUpperBound());
 
@@ -50,8 +49,8 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
 
         self::assertSame((bool) preg_match('/>=/', $stringConstraint), $constraint->isLowerBoundIncluded());
         self::assertSame((bool) preg_match('/<=/',$stringConstraint), $constraint->isUpperBoundIncluded());
-        self::assertStringMatchesFormat('%A' . $constraint->getLowerBound()->getVersion() . '%A', $constraintAsString);
-        self::assertStringMatchesFormat('%A' . $constraint->getUpperBound()->getVersion() . '%A', $constraintAsString);
+        self::assertStringMatchesFormat('%A' . $constraint->getLowerBound() . '%A', $constraintAsString);
+        self::assertStringMatchesFormat('%A' . $constraint->getUpperBound() . '%A', $constraintAsString);
     }
 
     /**
@@ -69,7 +68,6 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
     {
         $constraint = VersionConstraint::fromString('<1');
 
-        self::assertTrue($constraint->isSimpleRangeString());
         self::assertSame('<1', $constraint->getConstraintString());
         self::assertNull($constraint->getLowerBound());
         self::assertInstanceOf(Version::class, $constraint->getUpperBound());
@@ -81,7 +79,6 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
     {
         $constraint = VersionConstraint::fromString('>1');
 
-        self::assertTrue($constraint->isSimpleRangeString());
         self::assertSame('>1', $constraint->getConstraintString());
         self::assertNull($constraint->getUpperBound());
         self::assertInstanceOf(Version::class, $constraint->getLowerBound());
@@ -93,7 +90,6 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
     {
         $constraint = VersionConstraint::fromString('<=1');
 
-        self::assertTrue($constraint->isSimpleRangeString());
         self::assertSame('<=1', $constraint->getConstraintString());
         self::assertNull($constraint->getLowerBound());
         self::assertInstanceOf(Version::class, $constraint->getUpperBound());
@@ -105,7 +101,6 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
     {
         $constraint = VersionConstraint::fromString('>=1');
 
-        self::assertTrue($constraint->isSimpleRangeString());
         self::assertSame('>=1', $constraint->getConstraintString());
         self::assertNull($constraint->getUpperBound());
         self::assertInstanceOf(Version::class, $constraint->getLowerBound());
@@ -123,7 +118,6 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
         $constraint = VersionConstraint::fromString($stringConstraint);
 
         self::assertInstanceOf(VersionConstraint::class, $constraint);
-        self::assertFalse($constraint->isSimpleRangeString());
         self::assertSame($stringConstraint, $constraint->getConstraintString());
     }
 
@@ -138,6 +132,7 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
 
     public function testCannotCompareComplexRanges() : void
     {
+        $this->markTestIncomplete();
         $constraint1 = VersionConstraint::fromString('1|2');
         $constraint2 = VersionConstraint::fromString('1|2|3');
 

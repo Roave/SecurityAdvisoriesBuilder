@@ -199,7 +199,7 @@ final class VersionConstraint
             xor $this->strictlyContainsOtherBound($other->upperBoundary);
     }
 
-    public function adjacentTo(VersionConstraint $other) : bool
+    private function adjacentTo(VersionConstraint $other) : bool
     {
         if ($this->lowerBoundary && $other->upperBoundary && $this->lowerBoundary->adjacentTo($other->upperBoundary)) {
             return true;

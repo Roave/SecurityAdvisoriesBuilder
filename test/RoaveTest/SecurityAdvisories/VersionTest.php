@@ -37,7 +37,7 @@ final class VersionTest extends PHPUnit_Framework_TestCase
      */
     public function testVersionWillNotAllowInvalidFormats(string $versionString) : void
     {
-        $this->setExpectedException(\InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
 
         Version::fromString($versionString);
     }
@@ -52,7 +52,7 @@ final class VersionTest extends PHPUnit_Framework_TestCase
         $version = Version::fromString($versionString);
 
         self::assertInstanceOf(Version::class, $version);
-        self::assertRegExp('/([0-9]*)(\\.[1-9][0-9]*)*/', $version->getVersion());
+        self::assertRegExp('/([0-9]*)(\\.[1-9][0-9]*)*/', (string) $version);
     }
 
     /**
@@ -62,7 +62,7 @@ final class VersionTest extends PHPUnit_Framework_TestCase
      */
     public function testVersionNumbersAreNormalized(string $versionString) : void
     {
-        self::assertNotRegExp('/(\\.[0]+)+$/', Version::fromString($versionString)->getVersion());
+        self::assertNotRegExp('/(\\.[0]+)+$/', (string) Version::fromString($versionString));
     }
 
     /**
@@ -230,8 +230,8 @@ final class VersionTest extends PHPUnit_Framework_TestCase
     public function invalidVersionStringsProvider() : array
     {
         return [
-            [''],
             ['12.a'],
+            [''],
             ['12a3'],
             ['alpha'],
             ['beta'],

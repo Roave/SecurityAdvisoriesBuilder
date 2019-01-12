@@ -35,26 +35,31 @@ final class Version
             throw new \InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
-        return new self($version);
+        return new self(self::stripEndZeroes($version));
     }
 
     public function equalTo(self $other) : bool
     {
-        return (bool) version_compare($this->stripEndZeroes(), $other->stripEndZeroes(), '==');
+        return (bool) version_compare((string)$this, (string) $other, '==');
     }
 
     public function isGreaterThan(self $other) : bool
     {
-        return (bool) version_compare($this->version, $other->version, '>');
+        return (bool) version_compare((string)$this, (string) $other, '>');
     }
 
     public function isGreaterOrEqualThan(self $other) : bool
     {
-        return (bool) version_compare($this->version, $other->version, '>=');
+        return (bool) version_compare((string)$this, (string) $other, '>=');
     }
 
-    public function stripEndZeroes() : string
+    public static function stripEndZeroes(string $version) : string
     {
-        return preg_replace('/\.[\.0+]+$/', '', (string)$this->version);
+        return preg_replace('/\.[\.0+]+$/', '', $version);
+    }
+
+    public function __toString()
+    {
+        return $this->version;
     }
 }

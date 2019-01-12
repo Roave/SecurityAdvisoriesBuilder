@@ -9,8 +9,9 @@ namespace Roave\SecurityAdvisories;
  */
 final class Boundary
 {
-    private const MATCHER = '/^\s*(<|<=|=|>=|>)\s*((?:\d+\.)*\d+)\s*$/';
-    private const VALID_ADJACENCY_MAP = [
+    const STABILITY_TAIL = '[._-]?(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)*+)?)?([.-]?dev)?';
+    const MATCHER = '/^\s*(<|<=|=|>=|>)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')\s*$/';
+    const VALID_ADJACENCY_MAP = [
         ['<', '='],
         ['<', '>='],
         ['<=', '>'],
@@ -74,6 +75,6 @@ final class Boundary
 
     public function getBoundaryString() : string
     {
-        return $this->limitType . $this->version->getVersion();
+        return $this->limitType . $this->version->stripEndZeroes();
     }
 }

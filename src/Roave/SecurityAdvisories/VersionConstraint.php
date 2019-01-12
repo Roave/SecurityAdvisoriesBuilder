@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
-/**
- * A simple version constraint - naively assumes that it is only about ranges like ">=1.2.3,<4.5.6"
- */
 final class VersionConstraint
 {
-    const CLOSED_RANGE_MATCHER     = '/^>(=?)\s*((?:\d+\.)*\d+)\s*,\s*<(=?)\s*((?:\d+\.)*\d+)$/';
-    const LEFT_OPEN_RANGE_MATCHER  = '/^<(=?)\s*((?:\d+\.)*\d+)$/';
-    const RIGHT_OPEN_RANGE_MATCHER = '/^>(=?)\s*((?:\d+\.)*\d+)$/';
+    const STABILITY_TAIL    = '[._-]?(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)*+)?)?([.-]?dev)?';
+    const CLOSED_RANGE_MATCHER     = '/^>(=?)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')\s*,\s*<(=?)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')$/';
+    const LEFT_OPEN_RANGE_MATCHER  = '/^<(=?)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')$/';
+    const RIGHT_OPEN_RANGE_MATCHER = '/^>(=?)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')$/';
 
     /**
      * @var string|null
@@ -28,10 +26,6 @@ final class VersionConstraint
      */
     private $upperBoundary;
 
-    private function __construct()
-    {
-    }
-
     /**
      * @param string $versionConstraint
      *
@@ -41,7 +35,7 @@ final class VersionConstraint
      */
     public static function fromString(string $versionConstraint) : self
     {
-        $constraintString = (string) $versionConstraint;
+        $constraintString = strtolower((string) $versionConstraint);
         $instance         = new self();
 
         if (preg_match(self::CLOSED_RANGE_MATCHER, $constraintString, $matches)) {
@@ -68,11 +62,6 @@ final class VersionConstraint
         $instance->constraintString = $constraintString;
 
         return $instance;
-    }
-
-    public function isSimpleRangeString() : bool
-    {
-        return null === $this->constraintString;
     }
 
     public function getConstraintString() : string
@@ -161,9 +150,7 @@ final class VersionConstraint
 
     private function contains(self $other) : bool
     {
-        return $this->isSimpleRangeString()  // cannot compare - too complex :-(
-            && $other->isSimpleRangeString() // cannot compare - too complex :-(
-            && $this->containsLowerBound($other->lowerBoundary)
+        return $this->containsLowerBound($other->lowerBoundary)
             && $this->containsUpperBound($other->upperBoundary);
     }
 
@@ -203,9 +190,6 @@ final class VersionConstraint
 
     private function overlapsWith(VersionConstraint $other) : bool
     {
-        if (! $this->isSimpleRangeString() && $other->isSimpleRangeString()) {
-            return false;
-        }
 
         if ($this->contains($other) || $other->contains($this)) {
             return false;
@@ -215,7 +199,7 @@ final class VersionConstraint
             xor $this->strictlyContainsOtherBound($other->upperBoundary);
     }
 
-    private function adjacentTo(VersionConstraint $other) : bool
+    public function adjacentTo(VersionConstraint $other) : bool
     {
         if ($this->lowerBoundary && $other->upperBoundary && $this->lowerBoundary->adjacentTo($other->upperBoundary)) {
             return true;

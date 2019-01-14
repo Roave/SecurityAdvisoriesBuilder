@@ -49,8 +49,8 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
 
         self::assertSame((bool) preg_match('/>=/', $stringConstraint), $constraint->isLowerBoundIncluded());
         self::assertSame((bool) preg_match('/<=/',$stringConstraint), $constraint->isUpperBoundIncluded());
-        self::assertStringMatchesFormat('%A' . $constraint->getLowerBound() . '%A', $constraintAsString);
-        self::assertStringMatchesFormat('%A' . $constraint->getUpperBound() . '%A', $constraintAsString);
+        self::assertStringMatchesFormat('%A' . $constraint->getLowerBound()->toString() . '%A', $constraintAsString);
+        self::assertStringMatchesFormat('%A' . $constraint->getUpperBound()->toString() . '%A', $constraintAsString);
     }
 
     /**
@@ -127,16 +127,6 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
         $constraint2 = VersionConstraint::fromString('>1.2.4,<4.5.5');
 
         self::assertTrue($this->callContains($constraint1, $constraint2));
-        self::assertFalse($this->callContains($constraint2, $constraint1));
-    }
-
-    public function testCannotCompareComplexRanges() : void
-    {
-        $this->markTestIncomplete();
-        $constraint1 = VersionConstraint::fromString('1|2');
-        $constraint2 = VersionConstraint::fromString('1|2|3');
-
-        self::assertFalse($this->callContains($constraint1, $constraint2));
         self::assertFalse($this->callContains($constraint2, $constraint1));
     }
 

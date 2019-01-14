@@ -40,25 +40,33 @@ final class Version
 
     public function equalTo(self $other) : bool
     {
-        return (bool) version_compare((string)$this, (string) $other, '==');
+        return (bool) version_compare($this->toString(), $other->toString(), '==');
     }
 
     public function isGreaterThan(self $other) : bool
     {
-        return (bool) version_compare((string)$this, (string) $other, '>');
+        return (bool) version_compare($this->toString(), $other->toString(), '>');
     }
 
     public function isGreaterOrEqualThan(self $other) : bool
     {
-        return (bool) version_compare((string)$this, (string) $other, '>=');
+        return (bool) version_compare($this->toString(), $other->toString(), '>=');
     }
 
+    /**
+     * Strips all the '0' and '.' out of the version,
+     * e.g. for '0.0.0' version this part will be removed - '.0.0'
+     *
+     * @param string $version
+     *
+     * @return string
+     */
     public static function stripEndZeroes(string $version) : string
     {
         return preg_replace('/\.[\.0+]+$/', '', $version);
     }
 
-    public function __toString()
+    public function toString()
     {
         return $this->version;
     }

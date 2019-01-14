@@ -75,6 +75,6 @@ final class Boundary
 
     public function getBoundaryString() : string
     {
-        return $this->limitType . $this->version;
+        return $this->limitType . $this->version->toString();
     }
 }

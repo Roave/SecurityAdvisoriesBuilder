@@ -35,7 +35,7 @@ final class Version
             throw new \InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
-        return new self(self::stripTrailingZeroes($version));
+        return new self($version);
     }
 
     public function equalTo(self $other) : bool
@@ -68,6 +68,6 @@ final class Version
 
     public function toString()
     {
-        return $this->version;
+        return self::stripTrailingZeroes($this->version);
     }
 }

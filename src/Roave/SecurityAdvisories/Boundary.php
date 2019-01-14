@@ -9,7 +9,7 @@ namespace Roave\SecurityAdvisories;
  */
 final class Boundary
 {
-    const STABILITY_TAIL = '[._-]?(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)*+)?)?([.-]?dev)?';
+    const STABILITY_TAIL = '[._-]?(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)+)?)?([.-]?dev)?';
     const MATCHER = '/^\s*(<|<=|=|>=|>)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')\s*$/';
     const VALID_ADJACENCY_MAP = [
         ['<', '='],

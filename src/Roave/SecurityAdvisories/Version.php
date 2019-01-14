@@ -6,7 +6,7 @@ namespace Roave\SecurityAdvisories;
 
 final class Version
 {
-    const STABILITY_TAIL = '[._-]?(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)*+)?)?([.-]?dev)?';
+    const STABILITY_TAIL = '[._-]?(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)+)?)?([.-]?dev)?';
     const VALIDITY_MATCHER = '/^(?:\d+\.)*\d+'.self::STABILITY_TAIL.'$/';
 
     /**
@@ -35,7 +35,7 @@ final class Version
             throw new \InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
-        return new self(self::stripEndZeroes($version));
+        return new self(self::stripTrailingZeroes($version));
     }
 
     public function equalTo(self $other) : bool
@@ -54,14 +54,14 @@ final class Version
     }
 
     /**
-     * Strips all the '0' and '.' out of the version,
+     * Strips all trailing '0' and '.' out of the version,
      * e.g. for '0.0.0' version this part will be removed - '.0.0'
      *
      * @param string $version
      *
      * @return string
      */
-    public static function stripEndZeroes(string $version) : string
+    public static function stripTrailingZeroes(string $version) : string
     {
         return preg_replace('/\.[\.0+]+$/', '', $version);
     }

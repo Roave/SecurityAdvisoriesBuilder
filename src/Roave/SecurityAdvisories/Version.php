@@ -40,34 +40,40 @@ final class Version
 
     public function equalTo(self $other) : bool
     {
-        return (bool) version_compare($this->toString(), $other->toString(), '==');
+        [$first, $second] = $this->normalizeVersions($other);
+        return (bool) version_compare($first, $second, '==');
     }
 
     public function isGreaterThan(self $other) : bool
     {
-        return (bool) version_compare($this->toString(), $other->toString(), '>');
+        [$first, $second] = $this->normalizeVersions($other);
+        return (bool) version_compare($first, $second, '>');
     }
 
     public function isGreaterOrEqualThan(self $other) : bool
     {
-        return (bool) version_compare($this->toString(), $other->toString(), '>=');
-    }
-
-    /**
-     * Strips all trailing '0' and '.' out of the version,
-     * e.g. for '0.0.0' version this part will be removed - '.0.0'
-     *
-     * @param string $version
-     *
-     * @return string
-     */
-    public static function stripTrailingZeroes(string $version) : string
-    {
-        return preg_replace('/\.[\.0+]+$/', '', $version);
+        [$first, $second] = $this->normalizeVersions($other);
+        return (bool) version_compare($first, $second, '>=');
     }
 
     public function toString()
     {
-        return self::stripTrailingZeroes($this->version);
+        return $this->version;
     }
+
+    /**
+     * Here we need to append zeroes so comparison will work correctly
+     * @return array
+     */
+    private function normalizeVersions(self $other): array
+    {
+        $first = $this->version;
+        $second = $this->version;
+
+        // detect which version does not have equal length, take into account stability tails
+        // do the padding for the that version
+
+        return [$first, $second];
+    }
+
 }

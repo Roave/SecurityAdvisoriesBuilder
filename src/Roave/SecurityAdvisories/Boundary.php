@@ -75,6 +75,20 @@ final class Boundary
 
     public function getBoundaryString() : string
     {
-        return $this->limitType . $this->version->toString();
+        return $this->limitType . $this->stripTrailingZeroes($this->version->toString());
     }
+
+    /**
+     * Strips all trailing '0' and '.' out of the version,
+     * e.g. for '0.0.0' version this part will be removed - '.0.0'
+     *
+     * @param string $version
+     *
+     * @return string
+     */
+    private function stripTrailingZeroes(string $version) : string
+    {
+        return preg_replace('/\.[\.0+]+$/', '', $version);
+    }
+
 }

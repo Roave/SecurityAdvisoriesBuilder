@@ -140,6 +140,20 @@ final class VersionTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @dataProvider differentLengthVersionsProvider
+     */
+    public function testVersionsAreComparable($a, $b, $expectedA, $expectedB)
+    {
+        $versionA = Version::fromString($a);
+        $versionB = Version::fromString($b);
+
+        [$normalizedA, $normalizedB] = $this->callNormalizeVersions($versionA, $versionB);
+
+        $this->assertEquals($expectedA, $normalizedA);
+        $this->assertEquals($expectedB, $normalizedB);
+    }
+
+    /**
      * @return string[][]
      */
     public function validVersionStringProvider()
@@ -265,5 +279,22 @@ final class VersionTest extends PHPUnit_Framework_TestCase
             ['2.0.1.1', '2.0.1'],
             ['2.0.1.0.0.0', '2.0.2'],
         ];
+    }
+
+    public function differentLengthVersionsProvider() : array
+    {
+        return [
+            ['3', '3.0.0', '3.0.0', '3.0.0'],
+            ['2.1.0-beta1', '2.1', '2.1.0-beta1', '2.1.0'],
+        ];
+    }
+
+    private function callNormalizeVersions(Version $version, Version $other) : array
+    {
+        $normalizeVersionsReflection = new \ReflectionMethod($version, 'normalizeVersions');
+
+        $normalizeVersionsReflection->setAccessible(true);
+
+        return $normalizeVersionsReflection->invoke($version, $other);
     }
 }

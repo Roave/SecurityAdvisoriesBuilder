@@ -81,10 +81,6 @@ final class Boundary
     /**
      * Strips all trailing '0' and '.' out of the version,
      * e.g. for '0.0.0' version this part will be removed - '.0.0'
-     *
-     * @param string $version
-     *
-     * @return string
      */
     private function stripTrailingZeroes(string $version) : string
     {

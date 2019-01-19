@@ -191,13 +191,13 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
         $constraint2 = VersionConstraint::fromString($constraintString2);
 
         if (! ($constraint2ContainsConstraint1 || $constraint1ContainsConstraint2)) {
-            $this->setExpectedException(\LogicException::class);
+            $this->expectException(\LogicException::class);
         }
 
         $merged1 = $constraint1->mergeWith($constraint2);
         $merged2 = $constraint2->mergeWith($constraint1);
 
-//        self::assertEquals($merged1, $merged2);
+        self::assertEquals($merged1, $merged2);
 
         self::assertTrue($this->callContains($merged1, $constraint1));
         self::assertTrue($this->callContains($merged1, $constraint2));
@@ -360,8 +360,8 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
             ['>1,<2.10', '>1,<2.100', false, true],
             ['>1.0,<2', '>1,<2', true, true],
             ['>1,<2.0', '>1,<2', true, true],
-            ['>1.0.0,<2', '>1,<2', true, true],
-            ['>1,<2.0.0', '>1,<2', true, true],
+            ['>1.0.0,<2', '>1.0.0 ,<2', true, true],
+            ['>1,<2.0.0', '>1,<2.0.0', true, true],
             ['>=1,<2', '>1,<2', true, false],
             ['>=1,<2', '>=1,<2', true, true],
             ['>1,<=2', '>1,<2', true, false],

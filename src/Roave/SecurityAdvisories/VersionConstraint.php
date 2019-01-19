@@ -6,10 +6,10 @@ namespace Roave\SecurityAdvisories;
 
 final class VersionConstraint
 {
-    const STABILITY_TAIL           = '[._-]?(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)+)?)?([.-]?dev)?';
-    const CLOSED_RANGE_MATCHER     = '/^>(=?)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')\s*,\s*<(=?)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')$/';
-    const LEFT_OPEN_RANGE_MATCHER  = '/^<(=?)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')$/';
-    const RIGHT_OPEN_RANGE_MATCHER = '/^>(=?)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')$/';
+    private const STABILITY_TAIL           = '[._-]?(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)+)?)?([.-]?dev)?';
+    private const CLOSED_RANGE_MATCHER     = '/^>(=?)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')\s*,\s*<(=?)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')$/';
+    private const LEFT_OPEN_RANGE_MATCHER  = '/^<(=?)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')$/';
+    private const RIGHT_OPEN_RANGE_MATCHER = '/^>(=?)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')$/';
 
     /**
      * @var string|null

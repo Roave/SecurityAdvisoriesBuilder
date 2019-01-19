@@ -6,11 +6,11 @@ namespace Roave\SecurityAdvisories;
 
 final class Version
 {
-    const STABILITY_TAIL = '[._-]?'.
+    private const STABILITY_TAIL = '[._-]?'.
                            '(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)+)?)?'.
                            '([.-]?dev)?';
 
-    const VALIDITY_MATCHER = '/^(?:\d+\.)*\d+'.self::STABILITY_TAIL.'$/';
+    private const VALIDITY_MATCHER = '/^(?:\d+\.)*\d+'.self::STABILITY_TAIL.'$/';
 
     /**
      * @var string

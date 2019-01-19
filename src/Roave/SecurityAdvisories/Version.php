@@ -66,11 +66,15 @@ final class Version
 
     /**
      * Here we need to append zeroes so comparison will work correctly
+     *
+     * @param Version $other
+     *
+     * @return array
      */
     private function normalizeVersions(Version $other): array
     {
-        [$versionA, $tailA] = $this->stabilizeVersion($this->version);
-        [$versionB, $tailB] = $this->stabilizeVersion($other->version);
+        [$versionA, $tailA] = $this->splitVersionIntoStableAndStability($this->version);
+        [$versionB, $tailB] = $this->splitVersionIntoStableAndStability($other->version);
 
         [$countA, $countB, $diff] = $this->getVersionStats($versionA, $versionB);
         switch ($countA <=> $countB) {
@@ -95,8 +99,12 @@ final class Version
     /**
      * Split version string representation in two parts - stable and stability tail,
      * if no tail is present return null
+     *
+     * @param string $version Unsigned string representation of a version, e.g. '1.0.0'
+     *
+     * @return array
      */
-    private function stabilizeVersion(string $version) : array
+    private function splitVersionIntoStableAndStability(string $version) : array
     {
         $regExp = '/'.self::STABILITY_TAIL.'$/';
         preg_match($regExp, $version, $matches, PREG_OFFSET_CAPTURE);
@@ -111,6 +119,11 @@ final class Version
     /**
      * Get count of version numbers for each version
      * also return difference in version numbers between versions
+     *
+     * @param string $versionA Unsigned string representation of a version, e.g. '1.0.0'
+     * @param string $versionB Unsigned string representation of a version, e.g. '1.0.0'
+     *
+     * @return array
      */
     private function getVersionStats(string $versionA, string $versionB) : array
     {

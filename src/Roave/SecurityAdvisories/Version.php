@@ -6,7 +6,10 @@ namespace Roave\SecurityAdvisories;
 
 final class Version
 {
-    const STABILITY_TAIL = '[._-]?(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)+)?)?([.-]?dev)?';
+    const STABILITY_TAIL = '[._-]?'.
+                           '(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)+)?)?'.
+                           '([.-]?dev)?';
+
     const VALIDITY_MATCHER = '/^(?:\d+\.)*\d+'.self::STABILITY_TAIL.'$/';
 
     /**
@@ -41,19 +44,19 @@ final class Version
     public function equalTo(self $other) : bool
     {
         [$first, $second] = $this->normalizeVersions($other);
-        return (bool) version_compare($first, $second, '==');
+        return version_compare($first, $second, '==');
     }
 
     public function isGreaterThan(self $other) : bool
     {
         [$first, $second] = $this->normalizeVersions($other);
-        return (bool) version_compare($first, $second, '>');
+        return version_compare($first, $second, '>');
     }
 
     public function isGreaterOrEqualThan(self $other) : bool
     {
         [$first, $second] = $this->normalizeVersions($other);
-        return (bool) version_compare($first, $second, '>=');
+        return version_compare($first, $second, '>=');
     }
 
     public function toString()
@@ -63,50 +66,62 @@ final class Version
 
     /**
      * Here we need to append zeroes so comparison will work correctly
-     *
-     * @param Version $other
-     *
-     * @return array
      */
     private function normalizeVersions(Version $other): array
     {
-
-        // strip the stability tail and save it for later
-        // compare by count of version in strgin
-
         [$versionA, $tailA] = $this->stabilizeVersion($this->version);
         [$versionB, $tailB] = $this->stabilizeVersion($other->version);
 
-        $comp = substr_count($versionA, '.') <=> substr_count($versionB, '.');
-        switch ($comp) {
+        [$countA, $countB, $diff] = $this->getVersionStats($versionA, $versionB);
+        switch ($countA <=> $countB) {
             case -1:
-                $count = substr_count($versionB, '.') - substr_count($versionA, '.');
-                return [$versionA.str_repeat('.0', $count).$tailA, $versionB.$tailB];
+                return [
+                    $versionA.str_repeat('.0', $diff).$tailA,
+                    $versionB.$tailB
+                ];
             case 0;
-                return [$versionA.$tailA, $versionB.$tailB];
+                return [
+                    $versionA.$tailA,
+                    $versionB.$tailB
+                ];
             case 1;
-                $count = substr_count($versionA, '.') - substr_count($versionB, '.');
-                return [$versionA.$tailA, $versionB.str_repeat('.0', $count).$tailB];
+                return [
+                    $versionA.$tailA,
+                    $versionB.str_repeat('.0', $diff).$tailB
+                ];
         }
-
-        // detect which version does not have equal length, take into account stability tails
-        // do the padding for the that version
-
-
     }
 
+    /**
+     * Split version string representation in two parts - stable and stability tail,
+     * if no tail is present return null
+     */
     private function stabilizeVersion(string $version) : array
     {
-        // todo: do beautify
-        preg_match('/[._-]?(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)+)?)?([.-]?dev)?$/',
-            $version, $matches, PREG_OFFSET_CAPTURE);
+        $regExp = '/'.self::STABILITY_TAIL.'$/';
+        preg_match($regExp, $version, $matches, PREG_OFFSET_CAPTURE);
 
         if (!is_null($matches[0][0])) {
             return [substr($version, 0, $matches[0][1]), $matches[0][0]];
         }
+
         return [$version, null];
+    }
 
+    /**
+     * Get count of version numbers for each version
+     * also return difference in version numbers between versions
+     */
+    private function getVersionStats(string $versionA, string $versionB) : array
+    {
+        $first = substr_count($versionA, '.');
+        $second = substr_count($versionB, '.');
 
+        return [
+            $first,
+            $second,
+            abs($first - $second),
+        ];
     }
 
 }

@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
+use Composer\Semver\VersionParser;
 use PHPUnit_Framework_TestCase;
 use Roave\SecurityAdvisories\Version;
 
@@ -39,7 +40,7 @@ final class VersionTest extends PHPUnit_Framework_TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        Version::fromString($versionString);
+        Version::fromString($versionString, new VersionParser());
     }
 
     /**
@@ -49,7 +50,7 @@ final class VersionTest extends PHPUnit_Framework_TestCase
      */
     public function testGetVersionWithValidVersion(string $versionString) : void
     {
-        $version = Version::fromString($versionString);
+        $version = Version::fromString($versionString, new VersionParser());
 
         self::assertInstanceOf(Version::class, $version);
         self::assertRegExp('/([0-9]*)(\\.[1-9][0-9]*)*/', $version->toString());
@@ -79,8 +80,8 @@ final class VersionTest extends PHPUnit_Framework_TestCase
         bool $v1GreaterThanV2,
         bool $v2GreaterThanV1
     ) : void {
-        $version1 = Version::fromString($version1String);
-        $version2 = Version::fromString($version2String);
+        $version1 = Version::fromString($version1String, new VersionParser());
+        $version2 = Version::fromString($version2String, new VersionParser());
 
         self::assertSame($v1GreaterThanV2, $version1->isGreaterThan($version2));
         self::assertSame($v2GreaterThanV1, $version2->isGreaterThan($version1));
@@ -100,8 +101,8 @@ final class VersionTest extends PHPUnit_Framework_TestCase
         bool $v1GreaterOrEqualThanV2,
         bool $v2GreaterOrEqualThanV1
     ) : void {
-        $version1 = Version::fromString($version1String);
-        $version2 = Version::fromString($version2String);
+        $version1 = Version::fromString($version1String, new VersionParser());
+        $version2 = Version::fromString($version2String, new VersionParser());
 
         self::assertSame($v1GreaterOrEqualThanV2, $version1->isGreaterOrEqualThan($version2));
         self::assertSame($v2GreaterOrEqualThanV1, $version2->isGreaterOrEqualThan($version1));
@@ -115,10 +116,10 @@ final class VersionTest extends PHPUnit_Framework_TestCase
      */
     public function testVersionEquivalence(string $version1String, string $version2String) : void
     {
-        $version1 = Version::fromString($version1String);
-        $version2 = Version::fromString($version2String);
+        $version1 = Version::fromString($version1String, new VersionParser());
+        $version2 = Version::fromString($version2String, new VersionParser());
 
-//        self::assertEquals($version1, $version2);
+        self::assertEquals($version1, $version2);
         self::assertTrue($version1->equalTo($version2));
         self::assertTrue($version2->equalTo($version1));
     }
@@ -131,46 +132,12 @@ final class VersionTest extends PHPUnit_Framework_TestCase
      */
     public function testVersionNonEquivalence(string $version1String, string $version2String) : void
     {
-        $version1 = Version::fromString($version1String);
-        $version2 = Version::fromString($version2String);
+        $version1 = Version::fromString($version1String, new VersionParser());
+        $version2 = Version::fromString($version2String, new VersionParser());
 
         self::assertNotEquals($version1, $version2);
         self::assertFalse($version1->equalTo($version2));
         self::assertFalse($version2->equalTo($version1));
-    }
-
-    /**
-     * @dataProvider differentLengthVersionsProvider
-     */
-    public function testVersionsAreComparable($a, $b, $expectedA, $expectedB)
-    {
-        $versionA = Version::fromString($a);
-        $versionB = Version::fromString($b);
-
-        [$normalizedA, $normalizedB] = $this->callNormalizeVersions($versionA, $versionB);
-
-        $this->assertEquals($expectedA, $normalizedA);
-        $this->assertEquals($expectedB, $normalizedB);
-    }
-
-    /**
-     * @dataProvider versionsToSplitProvider
-     */
-    public function testVersionsCanBeSplitIntoStableAndStabilityParts($version, $expected)
-    {
-        $result = $this->callSplitVersionIntoStableAndStability($version);
-
-        $this->assertEquals($result, $expected);
-    }
-
-    /**
-     * @dataProvider versionsToCollectStatsProvider
-     */
-    public function testVersionsStats($versionA, $versionB, $expected)
-    {
-        $result = $this->callVersionStats($versionA, $versionB, $expected);
-
-        $this->assertEquals($result, $expected);
     }
 
     /**
@@ -297,61 +264,5 @@ final class VersionTest extends PHPUnit_Framework_TestCase
             ['2.0.1.1', '2.0.1'],
             ['2.0.1.0.0.0', '2.0.2'],
         ];
-    }
-
-    public function differentLengthVersionsProvider() : array
-    {
-        return [
-            ['3', '3.0.0', '3.0.0', '3.0.0'],
-            ['2.1.0-beta1', '2.1', '2.1.0-beta1', '2.1.0'],
-        ];
-    }
-
-    public function versionsToSplitProvider(): array
-    {
-        return [
-            ['3.0.0', ['3.0.0', null]],
-            ['2.1.0-beta1', ['2.1.0', '-beta1']],
-        ];
-    }
-
-    public function versionsToCollectStatsProvider(): array
-    {
-        return [
-            ['3.0.0', '2', [2, 0, 2]],
-            ['2.1.0-beta1', '3.1.0', [2, 2, 0]],
-        ];
-    }
-
-    private function callNormalizeVersions(Version $version, Version $other) : array
-    {
-        $normalizeVersionsReflection = new \ReflectionMethod($version, 'normalizeVersions');
-
-        $normalizeVersionsReflection->setAccessible(true);
-
-        return $normalizeVersionsReflection->invoke($version, $other);
-    }
-
-    private function callSplitVersionIntoStableAndStability(string $versionString) : array
-    {
-        $version = Version::fromString($versionString);
-
-        $stabilizeVersionsReflection = new \ReflectionMethod($version, 'splitVersionIntoStableAndStability');
-
-        $stabilizeVersionsReflection->setAccessible(true);
-
-        return $stabilizeVersionsReflection->invoke($version, $version->toString());
-    }
-
-    private function callVersionStats(string $versionStringA, string $versionStringB) : array
-    {
-        $versionA = Version::fromString($versionStringA);
-        $versionB = Version::fromString($versionStringB);
-
-        $normalizeVersionsReflection = new \ReflectionMethod($versionA, 'getVersionStats');
-
-        $normalizeVersionsReflection->setAccessible(true);
-
-        return $normalizeVersionsReflection->invoke($versionA, $versionA->toString(), $versionB->toString());
     }
 }

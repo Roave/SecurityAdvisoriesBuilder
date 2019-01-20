@@ -154,11 +154,11 @@ final class VersionTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider versionsToStabilizeProvider
+     * @dataProvider versionsToSplitProvider
      */
-    public function testVersionsAreStabilizeAble($version, $expected)
+    public function testVersionsCanBeSplitIntoStableAndStabilityParts($version, $expected)
     {
-        $result = $this->callStabilizeVersions($version);
+        $result = $this->callSplitVersionIntoStableAndStability($version);
 
         $this->assertEquals($result, $expected);
     }
@@ -307,7 +307,7 @@ final class VersionTest extends PHPUnit_Framework_TestCase
         ];
     }
 
-    public function versionsToStabilizeProvider(): array
+    public function versionsToSplitProvider(): array
     {
         return [
             ['3.0.0', ['3.0.0', null]],
@@ -332,11 +332,11 @@ final class VersionTest extends PHPUnit_Framework_TestCase
         return $normalizeVersionsReflection->invoke($version, $other);
     }
 
-    private function callStabilizeVersions(string $versionString) : array
+    private function callSplitVersionIntoStableAndStability(string $versionString) : array
     {
         $version = Version::fromString($versionString);
 
-        $stabilizeVersionsReflection = new \ReflectionMethod($version, 'stabilizeVersion');
+        $stabilizeVersionsReflection = new \ReflectionMethod($version, 'splitVersionIntoStableAndStability');
 
         $stabilizeVersionsReflection->setAccessible(true);
 

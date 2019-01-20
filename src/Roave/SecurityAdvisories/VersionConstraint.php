@@ -64,6 +64,11 @@ final class VersionConstraint
         return $instance;
     }
 
+    public function isSimpleRangeString() : bool
+    {
+        return null === $this->constraintString;
+    }
+
     public function getConstraintString() : string
     {
         if (null !== $this->constraintString) {
@@ -150,7 +155,9 @@ final class VersionConstraint
 
     private function contains(self $other) : bool
     {
-        return $this->containsLowerBound($other->lowerBoundary)
+        return $this->isSimpleRangeString()  // cannot compare - too complex :-(
+            && $other->isSimpleRangeString() // cannot compare - too complex :-(
+            && $this->containsLowerBound($other->lowerBoundary)
             && $this->containsUpperBound($other->upperBoundary);
     }
 
@@ -190,6 +197,9 @@ final class VersionConstraint
 
     private function overlapsWith(VersionConstraint $other) : bool
     {
+        if (! $this->isSimpleRangeString() && $other->isSimpleRangeString()) {
+            return false;
+        }
 
         if ($this->contains($other) || $other->contains($this)) {
             return false;

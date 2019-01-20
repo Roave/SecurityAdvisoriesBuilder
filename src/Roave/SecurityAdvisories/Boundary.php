@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use Composer\Semver\VersionParser;
+
 /**
  * A simple version, such as 1.0 or 1.0.0.0 or 2.0.1.3.2
  */
@@ -46,9 +48,8 @@ final class Boundary
         if (! preg_match(self::MATCHER, $boundary, $matches)) {
             throw new \InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
         }
-
         return new self(
-            Version::fromString($matches[2]),
+            Version::fromString($matches[2], new VersionParser()),
             $matches[1]
         );
     }

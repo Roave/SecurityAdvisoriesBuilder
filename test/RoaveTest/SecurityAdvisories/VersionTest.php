@@ -40,7 +40,7 @@ final class VersionTest extends PHPUnit_Framework_TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        Version::fromString($versionString, new VersionParser());
+        Version::fromString($versionString);
     }
 
     /**
@@ -50,7 +50,7 @@ final class VersionTest extends PHPUnit_Framework_TestCase
      */
     public function testGetVersionWithValidVersion(string $versionString) : void
     {
-        $version = Version::fromString($versionString, new VersionParser());
+        $version = Version::fromString($versionString);
 
         self::assertInstanceOf(Version::class, $version);
         self::assertRegExp('/([0-9]*)(\\.[1-9][0-9]*)*/', $version->toString());
@@ -80,8 +80,8 @@ final class VersionTest extends PHPUnit_Framework_TestCase
         bool $v1GreaterThanV2,
         bool $v2GreaterThanV1
     ) : void {
-        $version1 = Version::fromString($version1String, new VersionParser());
-        $version2 = Version::fromString($version2String, new VersionParser());
+        $version1 = Version::fromString($version1String);
+        $version2 = Version::fromString($version2String);
 
         self::assertSame($v1GreaterThanV2, $version1->isGreaterThan($version2));
         self::assertSame($v2GreaterThanV1, $version2->isGreaterThan($version1));
@@ -101,8 +101,8 @@ final class VersionTest extends PHPUnit_Framework_TestCase
         bool $v1GreaterOrEqualThanV2,
         bool $v2GreaterOrEqualThanV1
     ) : void {
-        $version1 = Version::fromString($version1String, new VersionParser());
-        $version2 = Version::fromString($version2String, new VersionParser());
+        $version1 = Version::fromString($version1String);
+        $version2 = Version::fromString($version2String);
 
         self::assertSame($v1GreaterOrEqualThanV2, $version1->isGreaterOrEqualThan($version2));
         self::assertSame($v2GreaterOrEqualThanV1, $version2->isGreaterOrEqualThan($version1));
@@ -116,8 +116,8 @@ final class VersionTest extends PHPUnit_Framework_TestCase
      */
     public function testVersionEquivalence(string $version1String, string $version2String) : void
     {
-        $version1 = Version::fromString($version1String, new VersionParser());
-        $version2 = Version::fromString($version2String, new VersionParser());
+        $version1 = Version::fromString($version1String);
+        $version2 = Version::fromString($version2String);
 
         self::assertEquals($version1, $version2);
         self::assertTrue($version1->equalTo($version2));
@@ -132,8 +132,8 @@ final class VersionTest extends PHPUnit_Framework_TestCase
      */
     public function testVersionNonEquivalence(string $version1String, string $version2String) : void
     {
-        $version1 = Version::fromString($version1String, new VersionParser());
-        $version2 = Version::fromString($version2String, new VersionParser());
+        $version1 = Version::fromString($version1String);
+        $version2 = Version::fromString($version2String);
 
         self::assertNotEquals($version1, $version2);
         self::assertFalse($version1->equalTo($version2));

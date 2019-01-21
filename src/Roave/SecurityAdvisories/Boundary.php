@@ -11,9 +11,13 @@ use Composer\Semver\VersionParser;
  */
 final class Boundary
 {
-    private const STABILITY_TAIL = '[._-]?(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)+)?)?([.-]?dev)?';
+    private const STABILITY_TAIL =  '[._-]?'.
+                                    '(?:(stable|beta|rc|alpha|patch)((?:[.-]?\d+)+)?)?'.
+                                    '([.-]?dev)?';
+
     private const MATCHER = '/^\s*(<|<=|=|>=|>)\s*((?:\d+\.)*\d+'.self::STABILITY_TAIL.')\s*$/';
-    const VALID_ADJACENCY_MAP = [
+
+    public const VALID_ADJACENCY_MAP = [
         ['<', '='],
         ['<', '>='],
         ['<=', '>'],
@@ -49,7 +53,7 @@ final class Boundary
             throw new \InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
         }
         return new self(
-            Version::fromString($matches[2], new VersionParser()),
+            Version::fromString($matches[2]),
             $matches[1]
         );
     }

@@ -8,9 +8,9 @@ use Composer\Semver\VersionParser;
 
 final class Version
 {
-    private const STABILITY_TAIL = '[._-]?'.
-                           '(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]?\d+)+)?)?'.
-                           '([.-]?dev)?';
+    private const STABILITY_TAIL =  '[._-]?'.
+                                    '(?:(stable|beta|rc|alpha|patch)((?:[.-]?\d+)+)?)?'.
+                                    '([.-]?dev)?';
 
     private const VALIDITY_MATCHER = '/^(?:\d+\.)*\d+'.self::STABILITY_TAIL.'$/';
 
@@ -18,51 +18,52 @@ final class Version
      * @var string
      */
     private $version;
+
     /**
      * @var VersionParser
      */
-    private $versionParser;
+    private static $versionParser;
 
     /**
      * @param string $version
-     * @param VersionParser $versionParser
      */
-    private function __construct(string $version, VersionParser $versionParser)
+    private function __construct(string $version)
     {
+        if (self::$versionParser == null) {
+            self::$versionParser = new VersionParser();
+        }
+
         $this->version = $version;
-        $this->versionParser = $versionParser;
     }
 
     /**
      * @param string $version
      *
-     * @param VersionParser $versionParser
-     *
      * @return self
      *
      */
-    public static function fromString(string $version, VersionParser $versionParser) : self
+    public static function fromString(string $version) : self
     {
         if (! preg_match(self::VALIDITY_MATCHER, $version)) {
             throw new \InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
-        return new self($version, $versionParser);
+        return new self($version);
     }
 
     public function equalTo(self $other) : bool
     {
-        return version_compare($this->versionParser->normalize($this->toString()), $this->versionParser->normalize($other->toString()), '==');
+        return version_compare(self::$versionParser->normalize($this->toString()), self::$versionParser->normalize($other->toString()), '==');
     }
 
     public function isGreaterThan(self $other) : bool
     {
-        return version_compare($this->versionParser->normalize($this->toString()), $this->versionParser->normalize($other->toString()), '>');
+        return version_compare(self::$versionParser->normalize($this->toString()), self::$versionParser->normalize($other->toString()), '>');
     }
 
     public function isGreaterOrEqualThan(self $other) : bool
     {
-        return version_compare($this->versionParser->normalize($this->toString()), $this->versionParser->normalize($other->toString()), '>=');
+        return version_compare(self::$versionParser->normalize($this->toString()), self::$versionParser->normalize($other->toString()), '>=');
     }
 
     public function toString()

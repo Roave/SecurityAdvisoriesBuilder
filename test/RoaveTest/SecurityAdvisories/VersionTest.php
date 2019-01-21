@@ -53,7 +53,7 @@ final class VersionTest extends PHPUnit_Framework_TestCase
         $version = Version::fromString($versionString);
 
         self::assertInstanceOf(Version::class, $version);
-        self::assertRegExp('/([0-9]*)(\\.[1-9][0-9]*)*/', $version->toString());
+        self::assertRegExp('/([0-9]*)(\\.[1-9][0-9]*)*/', $version->getVersion());
     }
 
     /**
@@ -63,7 +63,7 @@ final class VersionTest extends PHPUnit_Framework_TestCase
      */
     public function testVersionNumbersAreNormalized(string $versionString) : void
     {
-        self::assertNotRegExp('/(\\.[0]+)+$/', Version::fromString($versionString)->toString());
+        self::assertNotRegExp('/(\\.[0]+)+$/', Version::fromString($versionString)->getVersion());
     }
 
     /**
@@ -109,38 +109,6 @@ final class VersionTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider equivalentVersionProvider
-     *
-     * @param string $version1String
-     * @param string $version2String
-     */
-    public function testVersionEquivalence(string $version1String, string $version2String) : void
-    {
-        $version1 = Version::fromString($version1String);
-        $version2 = Version::fromString($version2String);
-
-        self::assertEquals($version1, $version2);
-        self::assertTrue($version1->equalTo($version2));
-        self::assertTrue($version2->equalTo($version1));
-    }
-
-    /**
-     * @dataProvider nonEquivalentVersionProvider
-     *
-     * @param string $version1String
-     * @param string $version2String
-     */
-    public function testVersionNonEquivalence(string $version1String, string $version2String) : void
-    {
-        $version1 = Version::fromString($version1String);
-        $version2 = Version::fromString($version2String);
-
-        self::assertNotEquals($version1, $version2);
-        self::assertFalse($version1->equalTo($version2));
-        self::assertFalse($version2->equalTo($version1));
-    }
-
-    /**
      * @return string[][]
      */
     public function validVersionStringProvider()
@@ -172,8 +140,8 @@ final class VersionTest extends PHPUnit_Framework_TestCase
             ['1.2', '1.100', false, true],
             ['1.1', '1.1.0', false, false],
             ['1.1', '1.1.0.0', false, false],
-            ['1.1', '1.1.0.0.1', false, true],
-            ['1.0.0.0.0.0.2', '1.0.0.0.0.2', false, true],
+            ['1.1', '1.1.0.1', false, true],
+            ['1.0.0.2', '1.0.2', false, true],
             ['1.0.12', '1.0.11', true, false],
         ];
 
@@ -207,8 +175,8 @@ final class VersionTest extends PHPUnit_Framework_TestCase
             ['1.2', '1.100', false, true],
             ['1.1', '1.1.0', true, true],
             ['1.1', '1.1.0.0', true, true],
-            ['1.1', '1.1.0.0.1', false, true],
-            ['1.0.0.0.0.0.2', '1.0.0.0.0.2', false, true],
+            ['1.1', '1.1.0.1', false, true],
+            ['1.0.0.2', '1.0.2', false, true],
             ['1.0.12', '1.0.11', true, false],
         ];
 
@@ -236,33 +204,4 @@ final class VersionTest extends PHPUnit_Framework_TestCase
         ];
     }
 
-    /**
-     * @return string[][]
-     */
-    public function equivalentVersionProvider() : array
-    {
-        return [
-            ['0', '0.0'],
-            ['1', '1.0'],
-            ['1', '1.0.0'],
-            ['1.0.0.0', '1.0.0'],
-            ['2.0.1.0', '2.0.1'],
-            ['2.0.1.0.0.0', '2.0.1'],
-        ];
-    }
-
-    /**
-     * @return string[][]
-     */
-    public function nonEquivalentVersionProvider() : array
-    {
-        return [
-            ['0.1', '0.0'],
-            ['1.0.1', '1.0'],
-            ['1', '1.0.2'],
-            ['1.0.0.1', '1.0.0'],
-            ['2.0.1.1', '2.0.1'],
-            ['2.0.1.0.0.0', '2.0.2'],
-        ];
-    }
 }

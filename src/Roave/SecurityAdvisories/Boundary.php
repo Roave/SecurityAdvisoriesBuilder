@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
-use Composer\Semver\VersionParser;
-
 /**
  * A simple version, such as 1.0 or 1.0.0.0 or 2.0.1.3.2
  */
@@ -52,6 +50,7 @@ final class Boundary
         if (! preg_match(self::MATCHER, $boundary, $matches)) {
             throw new \InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
         }
+
         return new self(
             Version::fromString($matches[2]),
             $matches[1]
@@ -80,12 +79,16 @@ final class Boundary
 
     public function getBoundaryString() : string
     {
-        return $this->limitType . $this->stripTrailingZeroes($this->version->toString());
+        return $this->limitType . $this->stripTrailingZeroes($this->version->getVersion());
     }
 
     /**
      * Strips all trailing '0' and '.' out of the version,
      * e.g. for '0.0.0' version this part will be removed - '.0.0'
+     *
+     * @param string $version String representation without limiting operators
+     *
+     * @return string
      */
     private function stripTrailingZeroes(string $version) : string
     {

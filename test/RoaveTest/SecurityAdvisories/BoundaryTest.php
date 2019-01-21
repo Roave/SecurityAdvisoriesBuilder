@@ -20,7 +20,6 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
-use Composer\Semver\VersionParser;
 use PHPUnit_Framework_TestCase;
 use Roave\SecurityAdvisories\Boundary;
 use Roave\SecurityAdvisories\Version;
@@ -41,7 +40,7 @@ final class BoundaryTest extends PHPUnit_Framework_TestCase
      */
     public function testRejectsInvalidBoundaryStrings(string $boundaryString) : void
     {
-        $this->setExpectedException(\InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
 
         Boundary::fromString($boundaryString);
     }
@@ -89,7 +88,7 @@ final class BoundaryTest extends PHPUnit_Framework_TestCase
         preg_match('/((?:\d+\.)*\d+)\s*$/', $boundaryString, $matches);
 
         self::assertTrue(
-            Version::fromString($matches[1], new VersionParser())->equalTo(Boundary::fromString($boundaryString)->getVersion())
+            Version::fromString($matches[1])->equalTo(Boundary::fromString($boundaryString)->getVersion())
         );
     }
 
@@ -236,4 +235,5 @@ final class BoundaryTest extends PHPUnit_Framework_TestCase
             ['=1', '>1.1'],
         ];
     }
+
 }

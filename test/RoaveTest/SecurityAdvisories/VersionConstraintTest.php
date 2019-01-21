@@ -50,8 +50,8 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
 
         self::assertSame((bool) preg_match('/>=/', $stringConstraint), $constraint->isLowerBoundIncluded());
         self::assertSame((bool) preg_match('/<=/',$stringConstraint), $constraint->isUpperBoundIncluded());
-        self::assertStringMatchesFormat('%A' . $constraint->getLowerBound()->toString() . '%A', $constraintAsString);
-        self::assertStringMatchesFormat('%A' . $constraint->getUpperBound()->toString() . '%A', $constraintAsString);
+        self::assertStringMatchesFormat('%A' . $constraint->getLowerBound()->getVersion() . '%A', $constraintAsString);
+        self::assertStringMatchesFormat('%A' . $constraint->getUpperBound()->getVersion() . '%A', $constraintAsString);
     }
 
     /**

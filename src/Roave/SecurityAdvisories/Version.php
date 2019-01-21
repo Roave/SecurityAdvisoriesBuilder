@@ -41,6 +41,7 @@ final class Version
      *
      * @return self
      *
+     * @throws \InvalidArgumentException
      */
     public static function fromString(string $version) : self
     {
@@ -53,20 +54,25 @@ final class Version
 
     public function equalTo(self $other) : bool
     {
-        return version_compare(self::$versionParser->normalize($this->toString()), self::$versionParser->normalize($other->toString()), '==');
+        return version_compare(self::$versionParser->normalize($this->getVersion()), self::$versionParser->normalize($other->getVersion()), '==');
     }
 
     public function isGreaterThan(self $other) : bool
     {
-        return version_compare(self::$versionParser->normalize($this->toString()), self::$versionParser->normalize($other->toString()), '>');
+        return version_compare(self::$versionParser->normalize($this->getVersion()), self::$versionParser->normalize($other->getVersion()), '>');
     }
 
     public function isGreaterOrEqualThan(self $other) : bool
     {
-        return version_compare(self::$versionParser->normalize($this->toString()), self::$versionParser->normalize($other->toString()), '>=');
+        return version_compare(self::$versionParser->normalize($this->getVersion()), self::$versionParser->normalize($other->getVersion()), '>=');
     }
 
-    public function toString()
+    /**
+     * Return intact version string representation
+     *
+     * @return string
+     */
+    public function getVersion() : string
     {
         return $this->version;
     }

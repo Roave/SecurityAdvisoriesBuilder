@@ -57,16 +57,6 @@ final class VersionTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider validVersionStringProvider
-     *
-     * @param string $versionString
-     */
-    public function testVersionNumbersAreNormalized(string $versionString) : void
-    {
-        self::assertNotRegExp('/(\\.[0]+)+$/', Version::fromString($versionString)->getVersion());
-    }
-
-    /**
      * @dataProvider greaterThanComparisonVersionsProvider
      *
      * @param string $version1String
@@ -117,9 +107,11 @@ final class VersionTest extends PHPUnit_Framework_TestCase
             ['0'],
             ['1'],
             ['12345'],
+            ['12345.00'],
             ['0.1.2.3.4'],
             ['1.2.3.4'],
             ['1.2.3.4.5.6.7.8.9.10'],
+            ['12345.12345.12345.12345.0'],
         ];
     }
 
@@ -198,8 +190,12 @@ final class VersionTest extends PHPUnit_Framework_TestCase
     {
         return [
             [''],
+            ['12.a'],
+            ['12a3'],
             ['alpha'],
             ['beta'],
+            ['1-a'],
+            ['1.2.a'],
             ['.1'],
         ];
     }

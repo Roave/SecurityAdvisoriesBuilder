@@ -13,7 +13,7 @@
     "require": {
         "php": "^7.3",
         "ext-json": "*",
-        "symfony/yaml": "^3.0",
+        "symfony/yaml": "^4.2",
         "thecodingmachine/safe": "^0.1.13"
     },
     "require-dev": {

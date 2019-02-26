@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Boundary;
 use Roave\SecurityAdvisories\Version;
 
@@ -29,7 +29,7 @@ use Roave\SecurityAdvisories\Version;
  *
  * @covers \Roave\SecurityAdvisories\Boundary
  */
-final class BoundaryTest extends PHPUnit_Framework_TestCase
+final class BoundaryTest extends TestCase
 {
     /**
      * @dataProvider invalidBoundaryStrings
@@ -40,7 +40,7 @@ final class BoundaryTest extends PHPUnit_Framework_TestCase
      */
     public function testRejectsInvalidBoundaryStrings(string $boundaryString) : void
     {
-        $this->setExpectedException(\InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
 
         Boundary::fromString($boundaryString);
     }

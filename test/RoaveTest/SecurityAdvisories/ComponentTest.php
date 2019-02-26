@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\Component;
 
@@ -29,7 +29,7 @@ use Roave\SecurityAdvisories\Component;
  *
  * @covers \Roave\SecurityAdvisories\Component
  */
-final class ComponentTest extends PHPUnit_Framework_TestCase
+final class ComponentTest extends TestCase
 {
     public function testFromMultipleAdvisories() : void
     {

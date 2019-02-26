@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\VersionConstraint;
 
@@ -29,7 +29,7 @@ use Roave\SecurityAdvisories\VersionConstraint;
  *
  * @covers \Roave\SecurityAdvisories\Advisory
  */
-final class AdvisoryTest extends PHPUnit_Framework_TestCase
+final class AdvisoryTest extends TestCase
 {
     public function testFromArrayWithValidConfig() : void
     {

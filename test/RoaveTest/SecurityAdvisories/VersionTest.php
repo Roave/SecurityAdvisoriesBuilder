@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Version;
 
 /**
@@ -28,7 +28,7 @@ use Roave\SecurityAdvisories\Version;
  *
  * @covers \Roave\SecurityAdvisories\Version
  */
-final class VersionTest extends PHPUnit_Framework_TestCase
+final class VersionTest extends TestCase
 {
     /**
      * @dataProvider invalidVersionStringsProvider
@@ -37,7 +37,7 @@ final class VersionTest extends PHPUnit_Framework_TestCase
      */
     public function testVersionWillNotAllowInvalidFormats(string $versionString) : void
     {
-        $this->setExpectedException(\InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
 
         Version::fromString($versionString);
     }

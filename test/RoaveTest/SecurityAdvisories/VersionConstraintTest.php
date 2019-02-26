@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use Roave\SecurityAdvisories\Version;
 use Roave\SecurityAdvisories\VersionConstraint;
@@ -30,7 +30,7 @@ use Roave\SecurityAdvisories\VersionConstraint;
  *
  * @covers \Roave\SecurityAdvisories\VersionConstraint
  */
-final class VersionConstraintTest extends PHPUnit_Framework_TestCase
+final class VersionConstraintTest extends TestCase
 {
     /**
      * @dataProvider closedRangesProvider
@@ -206,7 +206,7 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
         $constraint2 = VersionConstraint::fromString($constraintString2);
 
         if (! ($constraint2ContainsConstraint1 || $constraint1ContainsConstraint2)) {
-            $this->setExpectedException(\LogicException::class);
+            $this->expectException(\LogicException::class);
         }
 
         $merged1 = $constraint1->mergeWith($constraint2);
@@ -248,7 +248,7 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
         self::assertFalse($this->callOverlapsWith($constraint1, $constraint2));
         self::assertFalse($this->callOverlapsWith($constraint2, $constraint1));
 
-        $this->setExpectedException(\LogicException::class);
+        $this->expectException(\LogicException::class);
 
         $this->callMergeWithOverlapping($constraint1, $constraint2);
     }

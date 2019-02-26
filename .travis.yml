@@ -19,3 +19,4 @@ script:
   - vendor/bin/phpunit
   - php build-conflicts.php
   - vendor/bin/phpcs
+  - vendor/bin/infection --min-msi=99 --min-covered-msi=100

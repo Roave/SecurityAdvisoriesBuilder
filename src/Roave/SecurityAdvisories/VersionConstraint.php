@@ -4,28 +4,31 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use InvalidArgumentException;
+use LogicException;
+use function array_filter;
+use function array_map;
+use function explode;
+use function implode;
+use function preg_match;
+use function sprintf;
+
 /**
  * A simple version constraint - naively assumes that it is only about ranges like ">=1.2.3,<4.5.6"
  */
 final class VersionConstraint
 {
-    const CLOSED_RANGE_MATCHER     = '/^>(=?)\s*((?:\d+\.)*\d+)\s*,\s*<(=?)\s*((?:\d+\.)*\d+)$/';
-    const LEFT_OPEN_RANGE_MATCHER  = '/^<(=?)\s*((?:\d+\.)*\d+)$/';
-    const RIGHT_OPEN_RANGE_MATCHER = '/^>(=?)\s*((?:\d+\.)*\d+)$/';
+    public const CLOSED_RANGE_MATCHER     = '/^>(=?)\s*((?:\d+\.)*\d+)\s*,\s*<(=?)\s*((?:\d+\.)*\d+)$/';
+    public const LEFT_OPEN_RANGE_MATCHER  = '/^<(=?)\s*((?:\d+\.)*\d+)$/';
+    public const RIGHT_OPEN_RANGE_MATCHER = '/^>(=?)\s*((?:\d+\.)*\d+)$/';
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     private $constraintString;
 
-    /**
-     * @var Boundary|null
-     */
+    /** @var Boundary|null */
     private $lowerBoundary;
 
-    /**
-     * @var Boundary|null
-     */
+    /** @var Boundary|null */
     private $upperBoundary;
 
     private function __construct()
@@ -33,11 +36,7 @@ final class VersionConstraint
     }
 
     /**
-     * @param string $versionConstraint
-     *
-     * @return self
-     *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function fromString(string $versionConstraint) : self
     {
@@ -72,19 +71,19 @@ final class VersionConstraint
 
     public function isSimpleRangeString() : bool
     {
-        return null === $this->constraintString;
+        return $this->constraintString === null;
     }
 
     public function getConstraintString() : string
     {
-        if (null !== $this->constraintString) {
+        if ($this->constraintString !== null) {
             return $this->constraintString;
         }
 
         return implode(
             ',',
             array_map(
-                function (Boundary $boundary) {
+                static function (Boundary $boundary) {
                     return $boundary->getBoundaryString();
                 },
                 array_filter([$this->lowerBoundary, $this->upperBoundary])
@@ -126,7 +125,7 @@ final class VersionConstraint
      *
      * @return VersionConstraint
      *
-     * @throws \LogicException
+     * @throws LogicException
      */
     public function mergeWith(self $other) : self
     {
@@ -150,7 +149,7 @@ final class VersionConstraint
             return $this->mergeAdjacent($other);
         }
 
-        throw new \LogicException(sprintf(
+        throw new LogicException(sprintf(
             'Cannot merge %s "%s" with %s "%s"',
             self::class,
             $this->getConstraintString(),
@@ -177,7 +176,9 @@ final class VersionConstraint
             return false;
         }
 
-        if (($this->lowerBoundary->limitIncluded() === $otherLowerBoundary->limitIncluded()) || $this->lowerBoundary->limitIncluded()) {
+        if (($this->lowerBoundary->limitIncluded() === $otherLowerBoundary->limitIncluded())
+            || $this->lowerBoundary->limitIncluded()
+        ) {
             return $otherLowerBoundary->getVersion()->isGreaterOrEqualThan($this->lowerBoundary->getVersion());
         }
 
@@ -194,7 +195,9 @@ final class VersionConstraint
             return false;
         }
 
-        if (($this->upperBoundary->limitIncluded() === $otherUpperBoundary->limitIncluded()) || $this->upperBoundary->limitIncluded()) {
+        if (($this->upperBoundary->limitIncluded() === $otherUpperBoundary->limitIncluded())
+            || $this->upperBoundary->limitIncluded()
+        ) {
             return $this->upperBoundary->getVersion()->isGreaterOrEqualThan($otherUpperBoundary->getVersion());
         }
 
@@ -229,16 +232,12 @@ final class VersionConstraint
     }
 
     /**
-     * @param VersionConstraint $other
-     *
-     * @return self
-     *
-     * @throws \LogicException
+     * @throws LogicException
      */
     private function mergeWithOverlapping(VersionConstraint $other) : self
     {
         if (! $this->overlapsWith($other)) {
-            throw new \LogicException(sprintf(
+            throw new LogicException(sprintf(
                 '%s "%s" does not overlap with %s "%s"',
                 self::class,
                 $this->getConstraintString(),
@@ -266,16 +265,12 @@ final class VersionConstraint
 
 
     /**
-     * @param VersionConstraint $other
-     *
-     * @return self
-     *
-     * @throws \LogicException
+     * @throws LogicException
      */
     private function mergeAdjacent(VersionConstraint $other) : self
     {
         if (! $this->adjacentTo($other)) {
-            throw new \LogicException(sprintf(
+            throw new LogicException(sprintf(
                 '%s "%s" is not adjacent to %s "%s"',
                 self::class,
                 $this->getConstraintString(),
@@ -302,8 +297,6 @@ final class VersionConstraint
     }
 
     /**
-     * @param Boundary|null $boundary
-     *
      * @return bool
      *
      * Note: most of the limitations/complication probably go away if we define a `Bound` VO

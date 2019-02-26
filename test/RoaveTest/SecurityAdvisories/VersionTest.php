@@ -20,8 +20,11 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Version;
+use function array_combine;
+use function array_map;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\Version}
@@ -32,20 +35,16 @@ final class VersionTest extends TestCase
 {
     /**
      * @dataProvider invalidVersionStringsProvider
-     *
-     * @param string $versionString
      */
     public function testVersionWillNotAllowInvalidFormats(string $versionString) : void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         Version::fromString($versionString);
     }
 
     /**
      * @dataProvider validVersionStringProvider
-     *
-     * @param string $versionString
      */
     public function testGetVersionWithValidVersion(string $versionString) : void
     {
@@ -57,8 +56,6 @@ final class VersionTest extends TestCase
 
     /**
      * @dataProvider validVersionStringProvider
-     *
-     * @param string $versionString
      */
     public function testVersionNumbersAreNormalized(string $versionString) : void
     {
@@ -67,11 +64,6 @@ final class VersionTest extends TestCase
 
     /**
      * @dataProvider greaterThanComparisonVersionsProvider
-     *
-     * @param string $version1String
-     * @param string $version2String
-     * @param bool   $v1GreaterThanV2
-     * @param bool   $v2GreaterThanV1
      */
     public function testGreaterThanVersionWith(
         string $version1String,
@@ -88,11 +80,6 @@ final class VersionTest extends TestCase
 
     /**
      * @dataProvider greaterOrEqualThanComparisonVersionsProvider
-     *
-     * @param string $version1String
-     * @param string $version2String
-     * @param bool   $v1GreaterOrEqualThanV2
-     * @param bool   $v2GreaterOrEqualThanV1
      */
     public function testGreaterOrEqualThanVersionWith(
         string $version1String,
@@ -109,9 +96,6 @@ final class VersionTest extends TestCase
 
     /**
      * @dataProvider equivalentVersionProvider
-     *
-     * @param string $version1String
-     * @param string $version2String
      */
     public function testVersionEquivalence(string $version1String, string $version2String) : void
     {
@@ -125,9 +109,6 @@ final class VersionTest extends TestCase
 
     /**
      * @dataProvider nonEquivalentVersionProvider
-     *
-     * @param string $version1String
-     * @param string $version2String
      */
     public function testVersionNonEquivalence(string $version1String, string $version2String) : void
     {
@@ -142,7 +123,7 @@ final class VersionTest extends TestCase
     /**
      * @return string[][]
      */
-    public function validVersionStringProvider()
+    public function validVersionStringProvider() : array
     {
         return [
             ['0'],
@@ -180,7 +161,7 @@ final class VersionTest extends TestCase
 
         return array_combine(
             array_map(
-                function (array $versionData) {
+                static function (array $versionData) {
                     return $versionData[0] . ' > ' . $versionData[1];
                 },
                 $versions
@@ -215,7 +196,7 @@ final class VersionTest extends TestCase
 
         return array_combine(
             array_map(
-                function (array $versionData) {
+                static function (array $versionData) {
                     return $versionData[0] . ' >= ' . $versionData[1];
                 },
                 $versions

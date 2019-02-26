@@ -61,26 +61,29 @@ final class AdvisoryTest extends TestCase
     }
 
     /**
+     * @param string[] $versionConstraint1
+     * @param string[] $versionConstraint2
+     *
      * @dataProvider unsortedBranchesProvider
      */
-    public function testFromArrayGeneratesSortedResult(array $versionConstraint1, array $versionConstraint2, string $expected) : void
-    {
+    public function testFromArrayGeneratesSortedResult(
+        array $versionConstraint1,
+        array $versionConstraint2,
+        string $expected
+    ) : void {
         $advisory = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
             'branches' => [
-                '2.0.x' => [
-                    'versions' => $versionConstraint2,
-                ],
-                '1.0.x' => [
-                    'versions' => $versionConstraint1,
-                ],
+                '2.0.x' => ['versions' => $versionConstraint2],
+                '1.0.x' => ['versions' => $versionConstraint1],
             ],
         ]);
 
         self::assertSame($expected, $advisory->getConstraint());
     }
 
-    public function unsortedBranchesProvider()
+    /** @return string[][]|string[][][] */
+    public function unsortedBranchesProvider() : array
     {
         return [
             [

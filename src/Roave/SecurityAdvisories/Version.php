@@ -4,16 +4,24 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use InvalidArgumentException;
+use function array_filter;
+use function array_map;
+use function array_slice;
+use function count;
+use function explode;
+use function implode;
+use function preg_match;
+use function sprintf;
+
 /**
  * A simple version, such as 1.0 or 1.0.0.0 or 2.0.1.3.2
  */
 final class Version
 {
-    const VALIDITY_MATCHER = '/^(?:\d+\.)*\d+$/';
+    public const VALIDITY_MATCHER = '/^(?:\d+\.)*\d+$/';
 
-    /**
-     * @var string[]
-     */
+    /** @var string[] */
     private $versionNumbers;
 
     /**
@@ -25,16 +33,12 @@ final class Version
     }
 
     /**
-     * @param string $version
-     *
-     * @return self
-     *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function fromString(string $version) : self
     {
         if (! preg_match(self::VALIDITY_MATCHER, $version)) {
-            throw new \InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
+            throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
         return new self(self::removeTrailingZeroes(array_map('intval', explode('.', $version))));
@@ -42,8 +46,6 @@ final class Version
 
     /**
      * @param Version $other
-     *
-     * @return bool
      */
     public function equalTo(self $other) : bool
     {
@@ -53,11 +55,9 @@ final class Version
     /**
      * Compares two versions and sees if this one is greater than the given one
      *
-     * @todo may become a simple array comparison (if PHP supports it)
-     *
      * @param Version $other
      *
-     * @return bool
+     * @todo may become a simple array comparison (if PHP supports it)
      */
     public function isGreaterThan(self $other) : bool
     {
@@ -77,11 +77,9 @@ final class Version
     /**
      * Compares two versions and sees if this one is greater or equal than the given one
      *
-     * @todo may become a simple array comparison (if PHP supports it)
-     *
      * @param Version $other
      *
-     * @return bool
+     * @todo may become a simple array comparison (if PHP supports it)
      */
     public function isGreaterOrEqualThan(self $other) : bool
     {

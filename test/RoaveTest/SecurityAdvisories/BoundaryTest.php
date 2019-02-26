@@ -20,9 +20,12 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Boundary;
 use Roave\SecurityAdvisories\Version;
+use function preg_match;
+use function strpos;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\Boundary}
@@ -33,25 +36,16 @@ final class BoundaryTest extends TestCase
 {
     /**
      * @dataProvider invalidBoundaryStrings
-     *
-     * @param string $boundaryString
-     *
-     * @return void
      */
     public function testRejectsInvalidBoundaryStrings(string $boundaryString) : void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         Boundary::fromString($boundaryString);
     }
 
     /**
      * @dataProvider validBoundaryStrings
-     *
-     * @param string $boundaryString
-     * @param string $expectedNormalizedString
-     *
-     * @return void
      */
     public function testValidBoundaryString(string $boundaryString, string $expectedNormalizedString) : void
     {
@@ -64,25 +58,17 @@ final class BoundaryTest extends TestCase
 
     /**
      * @dataProvider validBoundaryStrings
-     *
-     * @param string $boundaryString
-     *
-     * @return void
      */
     public function testLimitIncluded(string $boundaryString) : void
     {
         self::assertSame(
-            false !== strpos($boundaryString, '='),
+            strpos($boundaryString, '=') !== false,
             Boundary::fromString($boundaryString)->limitIncluded()
         );
     }
 
     /**
      * @dataProvider validBoundaryStrings
-     *
-     * @param string $boundaryString
-     *
-     * @return void
      */
     public function testGetVersion(string $boundaryString) : void
     {
@@ -95,10 +81,6 @@ final class BoundaryTest extends TestCase
 
     /**
      * @dataProvider validBoundaryStrings
-     *
-     * @param string $boundaryString
-     *
-     * @return void
      */
     public function testBoundaryNotAdjacentToItself(string $boundaryString) : void
     {
@@ -107,11 +89,6 @@ final class BoundaryTest extends TestCase
 
     /**
      * @dataProvider adjacentBoundaries
-     *
-     * @param string $boundary1String
-     * @param string $boundary2String
-     *
-     * @return void
      */
     public function testAdjacentBoundaries(string $boundary1String, string $boundary2String) : void
     {
@@ -124,11 +101,6 @@ final class BoundaryTest extends TestCase
 
     /**
      * @dataProvider nonAdjacentBoundaries
-     *
-     * @param string $boundary1String
-     * @param string $boundary2String
-     *
-     * @return void
      */
     public function testNonAdjacentBoundaries(string $boundary1String, string $boundary2String) : void
     {

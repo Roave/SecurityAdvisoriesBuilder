@@ -20,27 +20,29 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use InvalidArgumentException;
+use function array_map;
+use function array_values;
+use function implode;
+use function str_replace;
+use function usort;
+
 final class Advisory
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $componentName;
 
-    /**
-     * @var VersionConstraint[]
-     */
+    /** @var VersionConstraint[] */
     private $branchConstraints;
 
     /**
-     * @param string              $componentName
      * @param VersionConstraint[] $branchConstraints
      */
     private function __construct(string $componentName, array $branchConstraints)
     {
         static $checkType;
 
-        $checkType = $checkType ?: function (VersionConstraint ...$versionConstraints) {
+        $checkType = $checkType ?: static function (VersionConstraint ...$versionConstraints) {
             return $versionConstraints;
         };
 
@@ -49,11 +51,9 @@ final class Advisory
     }
 
     /**
-     * @param array $config
+     * @param string[]|string[][][]|string[][][][] $config
      *
-     * @return self
-     *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function fromArrayData(array $config) : self
     {
@@ -61,7 +61,7 @@ final class Advisory
         return new self(
             str_replace('composer://', '', $config['reference']),
             array_values(array_map(
-                function (array $branchConfig) {
+                static function (array $branchConfig) {
                     return VersionConstraint::fromString(implode(',', (array) $branchConfig['versions']));
                 },
                 $config['branches']
@@ -88,7 +88,7 @@ final class Advisory
         return implode(
             '|',
             array_map(
-                function (VersionConstraint $versionConstraint) {
+                static function (VersionConstraint $versionConstraint) {
                     return $versionConstraint->getConstraintString();
                 },
                 $this->branchConstraints
@@ -98,9 +98,10 @@ final class Advisory
 
     /**
      * @param VersionConstraint[] $versionConstraints
+     *
      * @return VersionConstraint[]
      */
-    private function sortVersionConstraints(array $versionConstraints): array
+    private function sortVersionConstraints(array $versionConstraints) : array
     {
         usort($versionConstraints, new VersionConstraintSort());
 

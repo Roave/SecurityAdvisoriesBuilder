@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use InvalidArgumentException;
+use function in_array;
+use function preg_match;
+use function sprintf;
+
 /**
  * A simple version, such as 1.0 or 1.0.0.0 or 2.0.1.3.2
  */
 final class Boundary
 {
-    private const MATCHER = '/^\s*(<|<=|=|>=|>)\s*((?:\d+\.)*\d+)\s*$/';
+    private const MATCHER             = '/^\s*(<|<=|=|>=|>)\s*((?:\d+\.)*\d+)\s*$/';
     private const VALID_ADJACENCY_MAP = [
         ['<', '='],
         ['<', '>='],
@@ -17,14 +22,10 @@ final class Boundary
         ['=', '>'],
     ];
 
-    /**
-     * @var Version
-     */
+    /** @var Version */
     private $version;
 
-    /**
-     * @var string one of "<", "<=", "=", ">=", ">"
-     */
+    /** @var string one of "<", "<=", "=", ">=", ">" */
     private $limitType;
 
     private function __construct(Version $version, string $limitType)
@@ -34,16 +35,14 @@ final class Boundary
     }
 
     /**
-     * @param string $boundary
-     *
      * @return Boundary
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function fromString(string $boundary) : self
     {
         if (! preg_match(self::MATCHER, $boundary, $matches)) {
-            throw new \InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
+            throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
         }
 
         return new self(

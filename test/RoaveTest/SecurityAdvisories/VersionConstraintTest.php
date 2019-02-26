@@ -370,6 +370,9 @@ final class VersionConstraintTest extends TestCase
             ['>=2', '>2', true, false],
             ['>=2', '>1', false, true],
             ['>=2', '>3', true, false],
+            ['>1.1,<2.1', '>1.2,<2.0', true, false],
+            ['>1.2,<2.0', '>1.1,<2.1', true, false],
+            ['>1,<2,>3', '>1,<2', false, false],
         ];
 
         return array_combine(

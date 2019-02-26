@@ -21,7 +21,7 @@ use function Safe\sprintf;
  */
 final class Version
 {
-    public const VALIDITY_MATCHER = '/^(?:\d+\.)*\d+$/';
+    private const VALIDITY_MATCHER = '/^(?:\d+\.)*\d+$/';
 
     /** @var int[] */
     private $versionNumbers;

@@ -11,8 +11,8 @@ use function array_map;
 use function assert;
 use function explode;
 use function implode;
-use function preg_match;
-use function sprintf;
+use function Safe\preg_match;
+use function Safe\sprintf;
 
 /**
  * A simple version constraint - naively assumes that it is only about ranges like ">=1.2.3,<4.5.6"

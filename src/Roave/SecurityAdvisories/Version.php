@@ -11,8 +11,8 @@ use function array_slice;
 use function count;
 use function explode;
 use function implode;
-use function preg_match;
-use function sprintf;
+use function Safe\preg_match;
+use function Safe\sprintf;
 
 /**
  * A simple version, such as 1.0 or 1.0.0.0 or 2.0.1.3.2

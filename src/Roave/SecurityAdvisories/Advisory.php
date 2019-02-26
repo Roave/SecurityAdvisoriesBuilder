@@ -27,8 +27,8 @@ use function assert;
 use function implode;
 use function is_array;
 use function is_string;
+use function Safe\usort;
 use function str_replace;
-use function usort;
 
 final class Advisory
 {

@@ -11,9 +11,10 @@
         }
     ],
     "require": {
-        "ext-json":     "*",
-        "php":          "^7.3",
-        "symfony/yaml": "^3.0"
+        "php": "^7.3",
+        "ext-json": "*",
+        "symfony/yaml": "^3.0",
+        "thecodingmachine/safe": "^0.1.13"
     },
     "require-dev": {
         "doctrine/coding-standard": "^5.0",
@@ -22,7 +23,8 @@
         "phpstan/phpstan-phpunit": "^0.11.0",
         "phpstan/phpstan-strict-rules": "^0.11.0",
         "phpunit/phpunit": "^8.0.4",
-        "squizlabs/php_codesniffer": "^3.4"
+        "squizlabs/php_codesniffer": "^3.4",
+        "thecodingmachine/phpstan-safe-rule": "^0.1.2"
     },
     "autoload": {
         "psr-0": {

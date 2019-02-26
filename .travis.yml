@@ -15,7 +15,7 @@ before_script:
   - git config --global user.name "Marco Pivetta (via Travis-CI)"
 
 script:
+  - vendor/bin/phpstan analyse
   - vendor/bin/phpunit
   - php build-conflicts.php
   - vendor/bin/phpcs
-  - vendor/bin/phpstan analyse

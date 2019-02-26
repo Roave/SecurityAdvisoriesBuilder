@@ -24,7 +24,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Boundary;
 use Roave\SecurityAdvisories\Version;
-use function preg_match;
+use function Safe\preg_match;
 use function strpos;
 
 /**

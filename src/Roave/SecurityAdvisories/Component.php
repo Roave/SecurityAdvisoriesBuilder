@@ -26,7 +26,7 @@ use function array_map;
 use function array_merge;
 use function array_values;
 use function implode;
-use function usort;
+use function Safe\usort;
 
 final class Component
 {

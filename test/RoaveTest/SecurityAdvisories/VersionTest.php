@@ -23,10 +23,8 @@ namespace RoaveTest\SecurityAdvisories;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Version;
-use function array_combine;
 use function array_map;
-use function assert;
-use function is_array;
+use function Safe\array_combine;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\Version}
@@ -158,7 +156,7 @@ final class VersionTest extends TestCase
             ['1.0.12', '1.0.11', true, false],
         ];
 
-        $indexedEntries = array_combine(
+        return array_combine(
             array_map(
                 static function (array $versionData) {
                     return $versionData[0] . ' > ' . $versionData[1];
@@ -167,10 +165,6 @@ final class VersionTest extends TestCase
             ),
             $versions
         );
-
-        assert(is_array($indexedEntries));
-
-        return $indexedEntries;
     }
 
     /**
@@ -197,7 +191,7 @@ final class VersionTest extends TestCase
             ['1.0.12', '1.0.11', true, false],
         ];
 
-        $indexedEntries = array_combine(
+        return array_combine(
             array_map(
                 static function (array $versionData) {
                     return $versionData[0] . ' >= ' . $versionData[1];
@@ -206,10 +200,6 @@ final class VersionTest extends TestCase
             ),
             $versions
         );
-
-        assert(is_array($indexedEntries));
-
-        return $indexedEntries;
     }
 
     /**

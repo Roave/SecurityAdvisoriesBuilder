@@ -40,21 +40,23 @@ use const PHP_EOL;
 use function array_filter;
 use function array_map;
 use function array_merge;
-use function chdir;
+use function assert;
 use function dirname;
 use function escapeshellarg;
 use function exec;
-use function file_get_contents;
-use function file_put_contents;
-use function getcwd;
 use function getenv;
 use function implode;
+use function is_string;
 use function iterator_to_array;
-use function json_encode;
-use function ksort;
-use function realpath;
+use function Safe\chdir;
+use function Safe\file_get_contents;
+use function Safe\file_put_contents;
+use function Safe\getcwd;
+use function Safe\json_encode;
+use function Safe\ksort;
+use function Safe\realpath;
+use function Safe\sprintf;
 use function set_error_handler;
-use function sprintf;
 
 (static function () : void {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -67,7 +69,7 @@ use function sprintf;
     );
 
     $token                     = getenv('GITHUB_TOKEN');
-    $authentication            = $token ? $token . ':x-oauth-basic@' : '';
+    $authentication            = $token === false ? '' : $token . ':x-oauth-basic@';
     $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';
     $advisoriesExtension       = 'yaml';
@@ -129,18 +131,16 @@ use function sprintf;
         ));
     };
 
-    /**
-     * @param string $path
-     *
-     * @return Advisory[]
-     */
+    /** @return Advisory[] */
     $findAdvisories = static function (string $path) use ($advisoriesExtension) : array {
-        $yaml = new Yaml();
-
         return array_map(
-            static function (SplFileInfo $advisoryFile) use ($yaml) {
+            static function (SplFileInfo $advisoryFile) {
+                $filePath = $advisoryFile->getRealPath();
+
+                assert(is_string($filePath));
+
                 return Advisory::fromArrayData(
-                    $yaml->parse(file_get_contents($advisoryFile->getRealPath()), true)
+                    Yaml::parse(file_get_contents($filePath), Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE)
                 );
             },
             iterator_to_array(new CallbackFilterIterator(
@@ -175,6 +175,8 @@ use function sprintf;
         }
 
         foreach ($indexedAdvisories as $componentName => $componentAdvisories) {
+            assert(is_string($componentName));
+
             $components[$componentName] = new Component($componentName, ...$componentAdvisories);
         }
 

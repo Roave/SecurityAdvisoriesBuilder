@@ -54,6 +54,30 @@ final class AdvisoryTest extends TestCase
         self::assertSame('>=2,<2.1', $constraints[1]->getConstraintString());
     }
 
+    public function testFromArrayWithStringVersion() : void
+    {
+        $advisory = Advisory::fromArrayData([
+            'reference' => 'composer://foo/bar',
+            'branches' => [
+                '1.0.x' => [
+                    'versions' => '<1.1',
+                ],
+                '2.0.x' => [
+                    'versions' => '<2.1',
+                ],
+            ],
+        ]);
+
+        self::assertSame('foo/bar', $advisory->getComponentName());
+        self::assertSame('<1.1|<2.1', $advisory->getConstraint());
+
+        $constraints = $advisory->getVersionConstraints();
+
+        self::assertCount(2, $constraints);
+        self::assertSame('<1.1', $constraints[0]->getConstraintString());
+        self::assertSame('<2.1', $constraints[1]->getConstraintString());
+    }
+
     /**
      * @param string[] $versionConstraint1
      * @param string[] $versionConstraint2

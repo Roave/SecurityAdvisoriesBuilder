@@ -266,16 +266,6 @@ final class VersionConstraint
      */
     private function mergeAdjacent(VersionConstraint $other) : self
     {
-        if (! $this->adjacentTo($other)) {
-            throw new LogicException(sprintf(
-                '%s "%s" is not adjacent to %s "%s"',
-                self::class,
-                $this->getConstraintString(),
-                self::class,
-                $other->getConstraintString()
-            ));
-        }
-
         if ($this->upperBoundary !== null
             && $other->lowerBoundary !== null
             && $this->upperBoundary->adjacentTo($other->lowerBoundary)

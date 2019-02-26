@@ -17,3 +17,4 @@ before_script:
 script:
   - vendor/bin/phpunit
   - php build-conflicts.php
+  - vendor/bin/phpcs

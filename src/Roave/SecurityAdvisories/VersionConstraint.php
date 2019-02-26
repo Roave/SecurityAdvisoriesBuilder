@@ -205,10 +205,6 @@ final class VersionConstraint
             return false;
         }
 
-        if ($this->contains($other) || $other->contains($this)) {
-            return false;
-        }
-
         return $this->strictlyContainsOtherBound($other->lowerBoundary)
             xor $this->strictlyContainsOtherBound($other->upperBoundary);
     }

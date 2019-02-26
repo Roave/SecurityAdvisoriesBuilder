@@ -20,32 +20,26 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use LogicException;
+use function array_filter;
+use function array_map;
+use function array_merge;
+use function array_values;
+use function implode;
+use function Safe\usort;
+
 final class Component
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $name;
 
-    /**
-     * @var Advisory[]
-     */
+    /** @var Advisory[] */
     private $advisories;
 
-    /**
-     * @param string     $name
-     * @param Advisory[] $advisories
-     */
-    public function __construct(string $name, array $advisories)
+    public function __construct(string $name, Advisory ...$advisories)
     {
-        static $checkAdvisories;
-
-        $checkAdvisories = $checkAdvisories ?: function (Advisory ...$advisories) {
-            return $advisories;
-        };
-
-        $this->name       = (string) $name;
-        $this->advisories = $checkAdvisories(...array_values($advisories));
+        $this->name       = $name;
+        $this->advisories = $advisories;
     }
 
     public function getName() : string
@@ -54,22 +48,20 @@ final class Component
     }
 
     /**
-     * @return string
-     *
-     * @throws \LogicException
+     * @throws LogicException
      */
     public function getConflictConstraint() : string
     {
         return implode(
             '|',
             array_filter(array_map(
-                function (VersionConstraint $versionConstraint) {
+                static function (VersionConstraint $versionConstraint) {
                     return $versionConstraint->getConstraintString();
                 },
                 $this->deDuplicateConstraints(array_merge(
                     [],
                     ...array_values(array_map(
-                        function (Advisory $advisory) {
+                        static function (Advisory $advisory) {
                             return $advisory->getVersionConstraints();
                         },
                         $this->advisories
@@ -84,7 +76,7 @@ final class Component
      *
      * @return VersionConstraint[]
      *
-     * @throws \LogicException
+     * @throws LogicException
      */
     private function deDuplicateConstraints(array $constraints) : array
     {
@@ -92,14 +84,16 @@ final class Component
 
         foreach ($constraints as & $constraint) {
             foreach ($constraints as $key => $comparedConstraint) {
-                if ($constraint !== $comparedConstraint && $constraint->canMergeWith($comparedConstraint)) {
-                    unset($constraints[$key]);
-                    $constraint = $constraint->mergeWith($comparedConstraint);
-
-                    // note: this is just simulating tail recursion. Normal recursion not viable here, and `foreach`
-                    //       becomes unstable when elements are removed from the loop
-                    goto restart;
+                if ($constraint === $comparedConstraint || ! $constraint->canMergeWith($comparedConstraint)) {
+                    continue;
                 }
+
+                unset($constraints[$key]);
+                $constraint = $constraint->mergeWith($comparedConstraint);
+
+                // note: this is just simulating tail recursion. Normal recursion not viable here, and `foreach`
+                //       becomes unstable when elements are removed from the loop
+                goto restart;
             }
         }
 

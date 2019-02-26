@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use CallbackFilterIterator;
 use DateTime;
 use DateTimeZone;
 use ErrorException;
@@ -28,19 +29,47 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 use Symfony\Component\Yaml\Yaml;
+use UnexpectedValueException;
+use const E_NOTICE;
+use const E_STRICT;
+use const E_WARNING;
+use const JSON_PRETTY_PRINT;
+use const JSON_UNESCAPED_SLASHES;
+use const JSON_UNESCAPED_UNICODE;
+use const PHP_EOL;
+use function array_filter;
+use function array_map;
+use function array_merge;
+use function assert;
+use function dirname;
+use function escapeshellarg;
+use function exec;
+use function getenv;
+use function implode;
+use function is_string;
+use function iterator_to_array;
+use function Safe\chdir;
+use function Safe\file_get_contents;
+use function Safe\file_put_contents;
+use function Safe\getcwd;
+use function Safe\json_encode;
+use function Safe\ksort;
+use function Safe\realpath;
+use function Safe\sprintf;
+use function set_error_handler;
 
-(function () {
+(static function () : void {
     require_once __DIR__ . '/vendor/autoload.php';
 
     set_error_handler(
-        function ($errorCode, $message = '', $file = '', $line = 0) {
+        static function ($errorCode, $message = '', $file = '', $line = 0) : void {
             throw new ErrorException($message, 0, $errorCode, $file, $line);
         },
         E_STRICT | E_NOTICE | E_WARNING
     );
 
-    $token                     = \getenv('GITHUB_TOKEN');
-    $authentication            = $token ? $token . ':x-oauth-basic@' : '';
+    $token                     = getenv('GITHUB_TOKEN');
+    $authentication            = $token === false ? '' : $token . ':x-oauth-basic@';
     $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';
     $advisoriesExtension       = 'yaml';
@@ -52,19 +81,20 @@ use Symfony\Component\Yaml\Yaml;
             . 'no API, simply require it',
         'license'     => 'MIT',
         'authors'     => [[
-                              'name'  => 'Marco Pivetta',
-                              'role'  => 'maintainer',
-                              'email' => 'ocramius@gmail.com',
-                          ]],
+            'name'  => 'Marco Pivetta',
+            'role'  => 'maintainer',
+            'email' => 'ocramius@gmail.com',
+        ],
+        ],
     ];
 
-    $execute = function (string $commandString) : array {
+    $execute = static function (string $commandString) : array {
         // may the gods forgive me for this in-lined command addendum, but I CBA to fix proc_open's handling
         // of exit codes.
         exec($commandString . ' 2>&1', $output, $result);
 
-        if (0 !== $result) {
-            throw new \UnexpectedValueException(sprintf(
+        if ($result !== 0) {
+            throw new UnexpectedValueException(sprintf(
                 'Command failed: "%s" "%s"',
                 $commandString,
                 implode(PHP_EOL, $output)
@@ -74,12 +104,12 @@ use Symfony\Component\Yaml\Yaml;
         return $output;
     };
 
-    $cleanBuildDir = function () use ($buildDir, $execute) : void {
+    $cleanBuildDir = static function () use ($buildDir, $execute) : void {
         $execute('rm -rf ' . escapeshellarg($buildDir));
         $execute('mkdir ' . escapeshellarg($buildDir));
     };
 
-    $cloneAdvisories = function () use ($advisoriesRepository, $buildDir, $execute) : void {
+    $cloneAdvisories = static function () use ($advisoriesRepository, $buildDir, $execute) : void {
         $execute(
             'git clone '
             . escapeshellarg($advisoriesRepository)
@@ -87,40 +117,38 @@ use Symfony\Component\Yaml\Yaml;
         );
     };
 
-    $cloneRoaveAdvisories = function () use ($roaveAdvisoriesRepository, $buildDir, $execute) : void {
+    $cloneRoaveAdvisories = static function () use ($roaveAdvisoriesRepository, $buildDir, $execute) : void {
         $execute(
             'git clone '
             . escapeshellarg($roaveAdvisoriesRepository)
             . ' ' . escapeshellarg($buildDir . '/roave-security-advisories')
         );
 
-        $execute(\sprintf(
+        $execute(sprintf(
             'cp -r %s %s',
             escapeshellarg($buildDir . '/roave-security-advisories'),
             escapeshellarg($buildDir . '/roave-security-advisories-original')
         ));
     };
 
-    /**
-     * @param string $path
-     *
-     * @return Advisory[]
-     */
-    $findAdvisories = function (string $path) use ($advisoriesExtension) : array {
-        $yaml = new Yaml();
-
+    /** @return Advisory[] */
+    $findAdvisories = static function (string $path) use ($advisoriesExtension) : array {
         return array_map(
-            function (SplFileInfo $advisoryFile) use ($yaml) {
+            static function (SplFileInfo $advisoryFile) {
+                $filePath = $advisoryFile->getRealPath();
+
+                assert(is_string($filePath));
+
                 return Advisory::fromArrayData(
-                    $yaml->parse(file_get_contents($advisoryFile->getRealPath()), true)
+                    Yaml::parse(file_get_contents($filePath), Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE)
                 );
             },
-            iterator_to_array(new \CallbackFilterIterator(
+            iterator_to_array(new CallbackFilterIterator(
                 new RecursiveIteratorIterator(
                     new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
                     RecursiveIteratorIterator::SELF_FIRST
                 ),
-                function (SplFileInfo $advisoryFile) use ($advisoriesExtension) {
+                static function (SplFileInfo $advisoryFile) use ($advisoriesExtension) {
                     // @todo skip `vendor` dir
                     return $advisoryFile->isFile() && $advisoryFile->getExtension() === $advisoriesExtension;
                 }
@@ -133,7 +161,7 @@ use Symfony\Component\Yaml\Yaml;
      *
      * @return Component[]
      */
-    $buildComponents = function (array $advisories) : array {
+    $buildComponents = static function (array $advisories) : array {
         // @todo need a functional way to do this, somehow
         $indexedAdvisories = [];
         $components        = [];
@@ -146,8 +174,10 @@ use Symfony\Component\Yaml\Yaml;
             $indexedAdvisories[$advisory->getComponentName()][] = $advisory;
         }
 
-        foreach ($indexedAdvisories as $componentName => $advisories) {
-            $components[$componentName] = new Component($componentName, $advisories);
+        foreach ($indexedAdvisories as $componentName => $componentAdvisories) {
+            assert(is_string($componentName));
+
+            $components[$componentName] = new Component($componentName, ...$componentAdvisories);
         }
 
         return $components;
@@ -158,7 +188,7 @@ use Symfony\Component\Yaml\Yaml;
      *
      * @return string[]
      */
-    $buildConflicts = function (array $components) : array {
+    $buildConflicts = static function (array $components) : array {
         $conflicts = [];
 
         foreach ($components as $component) {
@@ -170,7 +200,7 @@ use Symfony\Component\Yaml\Yaml;
         return array_filter($conflicts);
     };
 
-    $buildConflictsJson = function (array $baseConfig, array $conflicts) : string {
+    $buildConflictsJson = static function (array $baseConfig, array $conflicts) : string {
         return json_encode(
             array_merge(
                 $baseConfig,
@@ -180,11 +210,11 @@ use Symfony\Component\Yaml\Yaml;
         );
     };
 
-    $writeJson = function (string $jsonString, string $path) : void {
+    $writeJson = static function (string $jsonString, string $path) : void {
         file_put_contents($path, $jsonString . "\n");
     };
 
-    $runInPath = function (callable $function, string $path) {
+    $runInPath = static function (callable $function, string $path) {
         $originalPath = getcwd();
 
         chdir($path);
@@ -198,9 +228,9 @@ use Symfony\Component\Yaml\Yaml;
         return $returnValue;
     };
 
-    $getComposerPhar = function (string $targetDir) use ($runInPath, $execute) : void {
+    $getComposerPhar = static function (string $targetDir) use ($runInPath, $execute) : void {
         $runInPath(
-            function () use ($targetDir, $execute) : void {
+            static function () use ($targetDir, $execute) : void {
                 $installerPath = escapeshellarg($targetDir . '/composer-installer.php');
 
                 $execute(sprintf(
@@ -213,42 +243,46 @@ use Symfony\Component\Yaml\Yaml;
         );
     };
 
-    $validateComposerJson = function (string $composerJsonPath) use ($runInPath, $execute) : void {
+    $validateComposerJson = static function (string $composerJsonPath) use ($runInPath, $execute) : void {
         $runInPath(
-            function () use ($execute) {
+            static function () use ($execute) : void {
                 $execute('php composer.phar validate');
             },
             dirname($composerJsonPath)
         );
     };
 
-    $copyGeneratedComposerJson = function (string $sourceComposerJsonPath, string $targetComposerJsonPath) use ($execute
-    ) : void {
-        $execute(\sprintf(
+    $copyGeneratedComposerJson = static function (
+        string $sourceComposerJsonPath,
+        string $targetComposerJsonPath
+    ) use ($execute) : void {
+        $execute(sprintf(
             'cp %s %s',
-            \escapeshellarg($sourceComposerJsonPath),
-            \escapeshellarg($targetComposerJsonPath)
+            escapeshellarg($sourceComposerJsonPath),
+            escapeshellarg($targetComposerJsonPath)
         ));
     };
 
-    $commitComposerJson = function (string $composerJsonPath) use ($runInPath, $execute) : void {
+    $commitComposerJson = static function (string $composerJsonPath) use ($runInPath, $execute) : void {
         $originalHash = $runInPath(
-            function () use ($execute) {
-               return $execute('git rev-parse HEAD');
+            static function () use ($execute) {
+                return $execute('git rev-parse HEAD');
             },
             dirname($composerJsonPath) . '/../security-advisories'
         );
 
         $runInPath(
-            function () use ($composerJsonPath, $originalHash, $execute) {
+            static function () use ($composerJsonPath, $originalHash, $execute) : void {
                 $execute('git add ' . escapeshellarg(realpath($composerJsonPath)));
 
-                $message = sprintf(
+                $message  = sprintf(
                     'Committing generated "composer.json" file as per "%s"',
                     (new DateTime('now', new DateTimeZone('UTC')))->format(DateTime::W3C)
                 );
-                $message .= "\n" . sprintf('Original commit: "%s"',
-                        'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash[0]);
+                $message .= "\n" . sprintf(
+                    'Original commit: "%s"',
+                    'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash[0]
+                );
 
                 $execute('git diff-index --quiet HEAD || git commit -m ' . escapeshellarg($message));
             },

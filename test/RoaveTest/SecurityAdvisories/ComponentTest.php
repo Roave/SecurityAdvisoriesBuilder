@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\Component;
 
@@ -29,7 +29,7 @@ use Roave\SecurityAdvisories\Component;
  *
  * @covers \Roave\SecurityAdvisories\Component
  */
-final class ComponentTest extends PHPUnit_Framework_TestCase
+final class ComponentTest extends TestCase
 {
     public function testFromMultipleAdvisories() : void
     {
@@ -56,9 +56,7 @@ final class ComponentTest extends PHPUnit_Framework_TestCase
             ],
         ]);
 
-        $component = new Component('foo/bar', [$advisory1, $advisory2]);
-
-        self::assertInstanceOf(Component::class, $component);
+        $component = new Component('foo/bar', $advisory1, $advisory2);
 
         self::assertSame('>=1,<1.1|>=2,<2.1|>=3,<3.1|>=4,<4.1', $component->getConflictConstraint());
         self::assertSame('foo/bar', $component->getName());
@@ -104,9 +102,7 @@ final class ComponentTest extends PHPUnit_Framework_TestCase
             ],
         ]);
 
-        $component = new Component('foo/bar', [$advisory1, $advisory2, $advisory3]);
-
-        self::assertInstanceOf(Component::class, $component);
+        $component = new Component('foo/bar', $advisory1, $advisory2, $advisory3);
 
         self::assertSame('>=1,<1.1|>=2,<2.1|>=3,<3.1', $component->getConflictConstraint());
         self::assertSame('foo/bar', $component->getName());
@@ -135,7 +131,7 @@ final class ComponentTest extends PHPUnit_Framework_TestCase
             ],
         ]);
 
-        $component = new Component('foo/bar', [$advisory1, $advisory2, $advisory3]);
+        $component = new Component('foo/bar', $advisory1, $advisory2, $advisory3);
 
         self::assertSame('>=3,<=3.0.11|>=3.1,<3.1.11', $component->getConflictConstraint());
     }

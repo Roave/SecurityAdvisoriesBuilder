@@ -1,2 +1,5 @@
 build
 vendor
+phpunit.xml
+infection.json
+infection-log.txt

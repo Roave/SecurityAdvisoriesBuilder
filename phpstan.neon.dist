@@ -1,0 +1,12 @@
+parameters:
+	level: 7
+	paths:
+		- build-conflicts.php
+		- public
+		- src
+		- test
+
+includes:
+	- vendor/phpstan/phpstan-strict-rules/rules.neon
+	- vendor/phpstan/phpstan-phpunit/extension.neon
+	- vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon

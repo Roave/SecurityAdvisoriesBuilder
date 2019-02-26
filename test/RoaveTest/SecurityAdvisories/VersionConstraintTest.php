@@ -20,28 +20,31 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
-use PHPUnit_Framework_TestCase;
+use LogicException;
+use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use Roave\SecurityAdvisories\Version;
 use Roave\SecurityAdvisories\VersionConstraint;
+use function array_column;
+use function array_map;
+use function Safe\array_combine;
+use function Safe\preg_match;
+use function var_export;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\VersionConstraint}
  *
  * @covers \Roave\SecurityAdvisories\VersionConstraint
  */
-final class VersionConstraintTest extends PHPUnit_Framework_TestCase
+final class VersionConstraintTest extends TestCase
 {
     /**
      * @dataProvider closedRangesProvider
-     *
-     * @param string $stringConstraint
      */
     public function testFromRange(string $stringConstraint) : void
     {
         $constraint = VersionConstraint::fromString($stringConstraint);
 
-        self::assertInstanceOf(VersionConstraint::class, $constraint);
         self::assertTrue($constraint->isSimpleRangeString());
         self::assertInstanceOf(Version::class, $constraint->getLowerBound());
         self::assertInstanceOf(Version::class, $constraint->getUpperBound());
@@ -49,16 +52,13 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
         $constraintAsString = $constraint->getConstraintString();
 
         self::assertSame((bool) preg_match('/>=/', $stringConstraint), $constraint->isLowerBoundIncluded());
-        self::assertSame((bool) preg_match('/<=/',$stringConstraint), $constraint->isUpperBoundIncluded());
+        self::assertSame((bool) preg_match('/<=/', $stringConstraint), $constraint->isUpperBoundIncluded());
         self::assertStringMatchesFormat('%A' . $constraint->getLowerBound()->getVersion() . '%A', $constraintAsString);
         self::assertStringMatchesFormat('%A' . $constraint->getUpperBound()->getVersion() . '%A', $constraintAsString);
     }
 
     /**
      * @dataProvider normalizableRangesProvider
-     *
-     * @param string $originalRange
-     * @param string $normalizedRange
      */
     public function testOperatesOnNormalizedRanges(string $originalRange, string $normalizedRange) : void
     {
@@ -115,14 +115,11 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider complexRangesProvider
-     *
-     * @param string $stringConstraint
      */
     public function testFromRangeWithComplexRanges(string $stringConstraint) : void
     {
         $constraint = VersionConstraint::fromString($stringConstraint);
 
-        self::assertInstanceOf(VersionConstraint::class, $constraint);
         self::assertFalse($constraint->isSimpleRangeString());
         self::assertSame($stringConstraint, $constraint->getConstraintString());
     }
@@ -147,11 +144,6 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider rangesForComparisonProvider
-     *
-     * @param string $constraintString1
-     * @param string $constraintString2
-     * @param bool   $constraint1ContainsConstraint2
-     * @param bool   $constraint2ContainsConstraint1
      */
     public function testContainsWithRanges(
         string $constraintString1,
@@ -168,11 +160,6 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider mergeableRangesProvider
-     *
-     * @param string $constraintString1
-     * @param string $constraintString2
-     * @param bool   $constraint1ContainsConstraint2
-     * @param bool   $constraint2ContainsConstraint1
      */
     public function testCanMergeWithContainedRanges(
         string $constraintString1,
@@ -190,11 +177,6 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider mergeableRangesProvider
-     *
-     * @param string $constraintString1
-     * @param string $constraintString2
-     * @param bool   $constraint1ContainsConstraint2
-     * @param bool   $constraint2ContainsConstraint1
      */
     public function testMergeWithMergeableRanges(
         string $constraintString1,
@@ -206,7 +188,7 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
         $constraint2 = VersionConstraint::fromString($constraintString2);
 
         if (! ($constraint2ContainsConstraint1 || $constraint1ContainsConstraint2)) {
-            $this->setExpectedException(\LogicException::class);
+            $this->expectException(LogicException::class);
         }
 
         $merged1 = $constraint1->mergeWith($constraint2);
@@ -220,10 +202,6 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider strictlyOverlappingRangesProvider
-     *
-     * @param string $range1
-     * @param string $range2
-     * @param string $expected
      */
     public function testCanMergeWithMergeableRanges(string $range1, string $range2, string $expected) : void
     {
@@ -236,9 +214,6 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider nonStrictlyOverlappingRangesProvider
-     *
-     * @param string $range1
-     * @param string $range2
      */
     public function testNonMergeableRanges(string $range1, string $range2) : void
     {
@@ -248,7 +223,7 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
         self::assertFalse($this->callOverlapsWith($constraint1, $constraint2));
         self::assertFalse($this->callOverlapsWith($constraint2, $constraint1));
 
-        $this->setExpectedException(\LogicException::class);
+        $this->expectException(LogicException::class);
 
         $this->callMergeWithOverlapping($constraint1, $constraint2);
     }
@@ -273,12 +248,7 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
         ];
 
         return array_combine(
-            array_map(
-                function (array $entry) {
-                    return $entry[0];
-                },
-                $matchedRanges
-            ),
+            array_column($matchedRanges, 0),
             $matchedRanges
         );
     }
@@ -351,7 +321,7 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
 
         return array_combine(
             array_map(
-                function (array $entry) {
+                static function (array $entry) {
                     return '(∀ x ∈ (' . $entry[0] . '): x ∈ (' . $entry[1] . ')) = ' . var_export($entry[2], true);
                 },
                 $entries
@@ -400,11 +370,14 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
             ['>=2', '>2', true, false],
             ['>=2', '>1', false, true],
             ['>=2', '>3', true, false],
+            ['>1.1,<2.1', '>1.2,<2.0', true, false],
+            ['>1.2,<2.0', '>1.1,<2.1', true, false],
+            ['>1,<2,>3', '>1,<2', false, false],
         ];
 
         return array_combine(
             array_map(
-                function (array $entry) {
+                static function (array $entry) {
                     return '((' . $entry[0] . ') ∩ (' . $entry[1] . ')) ≠ ∅';
                 },
                 $entries
@@ -452,7 +425,7 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
 
         return array_combine(
             array_map(
-                function (array $entry) {
+                static function (array $entry) {
                     return '((' . $entry[0] . ') ∪ (' . $entry[1] . ')) = (' . $entry[2] . ')';
                 },
                 $entries
@@ -483,7 +456,7 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
 
         return array_combine(
             array_map(
-                function (array $entry) {
+                static function (array $entry) {
                     return '((' . $entry[0] . ') ∩ (' . $entry[1] . ')) = ∅';
                 },
                 $entries
@@ -500,12 +473,7 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
     private function dataProviderFirstValueAsProviderKey(array $entries) : array
     {
         return array_combine(
-            array_map(
-                function (array $entry) {
-                    return $entry[0];
-                },
-                $entries
-            ),
+            array_column($entries, 0),
             $entries
         );
     }
@@ -528,8 +496,10 @@ final class VersionConstraintTest extends PHPUnit_Framework_TestCase
         return $overlapsWithReflection->invoke($versionConstraint, $other);
     }
 
-    private function callMergeWithOverlapping(VersionConstraint $versionConstraint, VersionConstraint $other) : VersionConstraint
-    {
+    private function callMergeWithOverlapping(
+        VersionConstraint $versionConstraint,
+        VersionConstraint $other
+    ) : VersionConstraint {
         $mergeWithOverlappingReflection = new ReflectionMethod($versionConstraint, 'mergeWithOverlapping');
 
         $mergeWithOverlappingReflection->setAccessible(true);

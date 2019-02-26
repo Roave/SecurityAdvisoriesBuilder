@@ -20,22 +20,21 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Advisory;
-use Roave\SecurityAdvisories\VersionConstraint;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\Advisory}
  *
  * @covers \Roave\SecurityAdvisories\Advisory
  */
-final class AdvisoryTest extends PHPUnit_Framework_TestCase
+final class AdvisoryTest extends TestCase
 {
     public function testFromArrayWithValidConfig() : void
     {
         $advisory = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
-            'branches' => [
+            'branches'  => [
                 '1.0.x' => [
                     'versions' => ['>=1.0', '<1.1'],
                 ],
@@ -45,42 +44,60 @@ final class AdvisoryTest extends PHPUnit_Framework_TestCase
             ],
         ]);
 
-        self::assertInstanceOf(Advisory::class, $advisory);
-
         self::assertSame('foo/bar', $advisory->getComponentName());
         self::assertSame('>=1,<1.1|>=2,<2.1', $advisory->getConstraint());
 
         $constraints = $advisory->getVersionConstraints();
 
         self::assertCount(2, $constraints);
-        self::assertInstanceOf(VersionConstraint::class, $constraints[0]);
-        self::assertInstanceOf(VersionConstraint::class, $constraints[1]);
-
         self::assertSame('>=1,<1.1', $constraints[0]->getConstraintString());
         self::assertSame('>=2,<2.1', $constraints[1]->getConstraintString());
     }
 
-    /**
-     * @dataProvider unsortedBranchesProvider
-     */
-    public function testFromArrayGeneratesSortedResult(array $versionConstraint1, array $versionConstraint2, string $expected) : void
+    public function testFromArrayWithStringVersion() : void
     {
         $advisory = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
-            'branches' => [
-                '2.0.x' => [
-                    'versions' => $versionConstraint2,
-                ],
-                '1.0.x' => [
-                    'versions' => $versionConstraint1,
-                ],
+            'branches'  => [
+                '1.0.x' => ['versions' => '<1.1'],
+                '2.0.x' => ['versions' => '<2.1'],
+            ],
+        ]);
+
+        self::assertSame('foo/bar', $advisory->getComponentName());
+        self::assertSame('<1.1|<2.1', $advisory->getConstraint());
+
+        $constraints = $advisory->getVersionConstraints();
+
+        self::assertCount(2, $constraints);
+        self::assertSame('<1.1', $constraints[0]->getConstraintString());
+        self::assertSame('<2.1', $constraints[1]->getConstraintString());
+    }
+
+    /**
+     * @param string[] $versionConstraint1
+     * @param string[] $versionConstraint2
+     *
+     * @dataProvider unsortedBranchesProvider
+     */
+    public function testFromArrayGeneratesSortedResult(
+        array $versionConstraint1,
+        array $versionConstraint2,
+        string $expected
+    ) : void {
+        $advisory = Advisory::fromArrayData([
+            'reference' => 'composer://foo/bar',
+            'branches'  => [
+                '2.0.x' => ['versions' => $versionConstraint2],
+                '1.0.x' => ['versions' => $versionConstraint1],
             ],
         ]);
 
         self::assertSame($expected, $advisory->getConstraint());
     }
 
-    public function unsortedBranchesProvider()
+    /** @return string[][]|string[][][] */
+    public function unsortedBranchesProvider() : array
     {
         return [
             [

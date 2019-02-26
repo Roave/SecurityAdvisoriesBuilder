@@ -4,47 +4,45 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use InvalidArgumentException;
+use function array_intersect_key;
+use function array_keys;
+use function array_map;
+use function array_reverse;
+use function array_slice;
+use function count;
+use function explode;
+use function implode;
+use function Safe\preg_match;
+use function Safe\sprintf;
+
 /**
  * A simple version, such as 1.0 or 1.0.0.0 or 2.0.1.3.2
  */
 final class Version
 {
-    const VALIDITY_MATCHER = '/^(?:\d+\.)*\d+$/';
+    private const VALIDITY_MATCHER = '/^(?:\d+\.)*\d+$/';
 
-    /**
-     * @var string[]
-     */
+    /** @var int[] */
     private $versionNumbers;
 
-    /**
-     * @param int[] $versionNumbers
-     */
-    private function __construct(array $versionNumbers)
+    private function __construct(int ...$versionNumbers)
     {
         $this->versionNumbers = $versionNumbers;
     }
 
     /**
-     * @param string $version
-     *
-     * @return self
-     *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function fromString(string $version) : self
     {
-        if (! preg_match(self::VALIDITY_MATCHER, $version)) {
-            throw new \InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
+        if (preg_match(self::VALIDITY_MATCHER, $version) !== 1) {
+            throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
-        return new self(self::removeTrailingZeroes(array_map('intval', explode('.', $version))));
+        return new self(...self::removeTrailingZeroes(...array_map('intval', explode('.', $version))));
     }
 
-    /**
-     * @param Version $other
-     *
-     * @return bool
-     */
     public function equalTo(self $other) : bool
     {
         return $other->versionNumbers === $this->versionNumbers;
@@ -54,48 +52,31 @@ final class Version
      * Compares two versions and sees if this one is greater than the given one
      *
      * @todo may become a simple array comparison (if PHP supports it)
-     *
-     * @param Version $other
-     *
-     * @return bool
      */
     public function isGreaterThan(self $other) : bool
     {
-        foreach ($other->versionNumbers as $index => $otherVersion) {
-            $thisVersion = $this->versionNumbers[$index] ?? 0;
-
-            if ($thisVersion === $otherVersion) {
-                continue;
+        foreach (array_keys(array_intersect_key($this->versionNumbers, $other->versionNumbers)) as $index) {
+            if ($this->versionNumbers[$index] > $other->versionNumbers[$index]) {
+                return true;
             }
 
-            return $thisVersion > $otherVersion;
+            if ($this->versionNumbers[$index] < $other->versionNumbers[$index]) {
+                return false;
+            }
         }
 
-        return (bool) array_filter(array_slice($this->versionNumbers, count($other->versionNumbers)));
+        return count($this->versionNumbers) > count($other->versionNumbers);
     }
 
     /**
      * Compares two versions and sees if this one is greater or equal than the given one
      *
      * @todo may become a simple array comparison (if PHP supports it)
-     *
-     * @param Version $other
-     *
-     * @return bool
      */
     public function isGreaterOrEqualThan(self $other) : bool
     {
-        foreach ($other->versionNumbers as $index => $otherVersion) {
-            $thisVersion = $this->versionNumbers[$index] ?? 0;
-
-            if ($thisVersion === $otherVersion) {
-                continue;
-            }
-
-            return $thisVersion > $otherVersion;
-        }
-
-        return true;
+        return $other->versionNumbers === $this->versionNumbers
+            || $this->isGreaterThan($other);
     }
 
     public function getVersion() : string
@@ -103,19 +84,15 @@ final class Version
         return implode('.', $this->versionNumbers);
     }
 
-    /**
-     * @param int[] $versionNumbers
-     *
-     * @return int[]
-     */
-    private static function removeTrailingZeroes(array $versionNumbers) : array
+    /** @return int[] */
+    private static function removeTrailingZeroes(int ...$versionNumbers) : array
     {
-        for ($i = count($versionNumbers) - 1; $i > 0; $i -= 1) {
-            if ($versionNumbers[$i] > 0) {
-                break;
+        foreach (array_reverse(array_keys($versionNumbers)) as $key) {
+            if ($versionNumbers[$key] !== 0) {
+                return array_slice($versionNumbers, 0, $key + 1);
             }
         }
 
-        return array_slice($versionNumbers, 0, $i + 1);
+        return [0];
     }
 }

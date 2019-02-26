@@ -4,12 +4,19 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use InvalidArgumentException;
+use function in_array;
+use function Safe\preg_match;
+use function Safe\sprintf;
+use function strpos;
+
 /**
  * A simple version, such as 1.0 or 1.0.0.0 or 2.0.1.3.2
  */
 final class Boundary
 {
-    private const MATCHER = '/^\s*(<|<=|=|>=|>)\s*((?:\d+\.)*\d+)\s*$/';
+    private const IN_ARRAY_STRICT     = true;
+    private const MATCHER             = '/^\s*(<|<=|=|>=|>)\s*((?:\d+\.)*\d+)\s*$/';
     private const VALID_ADJACENCY_MAP = [
         ['<', '='],
         ['<', '>='],
@@ -17,14 +24,10 @@ final class Boundary
         ['=', '>'],
     ];
 
-    /**
-     * @var Version
-     */
+    /** @var Version */
     private $version;
 
-    /**
-     * @var string one of "<", "<=", "=", ">=", ">"
-     */
+    /** @var string one of "<", "<=", "=", ">=", ">" */
     private $limitType;
 
     private function __construct(Version $version, string $limitType)
@@ -34,16 +37,14 @@ final class Boundary
     }
 
     /**
-     * @param string $boundary
-     *
      * @return Boundary
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function fromString(string $boundary) : self
     {
-        if (! preg_match(self::MATCHER, $boundary, $matches)) {
-            throw new \InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
+        if (preg_match(self::MATCHER, $boundary, $matches) !== 1) {
+            throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
         }
 
         return new self(
@@ -54,7 +55,7 @@ final class Boundary
 
     public function limitIncluded() : bool
     {
-        return in_array($this->limitType, ['<=', '=', '>='], true);
+        return strpos($this->limitType, '=') !== false;
     }
 
     public function adjacentTo(self $other) : bool
@@ -63,8 +64,8 @@ final class Boundary
             return false;
         }
 
-        return in_array([$this->limitType, $other->limitType], self::VALID_ADJACENCY_MAP, true)
-            || in_array([$other->limitType, $this->limitType], self::VALID_ADJACENCY_MAP, true);
+        return in_array([$this->limitType, $other->limitType], self::VALID_ADJACENCY_MAP, self::IN_ARRAY_STRICT)
+            || in_array([$other->limitType, $this->limitType], self::VALID_ADJACENCY_MAP, self::IN_ARRAY_STRICT);
     }
 
     public function getVersion() : Version

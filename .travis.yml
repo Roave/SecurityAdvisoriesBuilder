@@ -7,7 +7,7 @@ cache:
     - $HOME/.composer/cache/files
 
 php:
-  - 7.1
+  - 7.3
 
 before_script:
   - composer install
@@ -15,5 +15,8 @@ before_script:
   - git config --global user.name "Marco Pivetta (via Travis-CI)"
 
 script:
+  - vendor/bin/phpstan analyse
   - vendor/bin/phpunit
   - php build-conflicts.php
+  - vendor/bin/phpcs
+  - vendor/bin/infection --min-msi=99 --min-covered-msi=100

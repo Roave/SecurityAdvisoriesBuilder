@@ -46,17 +46,9 @@ final class VersionTest extends TestCase
     /**
      * @dataProvider validVersionStringProvider
      */
-    public function testGetVersionWithValidVersion(string $versionString) : void
+    public function testGetVersionWithValidVersion(string $versionString, string $normalisedExpectation) : void
     {
-        self::assertRegExp('/([0-9]*)(\\.[1-9][0-9]*)*/', Version::fromString($versionString)->getVersion());
-    }
-
-    /**
-     * @dataProvider validVersionStringProvider
-     */
-    public function testVersionNumbersAreNormalized(string $versionString) : void
-    {
-        self::assertNotRegExp('/(\\.[0]+)+$/', Version::fromString($versionString)->getVersion());
+        self::assertSame($normalisedExpectation, Version::fromString($versionString)->getVersion());
     }
 
     /**
@@ -123,14 +115,15 @@ final class VersionTest extends TestCase
     public function validVersionStringProvider() : array
     {
         return [
-            ['0'],
-            ['1'],
-            ['12345'],
-            ['12345.00'],
-            ['0.1.2.3.4'],
-            ['1.2.3.4'],
-            ['1.2.3.4.5.6.7.8.9.10'],
-            ['12345.12345.12345.12345.0'],
+            ['0', '0'],
+            ['0.0', '0'],
+            ['1', '1'],
+            ['12345', '12345'],
+            ['12345.00', '12345'],
+            ['0.1.2.3.4', '0.1.2.3.4'],
+            ['1.2.3.4', '1.2.3.4'],
+            ['1.2.3.4.5.6.7.8.9.10', '1.2.3.4.5.6.7.8.9.10'],
+            ['12345.12345.12345.12345.0', '12345.12345.12345.12345'],
         ];
     }
 

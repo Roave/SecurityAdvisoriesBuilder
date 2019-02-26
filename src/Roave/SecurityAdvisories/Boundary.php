@@ -14,6 +14,7 @@ use function Safe\sprintf;
  */
 final class Boundary
 {
+    private const IN_ARRAY_STRICT     = true;
     private const MATCHER             = '/^\s*(<|<=|=|>=|>)\s*((?:\d+\.)*\d+)\s*$/';
     private const VALID_ADJACENCY_MAP = [
         ['<', '='],
@@ -62,8 +63,8 @@ final class Boundary
             return false;
         }
 
-        return in_array([$this->limitType, $other->limitType], self::VALID_ADJACENCY_MAP, true)
-            || in_array([$other->limitType, $this->limitType], self::VALID_ADJACENCY_MAP, true);
+        return in_array([$this->limitType, $other->limitType], self::VALID_ADJACENCY_MAP, self::IN_ARRAY_STRICT)
+            || in_array([$other->limitType, $this->limitType], self::VALID_ADJACENCY_MAP, self::IN_ARRAY_STRICT);
     }
 
     public function getVersion() : Version

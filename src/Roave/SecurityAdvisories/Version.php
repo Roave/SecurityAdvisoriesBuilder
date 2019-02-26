@@ -6,6 +6,7 @@ namespace Roave\SecurityAdvisories;
 
 use InvalidArgumentException;
 use function array_filter;
+use function array_key_exists;
 use function array_map;
 use function array_slice;
 use function count;
@@ -41,9 +42,6 @@ final class Version
         return new self(...self::removeTrailingZeroes(...array_map('intval', explode('.', $version))));
     }
 
-    /**
-     * @param Version $other
-     */
     public function equalTo(self $other) : bool
     {
         return $other->versionNumbers === $this->versionNumbers;
@@ -52,20 +50,20 @@ final class Version
     /**
      * Compares two versions and sees if this one is greater than the given one
      *
-     * @param Version $other
-     *
      * @todo may become a simple array comparison (if PHP supports it)
      */
     public function isGreaterThan(self $other) : bool
     {
         foreach ($other->versionNumbers as $index => $otherVersion) {
-            $thisVersion = $this->versionNumbers[$index] ?? 0;
+            if (! array_key_exists($index, $this->versionNumbers)) {
+                return false;
+            }
 
-            if ($thisVersion === $otherVersion) {
+            if ($this->versionNumbers[$index] === $otherVersion) {
                 continue;
             }
 
-            return $thisVersion > $otherVersion;
+            return $this->versionNumbers[$index] > $otherVersion;
         }
 
         return (bool) array_filter(array_slice($this->versionNumbers, count($other->versionNumbers)));
@@ -73,8 +71,6 @@ final class Version
 
     /**
      * Compares two versions and sees if this one is greater or equal than the given one
-     *
-     * @param Version $other
      *
      * @todo may become a simple array comparison (if PHP supports it)
      */

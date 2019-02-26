@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories;
 
 use InvalidArgumentException;
-use function array_filter;
-use function array_key_exists;
+use function array_intersect_key;
+use function array_keys;
 use function array_map;
+use function array_reverse;
 use function array_slice;
 use function count;
 use function explode;
@@ -54,19 +55,17 @@ final class Version
      */
     public function isGreaterThan(self $other) : bool
     {
-        foreach ($other->versionNumbers as $index => $otherVersion) {
-            if (! array_key_exists($index, $this->versionNumbers)) {
+        foreach (array_keys(array_intersect_key($this->versionNumbers, $other->versionNumbers)) as $index) {
+            if ($this->versionNumbers[$index] > $other->versionNumbers[$index]) {
+                return true;
+            }
+
+            if ($this->versionNumbers[$index] < $other->versionNumbers[$index]) {
                 return false;
             }
-
-            if ($this->versionNumbers[$index] === $otherVersion) {
-                continue;
-            }
-
-            return $this->versionNumbers[$index] > $otherVersion;
         }
 
-        return (bool) array_filter(array_slice($this->versionNumbers, count($other->versionNumbers)));
+        return count($this->versionNumbers) > count($other->versionNumbers);
     }
 
     /**
@@ -76,17 +75,8 @@ final class Version
      */
     public function isGreaterOrEqualThan(self $other) : bool
     {
-        foreach ($other->versionNumbers as $index => $otherVersion) {
-            $thisVersion = $this->versionNumbers[$index] ?? 0;
-
-            if ($thisVersion === $otherVersion) {
-                continue;
-            }
-
-            return $thisVersion > $otherVersion;
-        }
-
-        return true;
+        return $other->versionNumbers === $this->versionNumbers
+            || $this->isGreaterThan($other);
     }
 
     public function getVersion() : string
@@ -97,16 +87,12 @@ final class Version
     /** @return int[] */
     private static function removeTrailingZeroes(int ...$versionNumbers) : array
     {
-        $i = count($versionNumbers) - 1;
-
-        while ($i > 0) {
-            if ($versionNumbers[$i] > 0) {
-                break;
+        foreach (array_reverse(array_keys($versionNumbers)) as $key) {
+            if ($versionNumbers[$key] !== 0) {
+                return array_slice($versionNumbers, 0, $key + 1);
             }
-
-            $i -= 1;
         }
 
-        return array_slice($versionNumbers, 0, $i + 1);
+        return [0];
     }
 }

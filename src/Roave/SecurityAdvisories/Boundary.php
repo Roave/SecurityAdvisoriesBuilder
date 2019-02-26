@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use function in_array;
 use function Safe\preg_match;
 use function Safe\sprintf;
+use function strpos;
 
 /**
  * A simple version, such as 1.0 or 1.0.0.0 or 2.0.1.3.2
@@ -54,7 +55,7 @@ final class Boundary
 
     public function limitIncluded() : bool
     {
-        return false !== strpos($this->limitType, '=');
+        return strpos($this->limitType, '=') !== false;
     }
 
     public function adjacentTo(self $other) : bool

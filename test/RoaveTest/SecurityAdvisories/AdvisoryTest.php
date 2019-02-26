@@ -34,7 +34,7 @@ final class AdvisoryTest extends TestCase
     {
         $advisory = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
-            'branches' => [
+            'branches'  => [
                 '1.0.x' => [
                     'versions' => ['>=1.0', '<1.1'],
                 ],
@@ -58,13 +58,9 @@ final class AdvisoryTest extends TestCase
     {
         $advisory = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
-            'branches' => [
-                '1.0.x' => [
-                    'versions' => '<1.1',
-                ],
-                '2.0.x' => [
-                    'versions' => '<2.1',
-                ],
+            'branches'  => [
+                '1.0.x' => ['versions' => '<1.1'],
+                '2.0.x' => ['versions' => '<2.1'],
             ],
         ]);
 
@@ -91,7 +87,7 @@ final class AdvisoryTest extends TestCase
     ) : void {
         $advisory = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
-            'branches' => [
+            'branches'  => [
                 '2.0.x' => ['versions' => $versionConstraint2],
                 '1.0.x' => ['versions' => $versionConstraint1],
             ],

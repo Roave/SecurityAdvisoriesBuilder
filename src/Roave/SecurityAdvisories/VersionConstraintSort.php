@@ -11,7 +11,7 @@ final class VersionConstraintSort
         $versionA = $a->getLowerBound() ?? $a->getUpperBound();
         $versionB = $b->getLowerBound() ?? $b->getUpperBound();
 
-        if ($versionA && $versionB) {
+        if (isset($versionA, $versionB)) {
             return $versionA->isGreaterOrEqualThan($versionB) ? 1 : -1;
         }
 

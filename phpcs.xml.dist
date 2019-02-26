@@ -15,6 +15,7 @@
 
     <rule ref="Doctrine"/>
 
+    <file>build-conflicts.php</file>
     <file>public</file>
     <file>src</file>
     <file>test</file>

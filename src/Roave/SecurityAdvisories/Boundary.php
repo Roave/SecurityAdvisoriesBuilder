@@ -41,7 +41,7 @@ final class Boundary
      */
     public static function fromString(string $boundary) : self
     {
-        if (! preg_match(self::MATCHER, $boundary, $matches)) {
+        if (preg_match(self::MATCHER, $boundary, $matches) !== 1) {
             throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
         }
 

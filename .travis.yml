@@ -18,3 +18,4 @@ script:
   - vendor/bin/phpunit
   - php build-conflicts.php
   - vendor/bin/phpcs
+  - vendor/bin/phpstan analyse

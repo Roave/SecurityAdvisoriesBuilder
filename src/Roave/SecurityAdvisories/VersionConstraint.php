@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use LogicException;
 use function array_filter;
 use function array_map;
+use function assert;
 use function explode;
 use function implode;
 use function preg_match;
@@ -40,10 +41,10 @@ final class VersionConstraint
      */
     public static function fromString(string $versionConstraint) : self
     {
-        $constraintString = (string) $versionConstraint;
+        $constraintString = $versionConstraint;
         $instance         = new self();
 
-        if (preg_match(self::CLOSED_RANGE_MATCHER, $constraintString, $matches)) {
+        if (preg_match(self::CLOSED_RANGE_MATCHER, $constraintString, $matches) === 1) {
             [$left, $right] = explode(',', $constraintString);
 
             $instance->lowerBoundary = Boundary::fromString($left);
@@ -52,13 +53,13 @@ final class VersionConstraint
             return $instance;
         }
 
-        if (preg_match(self::LEFT_OPEN_RANGE_MATCHER, $constraintString, $matches)) {
+        if (preg_match(self::LEFT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
             $instance->upperBoundary = Boundary::fromString($constraintString);
 
             return $instance;
         }
 
-        if (preg_match(self::RIGHT_OPEN_RANGE_MATCHER, $constraintString, $matches)) {
+        if (preg_match(self::RIGHT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
             $instance->lowerBoundary = Boundary::fromString($constraintString);
 
             return $instance;
@@ -93,22 +94,22 @@ final class VersionConstraint
 
     public function isLowerBoundIncluded() : bool
     {
-        return $this->lowerBoundary ? $this->lowerBoundary->limitIncluded() : false;
+        return $this->lowerBoundary !== null ? $this->lowerBoundary->limitIncluded() : false;
     }
 
     public function getLowerBound() : ?Version
     {
-        return $this->lowerBoundary ? $this->lowerBoundary->getVersion() : null;
+        return $this->lowerBoundary !== null ? $this->lowerBoundary->getVersion() : null;
     }
 
     public function getUpperBound() : ?Version
     {
-        return $this->upperBoundary ? $this->upperBoundary->getVersion() : null;
+        return $this->upperBoundary !== null ? $this->upperBoundary->getVersion() : null;
     }
 
     public function isUpperBoundIncluded() : bool
     {
-        return $this->upperBoundary ? $this->upperBoundary->limitIncluded() : false;
+        return $this->upperBoundary !== null ? $this->upperBoundary->limitIncluded() : false;
     }
 
     public function canMergeWith(self $other) : bool
@@ -120,13 +121,7 @@ final class VersionConstraint
             || $this->adjacentTo($other);
     }
 
-    /**
-     * @param VersionConstraint $other
-     *
-     * @return VersionConstraint
-     *
-     * @throws LogicException
-     */
+    /** @throws LogicException */
     public function mergeWith(self $other) : self
     {
         if ($this->contains($other)) {
@@ -168,11 +163,11 @@ final class VersionConstraint
 
     private function containsLowerBound(?Boundary $otherLowerBoundary) : bool
     {
-        if (! $this->lowerBoundary) {
+        if ($this->lowerBoundary === null) {
             return true;
         }
 
-        if (! $otherLowerBoundary) {
+        if ($otherLowerBoundary === null) {
             return false;
         }
 
@@ -187,17 +182,17 @@ final class VersionConstraint
 
     private function containsUpperBound(?Boundary $otherUpperBoundary) : bool
     {
-        if (! $this->upperBoundary) {
+        if ($this->upperBoundary === null) {
             return true;
         }
 
-        if (! $otherUpperBoundary) {
+        if ($otherUpperBoundary === null) {
             return false;
         }
 
-        if (($this->upperBoundary->limitIncluded() === $otherUpperBoundary->limitIncluded())
-            || $this->upperBoundary->limitIncluded()
-        ) {
+        $upperLimitIncluded = $this->upperBoundary->limitIncluded();
+
+        if ($upperLimitIncluded || ($upperLimitIncluded === $otherUpperBoundary->limitIncluded())) {
             return $this->upperBoundary->getVersion()->isGreaterOrEqualThan($otherUpperBoundary->getVersion());
         }
 
@@ -220,11 +215,17 @@ final class VersionConstraint
 
     private function adjacentTo(VersionConstraint $other) : bool
     {
-        if ($this->lowerBoundary && $other->upperBoundary && $this->lowerBoundary->adjacentTo($other->upperBoundary)) {
+        if ($this->lowerBoundary !== null
+            && $other->upperBoundary !== null
+            && $this->lowerBoundary->adjacentTo($other->upperBoundary)
+        ) {
             return true;
         }
 
-        if ($this->upperBoundary && $other->lowerBoundary && $this->upperBoundary->adjacentTo($other->lowerBoundary)) {
+        if ($this->upperBoundary !== null
+            && $other->lowerBoundary !== null
+            && $this->upperBoundary->adjacentTo($other->lowerBoundary)
+        ) {
             return true;
         }
 
@@ -279,7 +280,10 @@ final class VersionConstraint
             ));
         }
 
-        if ($this->upperBoundary && $other->lowerBoundary && $this->upperBoundary->adjacentTo($other->lowerBoundary)) {
+        if ($this->upperBoundary !== null
+            && $other->lowerBoundary !== null
+            && $this->upperBoundary->adjacentTo($other->lowerBoundary)
+        ) {
             $instance = new self();
 
             $instance->lowerBoundary = $this->lowerBoundary;
@@ -296,24 +300,22 @@ final class VersionConstraint
         return $instance;
     }
 
-    /**
-     * @return bool
-     *
-     * Note: most of the limitations/complication probably go away if we define a `Bound` VO
-     */
+    /** Note: most of the limitations/complication probably go away if we define a `Bound` VO */
     private function strictlyContainsOtherBound(?Boundary $boundary) : bool
     {
-        if (! $boundary) {
+        if ($boundary === null) {
             return false;
         }
 
         $boundVersion = $boundary->getVersion();
 
-        if (! $this->lowerBoundary) {
+        if ($this->lowerBoundary === null) {
+            assert($this->upperBoundary !== null, 'We either have a lower or an upper boundary, or both');
+
             return $this->upperBoundary->getVersion()->isGreaterThan($boundVersion);
         }
 
-        if (! $this->upperBoundary) {
+        if ($this->upperBoundary === null) {
             return $boundVersion->isGreaterThan($this->lowerBoundary->getVersion());
         }
 

@@ -25,8 +25,11 @@ use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use Roave\SecurityAdvisories\Version;
 use Roave\SecurityAdvisories\VersionConstraint;
+use function array_column;
 use function array_combine;
 use function array_map;
+use function assert;
+use function is_array;
 use function preg_match;
 use function var_export;
 
@@ -44,7 +47,6 @@ final class VersionConstraintTest extends TestCase
     {
         $constraint = VersionConstraint::fromString($stringConstraint);
 
-        self::assertInstanceOf(VersionConstraint::class, $constraint);
         self::assertTrue($constraint->isSimpleRangeString());
         self::assertInstanceOf(Version::class, $constraint->getLowerBound());
         self::assertInstanceOf(Version::class, $constraint->getUpperBound());
@@ -120,7 +122,6 @@ final class VersionConstraintTest extends TestCase
     {
         $constraint = VersionConstraint::fromString($stringConstraint);
 
-        self::assertInstanceOf(VersionConstraint::class, $constraint);
         self::assertFalse($constraint->isSimpleRangeString());
         self::assertSame($stringConstraint, $constraint->getConstraintString());
     }
@@ -248,15 +249,14 @@ final class VersionConstraintTest extends TestCase
             ['>1,<2'],
         ];
 
-        return array_combine(
-            array_map(
-                static function (array $entry) {
-                    return $entry[0];
-                },
-                $matchedRanges
-            ),
+        $indexedEntries = array_combine(
+            array_column($matchedRanges, 0),
             $matchedRanges
         );
+
+        assert(is_array($indexedEntries));
+
+        return $indexedEntries;
     }
 
     /**
@@ -325,7 +325,7 @@ final class VersionConstraintTest extends TestCase
             ['>=2', '>3', true, false],
         ];
 
-        return array_combine(
+        $indexedEntries = array_combine(
             array_map(
                 static function (array $entry) {
                     return '(∀ x ∈ (' . $entry[0] . '): x ∈ (' . $entry[1] . ')) = ' . var_export($entry[2], true);
@@ -334,6 +334,10 @@ final class VersionConstraintTest extends TestCase
             ),
             $entries
         );
+
+        assert(is_array($indexedEntries));
+
+        return $indexedEntries;
     }
 
     /**
@@ -378,7 +382,7 @@ final class VersionConstraintTest extends TestCase
             ['>=2', '>3', true, false],
         ];
 
-        return array_combine(
+        $indexedEntries = array_combine(
             array_map(
                 static function (array $entry) {
                     return '((' . $entry[0] . ') ∩ (' . $entry[1] . ')) ≠ ∅';
@@ -387,6 +391,10 @@ final class VersionConstraintTest extends TestCase
             ),
             $entries
         );
+
+        assert(is_array($indexedEntries));
+
+        return $indexedEntries;
     }
 
     /**
@@ -426,7 +434,7 @@ final class VersionConstraintTest extends TestCase
             ['>=1,<2', '<1', '<2'],
         ];
 
-        return array_combine(
+        $indexedEntries = array_combine(
             array_map(
                 static function (array $entry) {
                     return '((' . $entry[0] . ') ∪ (' . $entry[1] . ')) = (' . $entry[2] . ')';
@@ -435,6 +443,10 @@ final class VersionConstraintTest extends TestCase
             ),
             $entries
         );
+
+        assert(is_array($indexedEntries));
+
+        return $indexedEntries;
     }
 
     /**
@@ -457,7 +469,7 @@ final class VersionConstraintTest extends TestCase
             ['>1,<4', '>2,<3'], // note: containing, not overlapping.
         ];
 
-        return array_combine(
+        $indexedEntries = array_combine(
             array_map(
                 static function (array $entry) {
                     return '((' . $entry[0] . ') ∩ (' . $entry[1] . ')) = ∅';
@@ -466,6 +478,10 @@ final class VersionConstraintTest extends TestCase
             ),
             $entries
         );
+
+        assert(is_array($indexedEntries));
+
+        return $indexedEntries;
     }
 
     /**
@@ -475,15 +491,14 @@ final class VersionConstraintTest extends TestCase
      */
     private function dataProviderFirstValueAsProviderKey(array $entries) : array
     {
-        return array_combine(
-            array_map(
-                static function (array $entry) {
-                    return $entry[0];
-                },
-                $entries
-            ),
+        $indexedEntries = array_combine(
+            array_column($entries, 0),
             $entries
         );
+
+        assert(is_array($indexedEntries));
+
+        return $indexedEntries;
     }
 
     private function callContains(VersionConstraint $versionConstraint, VersionConstraint $other) : bool

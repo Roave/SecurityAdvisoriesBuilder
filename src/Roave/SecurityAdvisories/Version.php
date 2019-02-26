@@ -21,13 +21,10 @@ final class Version
 {
     public const VALIDITY_MATCHER = '/^(?:\d+\.)*\d+$/';
 
-    /** @var string[] */
+    /** @var int[] */
     private $versionNumbers;
 
-    /**
-     * @param int[] $versionNumbers
-     */
-    private function __construct(array $versionNumbers)
+    private function __construct(int ...$versionNumbers)
     {
         $this->versionNumbers = $versionNumbers;
     }
@@ -37,11 +34,11 @@ final class Version
      */
     public static function fromString(string $version) : self
     {
-        if (! preg_match(self::VALIDITY_MATCHER, $version)) {
+        if (preg_match(self::VALIDITY_MATCHER, $version) !== 1) {
             throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
-        return new self(self::removeTrailingZeroes(array_map('intval', explode('.', $version))));
+        return new self(...self::removeTrailingZeroes(...array_map('intval', explode('.', $version))));
     }
 
     /**
@@ -101,17 +98,17 @@ final class Version
         return implode('.', $this->versionNumbers);
     }
 
-    /**
-     * @param int[] $versionNumbers
-     *
-     * @return int[]
-     */
-    private static function removeTrailingZeroes(array $versionNumbers) : array
+    /** @return int[] */
+    private static function removeTrailingZeroes(int ...$versionNumbers) : array
     {
-        for ($i = count($versionNumbers) - 1; $i > 0; $i -= 1) {
+        $i = count($versionNumbers) - 1;
+
+        while ($i > 0) {
             if ($versionNumbers[$i] > 0) {
                 break;
             }
+
+            $i -= 1;
         }
 
         return array_slice($versionNumbers, 0, $i + 1);

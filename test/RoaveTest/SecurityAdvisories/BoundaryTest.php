@@ -51,7 +51,6 @@ final class BoundaryTest extends TestCase
     {
         $boundary = Boundary::fromString($boundaryString);
 
-        self::assertInstanceOf(Boundary::class, $boundary);
         self::assertSame($expectedNormalizedString, $boundary->getBoundaryString());
         self::assertEquals($boundary, Boundary::fromString($boundary->getBoundaryString()));
     }

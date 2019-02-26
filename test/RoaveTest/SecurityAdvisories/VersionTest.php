@@ -25,6 +25,8 @@ use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Version;
 use function array_combine;
 use function array_map;
+use function assert;
+use function is_array;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\Version}
@@ -48,10 +50,7 @@ final class VersionTest extends TestCase
      */
     public function testGetVersionWithValidVersion(string $versionString) : void
     {
-        $version = Version::fromString($versionString);
-
-        self::assertInstanceOf(Version::class, $version);
-        self::assertRegExp('/([0-9]*)(\\.[1-9][0-9]*)*/', $version->getVersion());
+        self::assertRegExp('/([0-9]*)(\\.[1-9][0-9]*)*/', Version::fromString($versionString)->getVersion());
     }
 
     /**
@@ -159,7 +158,7 @@ final class VersionTest extends TestCase
             ['1.0.12', '1.0.11', true, false],
         ];
 
-        return array_combine(
+        $indexedEntries = array_combine(
             array_map(
                 static function (array $versionData) {
                     return $versionData[0] . ' > ' . $versionData[1];
@@ -168,6 +167,10 @@ final class VersionTest extends TestCase
             ),
             $versions
         );
+
+        assert(is_array($indexedEntries));
+
+        return $indexedEntries;
     }
 
     /**
@@ -194,7 +197,7 @@ final class VersionTest extends TestCase
             ['1.0.12', '1.0.11', true, false],
         ];
 
-        return array_combine(
+        $indexedEntries = array_combine(
             array_map(
                 static function (array $versionData) {
                     return $versionData[0] . ' >= ' . $versionData[1];
@@ -203,6 +206,10 @@ final class VersionTest extends TestCase
             ),
             $versions
         );
+
+        assert(is_array($indexedEntries));
+
+        return $indexedEntries;
     }
 
     /**

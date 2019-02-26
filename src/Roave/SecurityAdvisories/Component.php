@@ -36,19 +36,10 @@ final class Component
     /** @var Advisory[] */
     private $advisories;
 
-    /**
-     * @param Advisory[] $advisories
-     */
-    public function __construct(string $name, array $advisories)
+    public function __construct(string $name, Advisory ...$advisories)
     {
-        static $checkAdvisories;
-
-        $checkAdvisories = $checkAdvisories ?: static function (Advisory ...$advisories) {
-            return $advisories;
-        };
-
-        $this->name       = (string) $name;
-        $this->advisories = $checkAdvisories(...array_values($advisories));
+        $this->name       = $name;
+        $this->advisories = $advisories;
     }
 
     public function getName() : string

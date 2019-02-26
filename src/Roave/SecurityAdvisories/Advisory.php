@@ -23,7 +23,10 @@ namespace Roave\SecurityAdvisories;
 use InvalidArgumentException;
 use function array_map;
 use function array_values;
+use function assert;
 use function implode;
+use function is_array;
+use function is_string;
 use function str_replace;
 use function usort;
 
@@ -58,13 +61,19 @@ final class Advisory
     public static function fromArrayData(array $config) : self
     {
         // @TODO may want to throw exceptions on missing/invalid keys
+        $componentName = str_replace('composer://', '', $config['reference']);
+        $branches      = $config['branches'];
+
+        assert(is_string($componentName));
+        assert(is_array($branches));
+
         return new self(
-            str_replace('composer://', '', $config['reference']),
+            $componentName,
             array_values(array_map(
                 static function (array $branchConfig) {
                     return VersionConstraint::fromString(implode(',', (array) $branchConfig['versions']));
                 },
-                $config['branches']
+                $branches
             ))
         );
     }

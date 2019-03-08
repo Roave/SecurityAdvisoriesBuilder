@@ -51,7 +51,7 @@
                 },
                 {
                     "name": "Gert de Pagter",
-                    "email": "BackEndTea@gmail.com"
+                    "email": "backendtea@gmail.com"
                 }
             ],
             "description": "Symfony polyfill for ctype functions",
@@ -3512,16 +3512,16 @@
         },
         {
             "name": "thecodingmachine/phpstan-safe-rule",
-            "version": "v0.1.2",
+            "version": "v0.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thecodingmachine/phpstan-safe-rule.git",
-                "reference": "ffbdebd2b82f8c18fcf923d83d2c05f3833c9a76"
+                "reference": "00f4845905feb5240ca62fb799e3c51ba85c9230"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thecodingmachine/phpstan-safe-rule/zipball/ffbdebd2b82f8c18fcf923d83d2c05f3833c9a76",
-                "reference": "ffbdebd2b82f8c18fcf923d83d2c05f3833c9a76",
+                "url": "https://api.github.com/repos/thecodingmachine/phpstan-safe-rule/zipball/00f4845905feb5240ca62fb799e3c51ba85c9230",
+                "reference": "00f4845905feb5240ca62fb799e3c51ba85c9230",
                 "shasum": ""
             },
             "require": {
@@ -3556,7 +3556,7 @@
                 }
             ],
             "description": "A PHPStan rule to detect safety issues. Must be used in conjunction with thecodingmachine/safe",
-            "time": "2019-01-21T12:46:57+00:00"
+            "time": "2019-03-07T13:52:42+00:00"
         },
         {
             "name": "theseer/tokenizer",

@@ -51,7 +51,7 @@
                 },
                 {
                     "name": "Gert de Pagter",
-                    "email": "BackEndTea@gmail.com"
+                    "email": "backendtea@gmail.com"
                 }
             ],
             "description": "Symfony polyfill for ctype functions",
@@ -125,16 +125,16 @@
         },
         {
             "name": "thecodingmachine/safe",
-            "version": "v0.1.13",
+            "version": "v0.1.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thecodingmachine/safe.git",
-                "reference": "4a8c8e55e6f6932f6d836fac74e33ec22d683fe3"
+                "reference": "67b654c7effeda8db27c133e5f0cbb638e90d1e4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thecodingmachine/safe/zipball/4a8c8e55e6f6932f6d836fac74e33ec22d683fe3",
-                "reference": "4a8c8e55e6f6932f6d836fac74e33ec22d683fe3",
+                "url": "https://api.github.com/repos/thecodingmachine/safe/zipball/67b654c7effeda8db27c133e5f0cbb638e90d1e4",
+                "reference": "67b654c7effeda8db27c133e5f0cbb638e90d1e4",
                 "shasum": ""
             },
             "require": {
@@ -253,7 +253,7 @@
                 "MIT"
             ],
             "description": "PHP core functions that throw exceptions instead of returning FALSE on error",
-            "time": "2019-01-30T21:09:54+00:00"
+            "time": "2019-03-07T11:09:21+00:00"
         }
     ],
     "packages-dev": [

@@ -20,3 +20,4 @@ script:
   - php build-conflicts.php
   - vendor/bin/phpcs
   - vendor/bin/infection --min-msi=99 --min-covered-msi=100
+  - vendor/bin/roave-no-leaks

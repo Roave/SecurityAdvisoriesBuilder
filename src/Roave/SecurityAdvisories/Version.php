@@ -21,14 +21,22 @@ use function Safe\sprintf;
  */
 final class Version
 {
-    private const VALIDITY_MATCHER = '/^(?:\d+\.)*\d+$/';
+    private const VERSION_MATCHER = <<<REGEXP
+        /^((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?/
+        REGEXP;
 
     /** @var int[] */
     private $versionNumbers;
 
-    private function __construct(int ...$versionNumbers)
+    /** @var VersionStability */
+    private $versionStability;
+
+    private function __construct(array $versionNumbers, array $versionStability)
     {
         $this->versionNumbers = $versionNumbers;
+        if(!empty($versionStability)) {
+            $this->versionStability = new VersionStability($versionStability);
+        }
     }
 
     /**
@@ -36,11 +44,13 @@ final class Version
      */
     public static function fromString(string $version) : self
     {
-        if (preg_match(self::VALIDITY_MATCHER, $version) !== 1) {
+        if (preg_match(self::VERSION_MATCHER, strtolower($version), $matches) !== 1) {
             throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
-        return new self(...self::removeTrailingZeroes(...array_map('intval', explode('.', $version))));
+        $version = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches[1])));
+
+        return new self($version, array_slice($matches, 2));
     }
 
     public function equalTo(self $other) : bool
@@ -81,7 +91,9 @@ final class Version
 
     public function getVersion() : string
     {
-        return implode('.', $this->versionNumbers);
+        $stability = $this->versionStability instanceof VersionStability ? '-'.$this->versionStability->getVersion() : '';
+
+        return implode('.', $this->versionNumbers) . $stability;
     }
 
     /** @return int[] */

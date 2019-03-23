@@ -124,6 +124,26 @@ final class VersionTest extends TestCase
             ['1.2.3.4', '1.2.3.4'],
             ['1.2.3.4.5.6.7.8.9.10', '1.2.3.4.5.6.7.8.9.10'],
             ['12345.12345.12345.12345.0', '12345.12345.12345.12345'],
+            ['1-STABLE', '1-stable'], // uppercase test
+            ['1.b', '1-b'], // check dot in front of stability
+            ['1_beta', '1-beta'], // check underscore in front of stability
+            ['1-stable', '1-stable'],
+            ['1-beta', '1-beta'],
+            ['1-rc', '1-rc'],
+            ['1-alpha', '1-alpha'],
+            ['1-a', '1-a'],
+            ['1-patch', '1-patch'],
+            ['1-p', '1-p'],
+            ['1.0.0-alpha', '1-alpha'],
+            ['1.0.0-alpha1', '1-alpha.1'],
+            ['1.0.0-alpha.1.2.3.0.0.0', '1-alpha.1.2.3.0.0.0'],
+            ['1-beta6_bugfix', '1-beta.6'],
+            ['1-beta_6+feature1', '1-beta.6'],
+            ['1-beta.6.6+feature2.9.0', '1-beta.6.6'],
+//            ['1.0.0-alpha.beta.1'],
+//            ['1.0.0-alpha.beta.1.2+preview1'],
+//            ['1.0.0-0.3.7'],
+//            ['1.0.0-x.7.z.92'],
         ];
     }
 
@@ -224,6 +244,7 @@ final class VersionTest extends TestCase
             ['1.0.0.0', '1.0.0'],
             ['2.0.1.0', '2.0.1'],
             ['2.0.1.0.0.0', '2.0.1'],
+            ['0.0.0-beta1', '0-beta1']
         ];
     }
 

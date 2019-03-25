@@ -65,14 +65,26 @@ final class Version
      */
     public function isGreaterThan(self $other) : bool
     {
+        $finalResponse = 0;
         foreach (array_keys(array_intersect_key($this->versionNumbers, $other->versionNumbers)) as $index) {
             if ($this->versionNumbers[$index] > $other->versionNumbers[$index]) {
-                return true;
+                $finalResponse = 1;
             }
 
             if ($this->versionNumbers[$index] < $other->versionNumbers[$index]) {
-                return false;
+                $finalResponse = -1;
             }
+        }
+
+        // if version allows to compare, then skip the rest
+        if ($finalResponse != 0) {
+            return $finalResponse == 1 ? true : false;
+        }
+
+        $finalResponse = $this->compareStabilities($other);
+
+        if ($finalResponse != 0) {
+            return $finalResponse == 1 ? true : false;
         }
 
         return count($this->versionNumbers) > count($other->versionNumbers);
@@ -106,5 +118,25 @@ final class Version
         }
 
         return [0];
+    }
+
+    private function compareStabilities(self $other) : int
+    {
+        if ($this->versionStability instanceof VersionStability
+            && $other->versionStability instanceof VersionStability
+        ) {
+            return $this->versionStability->compareFlags($other->versionStability);
+        }
+
+        if ($this->versionStability == null && $other->versionStability instanceof VersionStability) {
+            return 1;
+        }
+
+        if ($this->versionStability instanceof VersionStability && $other->versionStability == null) {
+            return -1;
+        }
+
+        return 0;
+
     }
 }

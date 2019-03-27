@@ -34,9 +34,7 @@ final class Version
     private function __construct(array $versionNumbers, array $versionStability)
     {
         $this->versionNumbers = $versionNumbers;
-        if(!empty($versionStability)) {
-            $this->versionStability = new VersionStability($versionStability);
-        }
+        $this->versionStability = new VersionStability($versionStability ?? []);
     }
 
     /**
@@ -65,29 +63,32 @@ final class Version
      */
     public function isGreaterThan(self $other) : bool
     {
-        $finalResponse = 0;
         foreach (array_keys(array_intersect_key($this->versionNumbers, $other->versionNumbers)) as $index) {
             if ($this->versionNumbers[$index] > $other->versionNumbers[$index]) {
-                $finalResponse = 1;
+                return true;
             }
 
             if ($this->versionNumbers[$index] < $other->versionNumbers[$index]) {
-                $finalResponse = -1;
+                return false;
             }
         }
 
-        // if version allows to compare, then skip the rest
-        if ($finalResponse != 0) {
-            return $finalResponse == 1 ? true : false;
+        // we can continue only when versions are equal
+        $isGreater = count($this->versionNumbers) <=> count($other->versionNumbers);
+
+        if ($isGreater != 0) {
+            return $isGreater == 1 ? true : false;
         }
 
-        $finalResponse = $this->compareStabilities($other);
+        // compare here stabilities - flags and versions
+        $isGreater = $this->versionStability->isGreaterThan($other->versionStability);
 
-        if ($finalResponse != 0) {
-            return $finalResponse == 1 ? true : false;
+        if ($isGreater != 0) {
+            return $isGreater == 1 ? true : false;
         }
 
-        return count($this->versionNumbers) > count($other->versionNumbers);
+        // the only chance we get here is when versions are absolutely equal to each other
+        return false;
     }
 
     /**
@@ -103,9 +104,9 @@ final class Version
 
     public function getVersion() : string
     {
-        $stability = $this->versionStability instanceof VersionStability ? '-'.$this->versionStability->getVersion() : '';
+        $stability = $this->versionStability instanceof VersionStability ? $this->versionStability->getVersion() : '';
 
-        return implode('.', $this->versionNumbers) . $stability;
+        return implode('.', $this->versionNumbers) . (!empty($stability) ? '-'.$stability:'');
     }
 
     /** @return int[] */
@@ -120,23 +121,4 @@ final class Version
         return [0];
     }
 
-    private function compareStabilities(self $other) : int
-    {
-        if ($this->versionStability instanceof VersionStability
-            && $other->versionStability instanceof VersionStability
-        ) {
-            return $this->versionStability->compareFlags($other->versionStability);
-        }
-
-        if ($this->versionStability == null && $other->versionStability instanceof VersionStability) {
-            return 1;
-        }
-
-        if ($this->versionStability instanceof VersionStability && $other->versionStability == null) {
-            return -1;
-        }
-
-        return 0;
-
-    }
 }

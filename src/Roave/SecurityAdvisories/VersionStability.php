@@ -10,7 +10,7 @@ class VersionStability
     private $flag;
 
     /** @var int[]  */
-    private $version;
+    private $versionNumbers;
 
     private const FLAGS_HIERARCHY = [
         'stable'    => 4,
@@ -23,19 +23,23 @@ class VersionStability
         'p'         => 0,
     ];
 
-    public function __construct(array $stability)
+    /**
+     * VersionStability constructor.
+     *
+     * @param array $stability
+     */
+    public function __construct(array $version)
     {
-        $this->flag = $stability[0];
-
         // todo remove trailing zeroes here too
-        $this->version = !empty($stability[1]) ? array_map('intval', explode('.', $stability[1])) : [];
+        $this->flag = $version[0] ?? null;
+        $this->versionNumbers = isset($version[1]) ? array_map('intval', explode('.', $version[1])) : [];
     }
 
-    public function getVersion()
+    public function getVersion(): string
     {
-        $version = !empty($this->version) ? '.' . join('.',$this->version) : null;
+        $version = !empty($this->versionNumbers) ? '.' . join('.',$this->versionNumbers) : null;
 
-        return $this->flag . $version;
+        return (string) ($this->flag . $version);
     }
 
     public function getFlag()
@@ -46,6 +50,40 @@ class VersionStability
     public function compareFlags(self $other)
     {
         return self::FLAGS_HIERARCHY[$this->flag] <=> self::FLAGS_HIERARCHY[$other->flag];
+    }
+
+    public function isGreaterThan(self $other):int
+    {
+        if($this->getFlag() == null && $other->getFlag() == null) {
+            return 0;
+        }
+
+        if ($this->getFlag() == null && is_string($other->getFlag())) {
+            return 1;
+        }
+
+        if (is_string($this->getFlag()) && $other->getFlag() == null) {
+            return -1;
+        }
+
+        $isGreater = $this->compareFlags($other);
+
+        if ($isGreater != 0) {
+            return $isGreater;
+        }
+
+        // compare versions here
+        foreach (array_keys(array_intersect_key($this->versionNumbers, $other->versionNumbers)) as $index) {
+            if ($this->versionNumbers[$index] > $other->versionNumbers[$index]) {
+                return 1;
+            }
+
+            if ($this->versionNumbers[$index] < $other->versionNumbers[$index]) {
+                return -1;
+            }
+        }
+
+        return 0;
     }
 
 }

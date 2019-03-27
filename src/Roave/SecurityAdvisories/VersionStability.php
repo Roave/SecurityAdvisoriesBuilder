@@ -71,7 +71,6 @@ class VersionStability
         if ($isGreater != 0) {
             return $isGreater;
         }
-
         // compare versions here
         foreach (array_keys(array_intersect_key($this->versionNumbers, $other->versionNumbers)) as $index) {
             if ($this->versionNumbers[$index] > $other->versionNumbers[$index]) {
@@ -83,7 +82,7 @@ class VersionStability
             }
         }
 
-        return 0;
+        return count($this->versionNumbers) <=> count($other->versionNumbers);
     }
 
 }

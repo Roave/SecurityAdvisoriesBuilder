@@ -143,6 +143,7 @@ final class VersionTest extends TestCase
             ['1-beta6_bugfix', '1-beta.6'],
             ['1-beta_6+feature1', '1-beta.6'],
             ['1-beta.6.6+feature2.9.0', '1-beta.6.6'],
+//            ['1-beta.6.6.0.0+feature2.9.0', '1-beta.6.6'], // trailing zeroes check
             // also valid versions
 //            ['1.0.0-alpha.beta.1'],
 //            ['1.0.0-alpha.beta.1.2+preview1'],
@@ -174,6 +175,7 @@ final class VersionTest extends TestCase
             ['1.1', '1.1.0.0.1', false, true],
             ['1.0.0.0.0.0.2', '1.0.0.0.0.2', false, true],
             ['1.0.12', '1.0.11', true, false],
+            // stability vs simple versions
             ['1-stable', '1', false, true],
             ['1-rc', '1', false, true],
             ['1-beta', '1', false, true],
@@ -182,16 +184,20 @@ final class VersionTest extends TestCase
             ['1-a', '1', false, true],
             ['1-patch', '1', false, true],
             ['1-p', '1', false, true],
-//
+            // stabilities vs stabilities
             ['1-stable', '1-rc', true, false],
             ['1-rc', '1-beta', true, false],
             ['1-beta', '1-alpha', true, false],
             ['1-b', '1-alpha', true, false],
             ['1-alpha', '1-patch', true, false],
             ['1-a', '1-patch', true, false],
-
-//            ['1-patch', '1', true, false],
-//            ['1-p', '1', false, true],
+            ['1-patch', '1', false, true],
+            ['1-p', '1', false, true],
+            // more complex comparisons
+            ['1-stable.1', '1-stable.1', false, false],
+            ['1-stable.1.2', '1-stable.1', true, false],
+            ['1-stable.1.2.3', '1-stable.1.2', true, false],
+            ['1-stable.1.2.3.4.5.6.7.8', '1-stable.1.2.3.4.5.6.7', true, false],
         ];
 
         return array_combine(

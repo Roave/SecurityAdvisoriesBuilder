@@ -198,6 +198,9 @@ final class VersionTest extends TestCase
             ['1-stable.1.2', '1-stable.1', true, false],
             ['1-stable.1.2.3', '1-stable.1.2', true, false],
             ['1-stable.1.2.3.4.5.6.7.8', '1-stable.1.2.3.4.5.6.7', true, false],
+
+            // introduce here equal examples
+            // also make 0 strip check here
         ];
 
         return array_combine(
@@ -236,6 +239,30 @@ final class VersionTest extends TestCase
             ['1.1', '1.1.0.0.1', false, true],
             ['1.0.0.0.0.0.2', '1.0.0.0.0.2', false, true],
             ['1.0.12', '1.0.11', true, false],
+            // stability vs simple versions
+            ['1-stable', '1', false, true],
+            ['1-rc', '1', false, true],
+            ['1-beta', '1', false, true],
+            ['1-b', '1', false, true],
+            ['1-alpha', '1', false, true],
+            ['1-a', '1', false, true],
+            ['1-patch', '1', false, true],
+            ['1-p', '1', false, true],
+            // stabilities vs stabilities
+            ['1-stable', '1-rc', true, false],
+            ['1-rc', '1-beta', true, false],
+            ['1-beta', '1-alpha', true, false],
+            ['1-b', '1-alpha', true, false],
+            ['1-alpha', '1-patch', true, false],
+            ['1-a', '1-patch', true, false],
+            ['1-patch', '1', false, true],
+            ['1-p', '1', false, true],
+            // more complex comparisons
+            ['1-stable.1', '1-stable.1', true, true],
+            ['1-stable.1.2', '1-stable.1', true, false],
+            ['1-stable.1.2.3', '1-stable.1.2', true, false],
+            ['1-stable.1.2.3.4.5.6.7.8', '1-stable.1.2.3.4.5.6.7', true, false],
+            ['2.1.0-beta1', '2.1', false, true]
         ];
 
         return array_combine(

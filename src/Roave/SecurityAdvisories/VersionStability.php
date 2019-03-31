@@ -85,4 +85,19 @@ class VersionStability
         return count($this->versionNumbers) <=> count($other->versionNumbers);
     }
 
+    public function isEqualTo(self $other) : bool
+    {
+        // here we assume that if we have no flags at all then stability parts are equal
+        if ($this->flag == null && $other->flag == null) {
+            return true;
+        }
+
+        if ($this->flag == null || $other->flag == null) {
+            return false;
+        }
+
+        return self::FLAGS_HIERARCHY[$this->flag] == self::FLAGS_HIERARCHY[$other->flag] &&
+            $this->versionNumbers === $other->versionNumbers;
+    }
+
 }

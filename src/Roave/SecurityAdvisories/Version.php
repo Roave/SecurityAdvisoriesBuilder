@@ -91,6 +91,12 @@ final class Version
         return false;
     }
 
+    private function isEqualTo(self $other) : bool
+    {
+        return $other->versionNumbers === $this->versionNumbers &&
+            $this->versionStability->isEqualTo($other->versionStability);
+    }
+
     /**
      * Compares two versions and sees if this one is greater or equal than the given one
      *
@@ -98,7 +104,7 @@ final class Version
      */
     public function isGreaterOrEqualThan(self $other) : bool
     {
-        return $other->versionNumbers === $this->versionNumbers
+        return $this->isEqualTo($other)
             || $this->isGreaterThan($other);
     }
 

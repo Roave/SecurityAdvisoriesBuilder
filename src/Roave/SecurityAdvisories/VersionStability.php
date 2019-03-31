@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
-class VersionStability
+final class VersionStability
 {
     /** @var string  */
     private $flag;

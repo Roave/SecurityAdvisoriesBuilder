@@ -19,9 +19,18 @@ use function Safe\sprintf;
  */
 final class VersionConstraint
 {
-    private const CLOSED_RANGE_MATCHER     = '/^>(=?)\s*((?:\d+\.)*\d+)\s*,\s*<(=?)\s*((?:\d+\.)*\d+)$/';
-    private const LEFT_OPEN_RANGE_MATCHER  = '/^<(=?)\s*((?:\d+\.)*\d+)$/';
-    private const RIGHT_OPEN_RANGE_MATCHER = '/^>(=?)\s*((?:\d+\.)*\d+)$/';
+    // that is fucking nasty regular expression todo: split it
+    private const CLOSED_RANGE_MATCHER      = <<<REGEXP
+        /^>(=?)\s*((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?\s*,\s*<(=?)\s*((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?$/
+        REGEXP;
+
+    private const LEFT_OPEN_RANGE_MATCHER   = <<<REGEXP
+        /^<(=?)\s*((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?$/
+        REGEXP;
+
+    private const RIGHT_OPEN_RANGE_MATCHER  = <<<REGEXP
+        /^>(=?)\s*((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?$/
+        REGEXP;
 
     /** @var string|null */
     private $constraintString;
@@ -65,14 +74,23 @@ final class VersionConstraint
             return $instance;
         }
 
+//        throw new InvalidArgumentException(sprintf('Given versionConstraint "%s" is not a valid constraint string', $versionConstraint)); // I would throw here Exception
+
+
         $instance->constraintString = $constraintString;
 
         return $instance;
+
     }
 
+    /**
+     * @return bool
+     * @deprecated No need for this flag, check where this property is set
+     * Is there a case when we can have a non matching case?
+     */
     public function isSimpleRangeString() : bool
     {
-        return $this->constraintString === null;
+        return false;
     }
 
     public function getConstraintString() : string

@@ -65,12 +65,14 @@ final class VersionConstraintTest extends TestCase
         self::assertSame($normalizedRange, VersionConstraint::fromString($originalRange)->getConstraintString());
     }
 
-    public function testLeftOpenEndedRange() : void
+    /**
+     * @dataProvider leftOpenEndedRangeProvider
+     */
+    public function testLeftOpenEndedRange($leftOpenedRange) : void
     {
-        $constraint = VersionConstraint::fromString('<1');
+        $constraint = VersionConstraint::fromString($leftOpenedRange);
 
-        self::assertTrue($constraint->isSimpleRangeString());
-        self::assertSame('<1', $constraint->getConstraintString());
+        self::assertSame($leftOpenedRange, $constraint->getConstraintString());
         self::assertNull($constraint->getLowerBound());
         self::assertInstanceOf(Version::class, $constraint->getUpperBound());
         self::assertFalse($constraint->isLowerBoundIncluded());
@@ -245,6 +247,7 @@ final class VersionConstraintTest extends TestCase
             ['>11.22.33,<44.55.66'],
             ['>11.22.33.44.55.66.77,<44.55.66.77.88.99.1010'],
             ['>1,<2'],
+            ['>1-stable.1.2,<1-rc.1.2'],
         ];
 
         return array_combine(
@@ -267,8 +270,9 @@ final class VersionConstraintTest extends TestCase
             ['>1,>2'],
             ['~2'],
             ['>1a2b3,<4c5d6'],
-            ['>1a2'],
-            ['<1a2'],
+            ['>1-a.2'],
+            ['<1-a.2'],
+            ['<1-a.2, >1-p.1.2'],
         ]);
     }
 
@@ -505,5 +509,14 @@ final class VersionConstraintTest extends TestCase
         $mergeWithOverlappingReflection->setAccessible(true);
 
         return $mergeWithOverlappingReflection->invoke($versionConstraint, $other);
+    }
+
+    public function leftOpenEndedRangeProvider() : array
+    {
+        return [
+            ['<1'],
+            ['<1-alpha'],
+            ['<1-alpha.1.2'],
+        ];
     }
 }

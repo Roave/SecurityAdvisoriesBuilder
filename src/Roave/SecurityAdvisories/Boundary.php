@@ -16,7 +16,11 @@ use function strpos;
 final class Boundary
 {
     private const IN_ARRAY_STRICT     = true;
-    private const MATCHER             = '/^\s*(<|<=|=|>=|>)\s*((?:\d+\.)*\d+)\s*$/';
+
+    private const MATCHER             = <<<REGEXP
+        /^\s*(<|<=|=|>=|>)\s*((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?\s*$/
+        REGEXP;
+
     private const VALID_ADJACENCY_MAP = [
         ['<', '='],
         ['<', '>='],
@@ -47,8 +51,16 @@ final class Boundary
             throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
         }
 
+        // fixme
+        $version = $matches[2];
+        if (!empty($matches[3])) {
+            $version .= '-' . $matches[3];
+        }
+        if (!empty($matches[4])) {
+            $version .= '.' . $matches[4];
+        }
         return new self(
-            Version::fromString($matches[2]),
+            Version::fromString($version),
             $matches[1]
         );
     }

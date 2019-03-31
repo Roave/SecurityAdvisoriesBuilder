@@ -133,6 +133,12 @@ final class VersionConstraintTest extends TestCase
 
         self::assertTrue($this->callContains($constraint1, $constraint2));
         self::assertFalse($this->callContains($constraint2, $constraint1));
+
+        $constraint1 = VersionConstraint::fromString('>1.2.3-alpha.1,<4.5.6-beta.3.4');
+        $constraint2 = VersionConstraint::fromString('>1.2.4-rc,<4.5.5-patch.5.6.7.8');
+
+        self::assertTrue($this->callContains($constraint1, $constraint2));
+        self::assertFalse($this->callContains($constraint2, $constraint1));
     }
 
     public function testCannotCompareComplexRanges() : void

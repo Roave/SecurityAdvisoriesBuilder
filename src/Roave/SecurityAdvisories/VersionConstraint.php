@@ -74,23 +74,17 @@ final class VersionConstraint
             return $instance;
         }
 
-//        throw new InvalidArgumentException(sprintf('Given versionConstraint "%s" is not a valid constraint string', $versionConstraint)); // I would throw here Exception
-
-
         $instance->constraintString = $constraintString;
 
         return $instance;
-
     }
 
     /**
      * @return bool
-     * @deprecated No need for this flag, check where this property is set
-     * Is there a case when we can have a non matching case?
      */
     public function isSimpleRangeString() : bool
     {
-        return false;
+        return $this->constraintString == null;
     }
 
     public function getConstraintString() : string

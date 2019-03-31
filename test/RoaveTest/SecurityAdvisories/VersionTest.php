@@ -62,9 +62,6 @@ final class VersionTest extends TestCase
     ) : void {
         $version1 = Version::fromString($version1String);
         $version2 = Version::fromString($version2String);
-//        print '----------' . PHP_EOL;
-//        var_dump($version1->getVersion());
-//        var_dump($version2->getVersion());
 
         self::assertSame($v1GreaterThanV2, $version1->isGreaterThan($version2));
         self::assertSame($v2GreaterThanV1, $version2->isGreaterThan($version1));

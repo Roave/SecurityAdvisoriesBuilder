@@ -45,7 +45,6 @@ final class VersionConstraintTest extends TestCase
     {
         $constraint = VersionConstraint::fromString($stringConstraint);
 
-        self::assertTrue($constraint->isSimpleRangeString());
         self::assertInstanceOf(Version::class, $constraint->getLowerBound());
         self::assertInstanceOf(Version::class, $constraint->getUpperBound());
 
@@ -122,7 +121,6 @@ final class VersionConstraintTest extends TestCase
     {
         $constraint = VersionConstraint::fromString($stringConstraint);
 
-        self::assertFalse($constraint->isSimpleRangeString());
         self::assertSame($stringConstraint, $constraint->getConstraintString());
     }
 

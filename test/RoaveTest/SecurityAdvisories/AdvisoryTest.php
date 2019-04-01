@@ -54,6 +54,31 @@ final class AdvisoryTest extends TestCase
         self::assertSame('>=2,<2.1', $constraints[1]->getConstraintString());
     }
 
+    // todo: move to dataProvider maybe?
+    public function testFromArrayWithComplexValidConfig() : void
+    {
+        $advisory = Advisory::fromArrayData([
+            'reference' => 'composer://foo/bar',
+            'branches'  => [
+                '1.0.x' => [
+                    'versions' => ['>=1.0-beta.3.4', '<1.1-alpha.4.5'],
+                ],
+                '2.0.x' => [
+                    'versions' => ['>=2.0-rc.5', '<2.1-rc.6'],
+                ],
+            ],
+        ]);
+
+        self::assertSame('foo/bar', $advisory->getComponentName());
+        self::assertSame('>=1-beta.3.4,<1.1-alpha.4.5|>=2-rc.5,<2.1-rc.6', $advisory->getConstraint());
+
+        $constraints = $advisory->getVersionConstraints();
+
+        self::assertCount(2, $constraints);
+        self::assertSame('>=1-beta.3.4,<1.1-alpha.4.5', $constraints[0]->getConstraintString());
+        self::assertSame('>=2-rc.5,<2.1-rc.6', $constraints[1]->getConstraintString());
+    }
+
     public function testFromArrayWithStringVersion() : void
     {
         $advisory = Advisory::fromArrayData([
@@ -114,6 +139,21 @@ final class AdvisoryTest extends TestCase
                 ['<1.1'],
                 ['>=2.0', '<2.1'],
                 '<1.1|>=2,<2.1',
+            ],
+            [
+                ['<1.1-patch.5.6.0'],
+                ['>=2.0', '<2.1'],
+                '<1.1-patch.5.6.0|>=2,<2.1',
+            ],
+            [
+                ['<1.1'],
+                ['>=2.0-rc', '<2.1-beta.1'],
+                '<1.1|>=2-rc,<2.1-beta.1',
+            ],
+            [
+                ['>=2.0-a', '<2.1-a'],
+                ['>=2.0-b', '<2.1-b'],
+                '>=2-a,<2.1-a|>=2-b,<2.1-b',
             ],
         ];
     }

@@ -181,4 +181,29 @@ final class ComponentTest extends TestCase
 
         self::assertSame('>=3,<=3.0.11|>=3.1,<3.1.11', $component->getConflictConstraint());
     }
+
+    public function testSortComplexAdvisoriesWithRealCase() : void
+    {
+        $advisory1 = Advisory::fromArrayData([
+            'reference' => 'composer://thelia/thelia',
+            'branches' => [
+                '2.1.x' => [
+                    'versions' => ['>=2.1.0', '<2.1.2'],
+                ],
+            ],
+        ]);
+        $advisory2 = clone $advisory1;
+        $advisory3 = Advisory::fromArrayData([
+            'reference' => 'composer://thelia/thelia',
+            'branches' => [
+                '2.1.x' => [
+                    'versions' => ['>=2.1.0-beta1', '<2.1.3'],
+                ],
+            ],
+        ]);
+
+        $component = new Component('foo/bar', $advisory1, $advisory2, $advisory3);
+
+        self::assertSame('>=2.1-beta.1,<2.1.3', $component->getConflictConstraint());
+    }
 }

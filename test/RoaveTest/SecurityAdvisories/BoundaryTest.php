@@ -71,7 +71,8 @@ final class BoundaryTest extends TestCase
      */
     public function testGetVersion(string $boundaryString) : void
     {
-        preg_match('/((?:\d+\.)*\d+)\s*$/', $boundaryString, $matches);
+        // fixme: to use here regexp from other class
+        preg_match('/((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?\s*$/', $boundaryString, $matches);
 
         self::assertTrue(
             Version::fromString($matches[1])->equalTo(Boundary::fromString($boundaryString)->getVersion())
@@ -138,6 +139,11 @@ final class BoundaryTest extends TestCase
             ['=>1.2'],
             ['=<1.2'],
             ['1.2'],
+            ['beta'],
+            ['>beta'],
+            ['<beta'],
+            ['<=beta'],
+            ['>=beta'],
         ];
     }
 
@@ -172,6 +178,26 @@ final class BoundaryTest extends TestCase
             ['  =  1.2.3   ', '=1.2.3'],
             ['  <=  1.2.3   ', '<=1.2.3'],
             ['  <  1.2.3   ', '<1.2.3'],
+            ['>1.2.3-beta', '>1.2.3-beta'],
+            ['>=1.2.3-beta', '>=1.2.3-beta'],
+            ['=1.2.3-beta', '=1.2.3-beta'],
+            ['<=1.2.3-beta', '<=1.2.3-beta'],
+            ['<1.2.3-beta', '<1.2.3-beta'],
+            ['>1.2.3-beta', '>1.2.3-beta'],
+            ['>=1.2.3-beta', '>=1.2.3-beta'],
+            ['=1.2.3-beta', '=1.2.3-beta'],
+            ['<=1.2.3-beta', '<=1.2.3-beta'],
+            ['<1.2.3-beta', '<1.2.3-beta'],
+            ['>  1.2.3-patch', '>1.2.3-patch'],
+            ['>=  1.2.3-patch', '>=1.2.3-patch'],
+            ['=  1.2.3-patch', '=1.2.3-patch'],
+            ['<=  1.2.3-patch', '<=1.2.3-patch'],
+            ['<  1.2.3-patch', '<1.2.3-patch'],
+            ['  >  1.2.3-patch   ', '>1.2.3-patch'],
+            ['  >=  1.2.3-patch   ', '>=1.2.3-patch'],
+            ['  =  1.2.3-patch   ', '=1.2.3-patch'],
+            ['  <=  1.2.3-patch   ', '<=1.2.3-patch'],
+            ['  <  1.2.3-patch   ', '<1.2.3-patch'],
         ];
     }
 
@@ -185,6 +211,10 @@ final class BoundaryTest extends TestCase
             ['<1', '>=1'],
             ['<=1', '>1'],
             ['=1', '>1'],
+            ['<1-alpha.1', '=1-alpha.1'],
+            ['<1-alpha.1', '>=1-alpha.1'],
+            ['<=1-alpha.1', '>1-alpha.1'],
+            ['=1-alpha.1', '>1-alpha.1'],
         ];
     }
 
@@ -205,6 +235,17 @@ final class BoundaryTest extends TestCase
             ['<1', '>=1.1'],
             ['<=1', '>1.1'],
             ['=1', '>1.1'],
+            ['<1-beta.1.1', '<1-beta.1.1'],
+            ['<1-beta.1.1', '<=1-beta.1.1'],
+            ['<=1-beta.1.1', '<=1-beta.1.1'],
+            ['<=1-beta.1.1', '>=1-beta.1.1'],
+            ['=1-beta.1.1', '=1-beta.1.1'],
+            ['=1-beta.1.1', '<=1-beta.1.1'],
+            ['=1-beta.1.1', '>=1-beta.1.1'],
+            ['<1-beta.1.1', '=1.1-beta.1.1'],
+            ['<1-beta.1.1', '>=1.1-beta.1.1'],
+            ['<=1-beta.1.1', '>1.1-beta.1.1'],
+            ['=1-beta.1.1', '>1.1-beta.1.1'],
         ];
     }
 }

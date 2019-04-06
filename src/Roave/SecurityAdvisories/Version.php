@@ -16,9 +16,6 @@ use function implode;
 use function Safe\preg_match;
 use function Safe\sprintf;
 
-/**
- * A simple version, such as 1.0 or 1.0.0.0 or 2.0.1.3.2
- */
 final class Version
 {
     private const VERSION_MATCHER = <<<REGEXP
@@ -53,7 +50,8 @@ final class Version
 
     public function equalTo(self $other) : bool
     {
-        return $other->versionNumbers === $this->versionNumbers;
+        return $other->versionNumbers === $this->versionNumbers &&
+            $this->versionStability->isEqualTo($other->versionStability);
     }
 
     /**
@@ -91,12 +89,6 @@ final class Version
         return false;
     }
 
-    private function isEqualTo(self $other) : bool
-    {
-        return $other->versionNumbers === $this->versionNumbers &&
-            $this->versionStability->isEqualTo($other->versionStability);
-    }
-
     /**
      * Compares two versions and sees if this one is greater or equal than the given one
      *
@@ -104,7 +96,7 @@ final class Version
      */
     public function isGreaterOrEqualThan(self $other) : bool
     {
-        return $this->isEqualTo($other)
+        return $this->equalTo($other)
             || $this->isGreaterThan($other);
     }
 

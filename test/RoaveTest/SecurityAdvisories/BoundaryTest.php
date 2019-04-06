@@ -75,7 +75,7 @@ final class BoundaryTest extends TestCase
         preg_match('/((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?\s*$/', $boundaryString, $matches);
 
         self::assertTrue(
-            Version::fromString($matches[1])->equalTo(Boundary::fromString($boundaryString)->getVersion())
+            Version::fromString($matches[0])->equalTo(Boundary::fromString($boundaryString)->getVersion())
         );
     }
 

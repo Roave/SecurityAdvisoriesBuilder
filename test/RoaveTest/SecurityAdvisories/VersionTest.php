@@ -140,12 +140,13 @@ final class VersionTest extends TestCase
             ['1-beta6_bugfix', '1-beta.6'],
             ['1-beta_6+feature1', '1-beta.6'],
             ['1-beta.6.6+feature2.9.0', '1-beta.6.6'],
-//            ['1-beta.6.6.0.0+feature2.9.0', '1-beta.6.6'], // trailing zeroes check
-            // also valid versions
+            ['1-beta.6.6.0+meta.9.0', '1-beta.6.6'],
+            // todo: also valid versions we do not handle for now
 //            ['1.0.0-alpha.beta.1'],
 //            ['1.0.0-alpha.beta.1.2+preview1'],
 //            ['1.0.0-0.3.7'],
 //            ['1.0.0-x.7.z.92'],
+            // todo: find and implement more exotic versions ?
         ];
     }
 
@@ -155,8 +156,6 @@ final class VersionTest extends TestCase
     public function greaterThanComparisonVersionsProvider() : array
     {
 
-//        bool $v1GreaterThanV2,
-//        bool $v2GreaterThanV1
         $versions = [
             ['0', '0', false, false],
             ['1', '1', false, false],
@@ -195,9 +194,18 @@ final class VersionTest extends TestCase
             ['1-stable.1.2', '1-stable.1', true, false],
             ['1-stable.1.2.3', '1-stable.1.2', true, false],
             ['1-stable.1.2.3.4.5.6.7.8', '1-stable.1.2.3.4.5.6.7', true, false],
-
-            // introduce here equal examples
-            // also make 0 strip check here
+            // equal examples
+            ['1-stable', '1-stable', false, false],
+            ['1-rc', '1-rc', false, false],
+            ['1-beta', '1-beta', false, false],
+            ['1-b', '1-b', false, false],
+            ['1-alpha', '1-alpha', false, false],
+            ['1-a', '1-a', false, false],
+            ['1-patch', '1-patch', false, false],
+            ['1-p', '1-p', false, false],
+            ['1-stable.1.1.1.1', '1-stable.1.1.1.1', false, false],
+            // 0 strip check
+            ['1-stable.1.1.1.1', '1-stable.1.1.1.1.0', false, false],
         ];
 
         return array_combine(
@@ -216,9 +224,6 @@ final class VersionTest extends TestCase
      */
     public function greaterOrEqualThanComparisonVersionsProvider() : array
     {
-        //        bool $v1GreaterOrEqualThanV2,
-        //        bool $v2GreaterOrEqualThanV1
-
         $versions = [
             ['0', '0', true, true],
             ['0.0', '0', true, true],
@@ -259,7 +264,19 @@ final class VersionTest extends TestCase
             ['1-stable.1.2', '1-stable.1', true, false],
             ['1-stable.1.2.3', '1-stable.1.2', true, false],
             ['1-stable.1.2.3.4.5.6.7.8', '1-stable.1.2.3.4.5.6.7', true, false],
-            ['2.1.0-beta1', '2.1', false, true]
+            ['2.1.0-beta1', '2.1', false, true],
+            // equal examples
+            ['1-stable', '1-stable', true, true],
+            ['1-rc', '1-rc', true, true],
+            ['1-beta', '1-beta', true, true],
+            ['1-b', '1-b', true, true],
+            ['1-alpha', '1-alpha', true, true],
+            ['1-a', '1-a', true, true],
+            ['1-patch', '1-patch', true, true],
+            ['1-p', '1-p', true, true],
+            ['1-stable.1.1.1.1', '1-stable.1.1.1.1', true, true],
+            // 0 strip check
+            ['1-stable.1.1.1.1', '1-stable.1.1.1.1.0', true, true],
         ];
 
         return array_combine(

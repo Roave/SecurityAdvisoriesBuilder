@@ -429,6 +429,24 @@ final class VersionConstraintTest extends TestCase
             ['>1,<2', '>=2', '>1'],
             ['>1,<2', '<=1', '<2'],
             ['>=1,<2', '<1', '<2'],
+            // just to make sure we are compatible
+            ['>2-alpha.1,<3-alpha.1', '>2.1-alpha.1,<4-alpha.1', '>2-alpha.1,<4-alpha.1'],
+            ['>2-alpha.1,<3-alpha.1', '>1-alpha.1,<2.1-alpha.1', '>1-alpha.1,<3-alpha.1'],
+            ['<3-alpha.1', '>1-alpha.1,<3.1-alpha.1', '<3.1-alpha.1'],
+            ['>3-alpha.1', '>2.1-alpha.1,<3.1-alpha.1', '>2.1-alpha.1'],
+            ['>1-alpha.1,<2-alpha.1', '>=2-alpha.1,<3-alpha.1', '>1-alpha.1,<3-alpha.1'],
+            ['>1-alpha.1,<=2-alpha.1', '>2-alpha.1,<3-alpha.1', '>1-alpha.1,<3-alpha.1'],
+            ['>1-alpha.1,<2-alpha.1', '>0.1-alpha.1,<=1-alpha.1', '>0.1-alpha.1,<2-alpha.1'],
+            ['>=1-alpha.1,<2-alpha.1', '>0.1-alpha.1,<1-alpha.1', '>0.1-alpha.1,<2-alpha.1'],
+            ['>1-alpha.1,<=2-alpha.1', '>2-alpha.1', '>1-alpha.1'],
+            ['>1-alpha.1,<2-alpha.1', '>=2-alpha.1', '>1-alpha.1'],
+            ['>1-alpha.1,<2-alpha.1', '<=1-alpha.1', '<2-alpha.1'],
+            ['>=1-alpha.1,<2-alpha.1', '<1-alpha.1', '<2-alpha.1'],
+            // test overlapping of flags
+            ['>1-p,<1-beta', '>1-alpha,<1-stable', '>1-p,<1-stable'], // should I monkey job here more permutations ?
+            ['>1-a,<1-rc', '>1-beta,<1-rc', '>1-a,<1-rc'], // should I monkey job here more permutations ?
+            // overlapping of stability numbers
+            ['>1-a.1,<1-a.4', '>1-a.2,<1-a.5', '>1-a.1,<1-a.5']
         ];
 
         return array_combine(

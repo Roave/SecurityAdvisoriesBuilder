@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories;
 
 use InvalidArgumentException;
+use Safe\Exceptions\PcreException;
+use Safe\Exceptions\StringsException;
 use function array_intersect_key;
 use function array_keys;
 use function array_map;
@@ -25,33 +27,70 @@ final class Version
     /** @var int[] */
     private $versionNumbers;
 
-    /** @var VersionStability */
-    private $versionStability;
+    /** @var string  */
+    private $flag;
 
-    private function __construct(array $versionNumbers, array $versionStability)
-    {
-        $this->versionNumbers = $versionNumbers;
-        $this->versionStability = new VersionStability($versionStability ?? []);
-    }
+    /** @var int[]  */
+    private $stabilityNumbers;
+
+    private const FLAGS_HIERARCHY = [
+        'stable'    => 4,
+        'rc'        => 3,
+        'beta'      => 2,
+        'b'         => 2,
+        'alpha'     => 1,
+        'a'         => 1,
+        'patch'     => 0,
+        'p'         => 0,
+    ];
 
     /**
-     * @throws InvalidArgumentException
+     * @param string $version
+     *
+     * @return Version
+     * @throws PcreException
+     * @throws StringsException
      */
-    public static function fromString(string $version) : self
+    public static function fromString(string $version): self
     {
         if (preg_match(self::VERSION_MATCHER, strtolower($version), $matches) !== 1) {
             throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
-        $version = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches[1])));
+        $object = new self;
 
-        return new self($version, array_slice($matches, 2));
+        $object->versionNumbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches[1])));
+
+        $object->flag = $matches[2] ?? null;
+
+        if (!empty($matches[3])) {
+            $stabilityNumbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches[3])));
+        }
+
+        $object->stabilityNumbers = $stabilityNumbers ?? [];
+
+        return $object;
     }
 
     public function equalTo(self $other) : bool
     {
         return $other->versionNumbers === $this->versionNumbers &&
-            $this->versionStability->isEqualTo($other->versionStability);
+            $this->stabilityEqualTo($other);
+    }
+
+    private function stabilityEqualTo(self $other)
+    {
+        // if we have no flags at all then stability parts are equal
+        if ($this->flag == null && $other->flag == null) {
+            return true;
+        }
+
+        if ($this->flag == null || $other->flag == null) {
+            return false;
+        }
+
+        return self::FLAGS_HIERARCHY[$this->flag] == self::FLAGS_HIERARCHY[$other->flag] &&
+            $this->stabilityNumbers == $other->stabilityNumbers;
     }
 
     /**
@@ -79,7 +118,7 @@ final class Version
         }
 
         // compare here stabilities - flags and versions
-        $isGreater = $this->versionStability->isGreaterThan($other->versionStability);
+        $isGreater = $this->isStabilityGreaterThan($other);
 
         if ($isGreater != 0) {
             return $isGreater == 1 ? true : false;
@@ -87,6 +126,41 @@ final class Version
 
         // the only chance we get here is when versions are absolutely equal to each other
         return false;
+    }
+
+    private function isStabilityGreaterThan(self $other)
+    {
+
+        if($this->flag == null && $other->flag == null) {
+            return 0;
+        }
+
+        if ($this->flag == null && is_string($other->flag)) {
+            return 1;
+        }
+
+        if (is_string($this->flag) && $other->flag == null) {
+            return -1;
+        }
+
+        $isGreater = $this->compareFlags($other);
+
+        if ($isGreater != 0) {
+            return $isGreater;
+        }
+
+        // compare versions here
+        foreach (array_keys(array_intersect_key($this->stabilityNumbers, $other->stabilityNumbers)) as $index) {
+            if ($this->stabilityNumbers[$index] > $other->stabilityNumbers[$index]) {
+                return 1;
+            }
+
+            if ($this->stabilityNumbers[$index] < $other->stabilityNumbers[$index]) {
+                return -1;
+            }
+        }
+
+        return count($this->stabilityNumbers) <=> count($other->stabilityNumbers);
     }
 
     /**
@@ -102,9 +176,17 @@ final class Version
 
     public function getVersion() : string
     {
-        $stability = $this->versionStability instanceof VersionStability ? $this->versionStability->getVersion() : '';
+        $version = implode('.', $this->versionNumbers);
 
-        return implode('.', $this->versionNumbers) . (!empty($stability) ? '-'.$stability:'');
+        if ($this->flag) {
+            $version .= '-'.$this->flag;
+
+            if ($this->stabilityNumbers) {
+                $version .= '.' . join('.', $this->stabilityNumbers);
+            }
+        }
+
+        return $version;
     }
 
     /** @return int[] */
@@ -118,5 +200,11 @@ final class Version
 
         return [0];
     }
+
+    private function compareFlags(self $other): int
+    {
+        return self::FLAGS_HIERARCHY[$this->flag] <=> self::FLAGS_HIERARCHY[$other->flag];
+    }
+
 
 }

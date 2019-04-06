@@ -136,7 +136,7 @@ final class VersionTest extends TestCase
             ['1-p', '1-p'],
             ['1.0.0-alpha', '1-alpha'],
             ['1.0.0-alpha1', '1-alpha.1'],
-            ['1.0.0-alpha.1.2.3.0.0.0', '1-alpha.1.2.3.0.0.0'],
+            ['1.0.0-alpha.1.2.3.0.0.0', '1-alpha.1.2.3'],
             ['1-beta6_bugfix', '1-beta.6'],
             ['1-beta_6+feature1', '1-beta.6'],
             ['1-beta.6.6+feature2.9.0', '1-beta.6.6'],

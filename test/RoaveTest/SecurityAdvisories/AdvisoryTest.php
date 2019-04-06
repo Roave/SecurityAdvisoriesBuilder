@@ -163,7 +163,7 @@ final class AdvisoryTest extends TestCase
             [
                 ['<1.1-patch.5.6.0'],
                 ['>=2.0', '<2.1'],
-                '<1.1-patch.5.6.0|>=2,<2.1',
+                '<1.1-patch.5.6|>=2,<2.1',
             ],
             [
                 ['<1.1'],

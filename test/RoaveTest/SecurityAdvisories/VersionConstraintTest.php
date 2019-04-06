@@ -479,6 +479,19 @@ final class VersionConstraintTest extends TestCase
             ['>2,<3', 'foo'],
             ['bar', 'foo'],
             ['>1,<4', '>2,<3'], // note: containing, not overlapping.
+            ['>2-alpha.1,<3-alpha.1', '>3-alpha.1,<4-alpha.1'],
+            ['>2-alpha.1,<3-alpha.1', '>=3-alpha.1,<4-alpha.1'],
+            ['>2-alpha.1,<=3-alpha.1', '>3-alpha.1,<4-alpha.1'],
+            ['>2-alpha.1,<=3-alpha.1', '>=3-alpha.1,<4-alpha.1'],
+            ['>2-alpha.1,<3-alpha.1', '>1-alpha.1,<2-alpha.1'],
+            ['>2-alpha.1,<3-alpha.1', '>1-alpha.1,<=2-alpha.1'],
+            ['>=2-alpha.1,<3-alpha.1', '>1-alpha.1,<2-alpha.1'],
+            ['>=2-alpha.1,<3-alpha.1', '>1-alpha.1,<=2-alpha.1'],
+            ['foo', '>1-alpha.1,<2-alpha.1'],
+            ['>2-alpha.1,<3', 'foo'],
+            ['bar', 'foo'],
+            ['>1-alpha.1,<4-alpha.1', '>2-beta.1,<3-beta.1'], // note: containing, not overlapping.
+            // more complex
         ];
 
         return array_combine(

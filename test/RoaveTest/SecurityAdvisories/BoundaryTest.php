@@ -23,6 +23,7 @@ namespace RoaveTest\SecurityAdvisories;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Boundary;
+use Roave\SecurityAdvisories\RegExp;
 use Roave\SecurityAdvisories\Version;
 use function Safe\preg_match;
 use function strpos;
@@ -71,8 +72,7 @@ final class BoundaryTest extends TestCase
      */
     public function testGetVersion(string $boundaryString) : void
     {
-        // fixme: to use here regexp from other class
-        preg_match('/((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?\s*$/', $boundaryString, $matches);
+        preg_match('/^'.RegExp::BOUNDARY_MATCHER.'$/', $boundaryString, $matches);
 
         self::assertTrue(
             Version::fromString($matches[0])->equalTo(Boundary::fromString($boundaryString)->getVersion())
@@ -144,6 +144,7 @@ final class BoundaryTest extends TestCase
             ['<beta'],
             ['<=beta'],
             ['>=beta'],
+            ['>=.1'],
         ];
     }
 
@@ -198,6 +199,7 @@ final class BoundaryTest extends TestCase
             ['  =  1.2.3-patch   ', '=1.2.3-patch'],
             ['  <=  1.2.3-patch   ', '<=1.2.3-patch'],
             ['  <  1.2.3-patch   ', '<1.2.3-patch'],
+            ['  <  1.2.3-patch.1.2.3.0-meta1+   ', '<1.2.3-patch.1.2.3'],
         ];
     }
 

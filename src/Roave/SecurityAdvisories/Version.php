@@ -20,10 +20,6 @@ use function Safe\sprintf;
 
 final class Version
 {
-    private const VERSION_MATCHER = <<<REGEXP
-        /^((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?/
-        REGEXP;
-
     /** @var int[] */
     private $versionNumbers;
 
@@ -44,6 +40,10 @@ final class Version
         'p'         => 0,
     ];
 
+    private function __construct()
+    {
+    }
+
     /**
      * @param string $version
      *
@@ -53,18 +53,18 @@ final class Version
      */
     public static function fromString(string $version): self
     {
-        if (preg_match(self::VERSION_MATCHER, strtolower($version), $matches) !== 1) {
+        if (preg_match('/'.RegExp::VERSION_MATCHER.'/', strtolower($version), $matches) !== 1) {
             throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
         $object = new self;
 
-        $object->versionNumbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches[1])));
+        $object->versionNumbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches['version'])));
 
-        $object->flag = $matches[2] ?? null;
+        $object->flag = $matches['flag'] ?? null;
 
-        if (!empty($matches[3])) {
-            $stabilityNumbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches[3])));
+        if (!empty($matches['stability_numbers'])) {
+            $stabilityNumbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches['stability_numbers'])));
         }
 
         $object->stabilityNumbers = $stabilityNumbers ?? [];

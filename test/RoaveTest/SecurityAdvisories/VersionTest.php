@@ -299,7 +299,6 @@ final class VersionTest extends TestCase
             [''],
             ['alpha'],
             ['beta'],
-            ['.1'],
 //            ['1.2.3-alpha.beta'], // it is actually a legit version, we just do not handle it for now
 //            ['4.5.6-8.9']
     ];

@@ -17,10 +17,6 @@ final class Boundary
 {
     private const IN_ARRAY_STRICT     = true;
 
-    private const MATCHER             = <<<REGEXP
-        /^\s*(<|<=|=|>=|>)\s*((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?\s*$/
-        REGEXP;
-
     private const VALID_ADJACENCY_MAP = [
         ['<', '='],
         ['<', '>='],
@@ -47,21 +43,15 @@ final class Boundary
      */
     public static function fromString(string $boundary) : self
     {
-        if (preg_match(self::MATCHER, $boundary, $matches) !== 1) {
+        if (preg_match('/^'.RegExp::BOUNDARY_MATCHER.'$/', $boundary, $matches) !== 1) {
             throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
         }
 
-        // fixme
-        $version = $matches[2];
-        if (!empty($matches[3])) {
-            $version .= '-' . $matches[3];
-        }
-        if (!empty($matches[4])) {
-            $version .= '.' . $matches[4];
-        }
+        $boundary = preg_replace('/'. $matches['boundary'] .'/', '', $boundary);
+
         return new self(
-            Version::fromString($version),
-            $matches[1]
+            Version::fromString($boundary),
+            $matches['boundary']
         );
     }
 

@@ -54,7 +54,6 @@ final class AdvisoryTest extends TestCase
         self::assertSame('>=2,<2.1', $constraints[1]->getConstraintString());
     }
 
-    // todo: move to dataProvider maybe?
     public function testFromArrayWithComplexValidConfig() : void
     {
         $advisory = Advisory::fromArrayData([

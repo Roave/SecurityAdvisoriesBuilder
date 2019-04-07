@@ -19,19 +19,6 @@ use function Safe\sprintf;
  */
 final class VersionConstraint
 {
-    // that is fucking nasty regular expression todo: split it
-    private const CLOSED_RANGE_MATCHER      = <<<REGEXP
-        /^>(=?)\s*((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?\s*,\s*<(=?)\s*((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?$/
-        REGEXP;
-
-    private const LEFT_OPEN_RANGE_MATCHER   = <<<REGEXP
-        /^<(=?)\s*((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?$/
-        REGEXP;
-
-    private const RIGHT_OPEN_RANGE_MATCHER  = <<<REGEXP
-        /^>(=?)\s*((?:\d+\.)*\d+)[._-]?(?:(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?$/
-        REGEXP;
-
     /** @var string|null */
     private $constraintString;
 
@@ -53,7 +40,7 @@ final class VersionConstraint
         $constraintString = $versionConstraint;
         $instance         = new self();
 
-        if (preg_match(self::CLOSED_RANGE_MATCHER, $constraintString, $matches) === 1) {
+        if (preg_match(RegExp::CLOSED_RANGE_MATCHER, $constraintString, $matches) === 1) {
             [$left, $right] = explode(',', $constraintString);
 
             $instance->lowerBoundary = Boundary::fromString($left);
@@ -62,13 +49,13 @@ final class VersionConstraint
             return $instance;
         }
 
-        if (preg_match(self::LEFT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
+        if (preg_match(RegExp::LEFT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
             $instance->upperBoundary = Boundary::fromString($constraintString);
 
             return $instance;
         }
 
-        if (preg_match(self::RIGHT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
+        if (preg_match(RegExp::RIGHT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
             $instance->lowerBoundary = Boundary::fromString($constraintString);
 
             return $instance;
@@ -79,9 +66,6 @@ final class VersionConstraint
         return $instance;
     }
 
-    /**
-     * @return bool
-     */
     public function isSimpleRangeString() : bool
     {
         return $this->constraintString == null;

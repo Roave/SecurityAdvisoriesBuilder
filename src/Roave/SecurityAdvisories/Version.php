@@ -53,7 +53,7 @@ final class Version
      */
     public static function fromString(string $version): self
     {
-        if (preg_match('/'.RegExp::VERSION_MATCHER.'/', strtolower($version), $matches) !== 1) {
+        if (preg_match('/'.RegExp::TAGGED_VERSION_MATCHER.'/', strtolower($version), $matches) !== 1) {
             throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 

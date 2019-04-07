@@ -72,7 +72,7 @@ final class BoundaryTest extends TestCase
      */
     public function testGetVersion(string $boundaryString) : void
     {
-        preg_match('/^'.RegExp::BOUNDARY_MATCHER.'$/', $boundaryString, $matches);
+        preg_match(RegExp::BOUNDARY_MATCHER, $boundaryString, $matches);
 
         self::assertTrue(
             Version::fromString($matches[0])->equalTo(Boundary::fromString($boundaryString)->getVersion())
@@ -199,7 +199,7 @@ final class BoundaryTest extends TestCase
             ['  =  1.2.3-patch   ', '=1.2.3-patch'],
             ['  <=  1.2.3-patch   ', '<=1.2.3-patch'],
             ['  <  1.2.3-patch   ', '<1.2.3-patch'],
-            ['  <  1.2.3-patch.1.2.3.0-meta1+   ', '<1.2.3-patch.1.2.3'],
+            ['  <  1.2.3-patch.1.2.3.0  ', '<1.2.3-patch.1.2.3'],
         ];
     }
 

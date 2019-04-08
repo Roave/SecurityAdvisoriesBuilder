@@ -138,7 +138,7 @@ final class Version
             return 1;
         }
 
-        if ($this->flag !== 1 && $other->flag === null) {
+        if ($this->flag !== null && $other->flag === null) {
             return -1;
         }
 

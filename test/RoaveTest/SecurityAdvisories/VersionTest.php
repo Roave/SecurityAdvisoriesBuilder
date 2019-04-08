@@ -399,6 +399,8 @@ final class VersionTest extends TestCase
             ['1-alpha', '1-p', 1, -1],
 
             ['1-alpha.1.1', '1-alpha.1.0', 1, -1],
+            ['1-alpha.1.2', '1-alpha.1.1', 1, -1],
+            ['1-alpha.1.2.1', '1-alpha.1.1', 1, -1],
             ['1-alpha', '1-alpha.1.2', -1, 1],
         ];
     }

@@ -15,7 +15,6 @@ use function array_slice;
 use function count;
 use function explode;
 use function implode;
-use function join;
 use function Safe\preg_match;
 use function Safe\sprintf;
 use function strtolower;
@@ -54,7 +53,7 @@ final class Version
      */
     public static function fromString(string $version) : self
     {
-        if (preg_match('/' . RegExp::TAGGED_VERSION_MATCHER . '/', strtolower($version), $matches) != 1) {
+        if (preg_match('/' . RegExp::TAGGED_VERSION_MATCHER . '/', strtolower($version), $matches) !== 1) {
             throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
@@ -65,33 +64,33 @@ final class Version
         $object->flag = $matches['flag'] ?? null;
 
         if ($matches['stability_numbers'] ?? null) {
-            $stabilityNumbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches['stability_numbers'])));
+            $numbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches['stability_numbers'])));
         }
 
-        $object->stabilityNumbers = $stabilityNumbers ?? [];
+        $object->stabilityNumbers = $numbers ?? [];
 
         return $object;
     }
 
     public function equalTo(self $other) : bool
     {
-        return $other->versionNumbers == $this->versionNumbers &&
+        return $other->versionNumbers === $this->versionNumbers &&
             $this->stabilityEqualTo($other);
     }
 
     private function stabilityEqualTo(self $other) : bool
     {
         // if we have no flags at all then stability parts are equal
-        if ($this->flag == null && $other->flag == null) {
+        if ($this->flag === null && $other->flag === null) {
             return true;
         }
 
-        if ($this->flag == null || $other->flag == null) {
+        if ($this->flag === null || $other->flag === null) {
             return false;
         }
 
-        return self::FLAGS_HIERARCHY[$this->flag] == self::FLAGS_HIERARCHY[$other->flag] &&
-            $this->stabilityNumbers == $other->stabilityNumbers;
+        return self::FLAGS_HIERARCHY[$this->flag] === self::FLAGS_HIERARCHY[$other->flag] &&
+            $this->stabilityNumbers === $other->stabilityNumbers;
     }
 
     /**
@@ -114,15 +113,15 @@ final class Version
         // we can continue only when versions are equal
         $isGreater = count($this->versionNumbers) <=> count($other->versionNumbers);
 
-        if ($isGreater != 0) {
-            return $isGreater == 1 ? true : false;
+        if ($isGreater !== 0) {
+            return $isGreater === 1 ? true : false;
         }
 
         // compare here stabilities - flags and versions
         $isGreater = $this->isStabilityGreaterThan($other);
 
-        if ($isGreater != 0) {
-            return $isGreater == 1 ? true : false;
+        if ($isGreater !== 0) {
+            return $isGreater === 1 ? true : false;
         }
 
         // the only chance we get here is when versions are absolutely equal to each other
@@ -131,21 +130,21 @@ final class Version
 
     private function isStabilityGreaterThan(self $other) : int
     {
-        if ($this->flag == null && $other->flag == null) {
+        if ($this->flag === null && $other->flag === null) {
             return 0;
         }
 
-        if ($this->flag == null && $other->flag != null) {
+        if ($this->flag === null && $other->flag !== null) {
             return 1;
         }
 
-        if ($this->flag != 1 && $other->flag == null) {
+        if ($this->flag !== 1 && $other->flag === null) {
             return -1;
         }
 
         $isGreater = $this->compareFlags($other);
 
-        if ($isGreater != 0) {
+        if ($isGreater !== 0) {
             return $isGreater;
         }
 
@@ -178,11 +177,11 @@ final class Version
     {
         $version = implode('.', $this->versionNumbers);
 
-        if ($this->flag != null) {
-            $version .= '-'.$this->flag;
+        if ($this->flag !== null) {
+            $version .= '-' . $this->flag;
 
-            if ($this->stabilityNumbers != []) {
-                $version .= '.' . join('.', $this->stabilityNumbers);
+            if ($this->stabilityNumbers !== []) {
+                $version .= '.' . implode('.', $this->stabilityNumbers);
             }
         }
 
@@ -193,7 +192,7 @@ final class Version
     private static function removeTrailingZeroes(int ...$versionNumbers) : array
     {
         foreach (array_reverse(array_keys($versionNumbers)) as $key) {
-            if ($versionNumbers[$key] != 0) {
+            if ($versionNumbers[$key] !== 0) {
                 return array_slice($versionNumbers, 0, $key + 1);
             }
         }

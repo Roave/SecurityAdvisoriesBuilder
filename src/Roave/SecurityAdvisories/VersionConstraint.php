@@ -68,7 +68,7 @@ final class VersionConstraint
 
     public function isSimpleRangeString() : bool
     {
-        return $this->constraintString == null;
+        return $this->constraintString === null;
     }
 
     public function getConstraintString() : string

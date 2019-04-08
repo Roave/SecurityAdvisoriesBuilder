@@ -42,16 +42,16 @@ final class Boundary
      *
      * @throws InvalidArgumentException
      */
-    public static function fromString(string $boundaryVersion) : self
+    public static function fromString(string $boundary) : self
     {
-        if (preg_match(RegExp::BOUNDARY_MATCHER, $boundaryVersion, $matches) !== 1) {
-            throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundaryVersion));
+        if (preg_match(RegExp::BOUNDARY_MATCHER, $boundary, $matches) !== 1) {
+            throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
         }
 
-        $boundaryVersion = str_replace('/' . $matches['boundary'] . '/', '', $boundaryVersion);
+        $boundary = str_replace('/' . $matches['boundary'] . '/', '', $boundary);
 
         return new self(
-            Version::fromString($boundaryVersion),
+            Version::fromString($boundary),
             $matches['boundary']
         );
     }

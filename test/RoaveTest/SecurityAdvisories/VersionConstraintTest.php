@@ -555,6 +555,9 @@ final class VersionConstraintTest extends TestCase
         return $mergeWithOverlappingReflection->invoke($versionConstraint, $other);
     }
 
+    /**
+     * @return string[][]
+     */
     public function leftOpenEndedRangeProvider() : array
     {
         return [

@@ -22,6 +22,7 @@ namespace RoaveTest\SecurityAdvisories;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 use Roave\SecurityAdvisories\Version;
 use function array_map;
 use function Safe\array_combine;
@@ -107,6 +108,34 @@ final class VersionTest extends TestCase
         self::assertNotEquals($version1, $version2);
         self::assertFalse($version1->equalTo($version2));
         self::assertFalse($version2->equalTo($version1));
+    }
+
+    /**
+     * @dataProvider stabilitiesToCompare
+     */
+    public function testStabilityIsGreaterThan(
+        string $version1String,
+        string $version2String,
+        int $version1vs2Expected,
+        int $version2vs1Expected
+    ) : void
+    {
+        $version1 = Version::fromString($version1String);
+        $version2 = Version::fromString($version2String);
+
+        self::assertEquals($version1vs2Expected, $this->callIsStabilityGreaterThan($version1, $version2));
+        self::assertEquals($version2vs1Expected, $this->callIsStabilityGreaterThan($version2, $version1));
+    }
+
+    private function callIsStabilityGreaterThan(
+        Version $version1,
+        Version $version2
+    ) : int {
+        $method = new ReflectionMethod($version1, 'isStabilityGreaterThan');
+
+        $method->setAccessible(true);
+
+        return $method->invoke($version1, $version2);
     }
 
     /**
@@ -347,6 +376,31 @@ final class VersionTest extends TestCase
             ['1-alpha.1', '1-alpha.1.2'],
             ['1-alpha.1.2', '1-alpha.1'],
             ['1-alpha.1.2.3.4.5', '1-alpha.1'],
+        ];
+    }
+
+    /**
+     * @return mixed[]
+     */
+    public function stabilitiesToCompare()
+    {
+        return [
+            ['1', '1', 0, 0],
+            ['1-beta', '1', -1, 1],
+            ['1-beta', '1-beta', 0, 0],
+            ['1-beta.1', '1-beta.1', 0, 0],
+            ['1-beta.1.1.1.1.1', '1-beta.1.1.1.1.1', 0, 0],
+
+            ['1-stable', '1-rc', 1, -1],
+            ['1-stable', '1-beta', 1, -1],
+            ['1-beta', '1-alpha', 1, -1],
+            ['1-b', '1-alpha', 1, -1],
+            ['1-alpha', '1-patch', 1, -1],
+            ['1-a', '1-patch', 1, -1],
+            ['1-alpha', '1-p', 1, -1],
+
+            ['1-alpha.1.1', '1-alpha.1.0', 1, -1],
+            ['1-alpha', '1-alpha.1.2', -1, 1],
         ];
     }
 }

@@ -15,8 +15,11 @@ use function array_slice;
 use function count;
 use function explode;
 use function implode;
+use function is_string;
+use function join;
 use function Safe\preg_match;
 use function Safe\sprintf;
+use function strtolower;
 
 final class Version
 {
@@ -45,15 +48,14 @@ final class Version
     }
 
     /**
-     * @param string $version
-     *
      * @return Version
+     *
      * @throws PcreException
      * @throws StringsException
      */
-    public static function fromString(string $version): self
+    public static function fromString(string $version) : self
     {
-        if (preg_match('/'.RegExp::TAGGED_VERSION_MATCHER.'/', strtolower($version), $matches) !== 1) {
+        if (preg_match('/' . RegExp::TAGGED_VERSION_MATCHER . '/', strtolower($version), $matches) != 1) {
             throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
@@ -74,7 +76,7 @@ final class Version
 
     public function equalTo(self $other) : bool
     {
-        return $other->versionNumbers === $this->versionNumbers &&
+        return $other->versionNumbers == $this->versionNumbers &&
             $this->stabilityEqualTo($other);
     }
 
@@ -130,8 +132,7 @@ final class Version
 
     private function isStabilityGreaterThan(self $other)
     {
-
-        if($this->flag == null && $other->flag == null) {
+        if ($this->flag == null && $other->flag == null) {
             return 0;
         }
 
@@ -193,7 +194,7 @@ final class Version
     private static function removeTrailingZeroes(int ...$versionNumbers) : array
     {
         foreach (array_reverse(array_keys($versionNumbers)) as $key) {
-            if ($versionNumbers[$key] !== 0) {
+            if ($versionNumbers[$key] != 0) {
                 return array_slice($versionNumbers, 0, $key + 1);
             }
         }
@@ -201,10 +202,8 @@ final class Version
         return [0];
     }
 
-    private function compareFlags(self $other): int
+    private function compareFlags(self $other) : int
     {
         return self::FLAGS_HIERARCHY[$this->flag] <=> self::FLAGS_HIERARCHY[$other->flag];
     }
-
-
 }

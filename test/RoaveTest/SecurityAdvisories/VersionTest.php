@@ -155,7 +155,6 @@ final class VersionTest extends TestCase
      */
     public function greaterThanComparisonVersionsProvider() : array
     {
-
         $versions = [
             ['0', '0', false, false],
             ['1', '1', false, false],
@@ -301,7 +300,7 @@ final class VersionTest extends TestCase
             ['beta'],
 //            ['1.2.3-alpha.beta'], // it is actually a legit version, we just do not handle it for now
 //            ['4.5.6-8.9']
-    ];
+        ];
     }
 
     /**
@@ -316,7 +315,7 @@ final class VersionTest extends TestCase
             ['1.0.0.0', '1.0.0'],
             ['2.0.1.0', '2.0.1'],
             ['2.0.1.0.0.0', '2.0.1'],
-            ['0.0.0-beta1', '0-beta1']
+            ['0.0.0-beta1', '0-beta1'],
         ];
     }
 

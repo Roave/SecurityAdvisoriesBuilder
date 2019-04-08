@@ -23,39 +23,38 @@ namespace Roave\SecurityAdvisories;
 final class RegExp
 {
     // pattern that matches full version only, without boundary sign
-    public const TAGGED_VERSION_MATCHER       = '(?<version>(?:\d+\.)*\d+)'.
-                                                '[._-]?'.
-                                                '(?:'.
-                                                    '(?<flag>stable|beta|b|rc|alpha|a|patch|p)'.
-                                                    '[._-]?'.
-                                                    '(?<stability_numbers>(?:\d+\.)*\d+)?'.
+    public const TAGGED_VERSION_MATCHER = '(?<version>(?:\d+\.)*\d+)' .
+                                                '[._-]?' .
+                                                '(?:' .
+                                                    '(?<flag>stable|beta|b|rc|alpha|a|patch|p)' .
+                                                    '[._-]?' .
+                                                    '(?<stability_numbers>(?:\d+\.)*\d+)?' .
                                                 ')?';
 
-    private const UNTAGGED_VERSION_MATCHER    = '((?:\d+\.)*\d+)'.
-                                                '[._-]?'.
-                                                '(?:'.
-                                                    '(stable|beta|b|rc|alpha|a|patch|p)'.
-                                                    '[._-]?'.
-                                                    '((?:\d+\.)*\d+)?'.
+    private const UNTAGGED_VERSION_MATCHER = '((?:\d+\.)*\d+)' .
+                                                '[._-]?' .
+                                                '(?:' .
+                                                    '(stable|beta|b|rc|alpha|a|patch|p)' .
+                                                    '[._-]?' .
+                                                    '((?:\d+\.)*\d+)?' .
                                                 ')?';
 
     // pattern that ensures we have a correct boundary in the right place
-    public const BOUNDARY_MATCHER             = '/^\s*(?<boundary><|<=|=|>=|>)\s*' .
+    public const BOUNDARY_MATCHER = '/^\s*(?<boundary><|<=|=|>=|>)\s*' .
                                                 self::TAGGED_VERSION_MATCHER .
                                                 '\s*$/';
 
-    public const CLOSED_RANGE_MATCHER         = '/^>(=?)\s*'.
-                                                self::UNTAGGED_VERSION_MATCHER.
-                                                '\s*,\s*<(=?)\s*'.
-                                                self::UNTAGGED_VERSION_MATCHER.
+    public const CLOSED_RANGE_MATCHER = '/^>(=?)\s*' .
+                                                self::UNTAGGED_VERSION_MATCHER .
+                                                '\s*,\s*<(=?)\s*' .
+                                                self::UNTAGGED_VERSION_MATCHER .
                                                 '$/';
 
-    public const LEFT_OPEN_RANGE_MATCHER      = '/^<(=?)\s*'.
-                                                self::UNTAGGED_VERSION_MATCHER.
+    public const LEFT_OPEN_RANGE_MATCHER = '/^<(=?)\s*' .
+                                                self::UNTAGGED_VERSION_MATCHER .
                                                 '$/';
 
-    public const RIGHT_OPEN_RANGE_MATCHER     = '/^>(=?)\s*'.
-                                                self::UNTAGGED_VERSION_MATCHER.
+    public const RIGHT_OPEN_RANGE_MATCHER = '/^>(=?)\s*' .
+                                                self::UNTAGGED_VERSION_MATCHER .
                                                 '$/';
-
 }

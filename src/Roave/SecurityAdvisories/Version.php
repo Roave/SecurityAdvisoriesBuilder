@@ -120,12 +120,7 @@ final class Version
         // compare here stabilities - flags and versions
         $isGreater = $this->isStabilityGreaterThan($other);
 
-        if ($isGreater !== 0) {
-            return $isGreater === 1 ? true : false;
-        }
-
-        // the only chance we get here is when versions are absolutely equal to each other
-        return false;
+        return $isGreater === 1;
     }
 
     private function isStabilityGreaterThan(self $other) : int

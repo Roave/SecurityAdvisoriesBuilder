@@ -118,8 +118,7 @@ final class VersionTest extends TestCase
         string $version2String,
         int $version1vs2Expected,
         int $version2vs1Expected
-    ) : void
-    {
+    ) : void {
         $version1 = Version::fromString($version1String);
         $version2 = Version::fromString($version2String);
 
@@ -382,7 +381,7 @@ final class VersionTest extends TestCase
     /**
      * @return mixed[]
      */
-    public function stabilitiesToCompare()
+    public function stabilitiesToCompare() : array
     {
         return [
             ['1', '1', 0, 0],

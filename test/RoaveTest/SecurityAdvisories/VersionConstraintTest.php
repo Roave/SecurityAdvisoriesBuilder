@@ -455,7 +455,7 @@ final class VersionConstraintTest extends TestCase
             ['>1-a,<1-rc', '>1-beta,<1-rc', '>1-a,<1-rc'],
             // overlapping of stability numbers
             ['>1-a.1,<1-a.4', '>1-a.2,<1-a.5', '>1-a.1,<1-a.5'],
-            ['>1-a.1.0.1.0,<1-a.4.1', '>1-a.1.0.2,<1-a.5.8', '>1-a.1.0.1,<1-a.5.8']
+            ['>1-a.1.0.1.0,<1-a.4.1', '>1-a.1.0.2,<1-a.5.8', '>1-a.1.0.1,<1-a.5.8'],
         ];
 
         return array_combine(

@@ -58,7 +58,7 @@ final class Version
             throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
-        $object = new self;
+        $object = new self();
 
         $object->versionNumbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches['version'])));
 

@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use function in_array;
 use function Safe\preg_match;
 use function Safe\sprintf;
+use function str_replace;
 use function strpos;
 
 /**

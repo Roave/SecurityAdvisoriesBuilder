@@ -6,7 +6,6 @@ namespace Roave\SecurityAdvisories;
 
 use InvalidArgumentException;
 use function in_array;
-use function preg_replace;
 use function Safe\preg_match;
 use function Safe\sprintf;
 use function strpos;
@@ -48,7 +47,7 @@ final class Boundary
             throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundaryVersion));
         }
 
-        $boundaryVersion = preg_replace('/' . $matches['boundary'] . '/', '', $boundaryVersion);
+        $boundaryVersion = str_replace('/' . $matches['boundary'] . '/', '', $boundaryVersion);
 
         return new self(
             Version::fromString($boundaryVersion),

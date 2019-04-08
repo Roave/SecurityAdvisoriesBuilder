@@ -15,7 +15,6 @@ use function array_slice;
 use function count;
 use function explode;
 use function implode;
-use function is_string;
 use function join;
 use function Safe\preg_match;
 use function Safe\sprintf;
@@ -26,7 +25,7 @@ final class Version
     /** @var int[] */
     private $versionNumbers;
 
-    /** @var string  */
+    /** @var string|null  */
     private $flag;
 
     /** @var int[]  */
@@ -65,7 +64,7 @@ final class Version
 
         $object->flag = $matches['flag'] ?? null;
 
-        if (!empty($matches['stability_numbers'])) {
+        if ($matches['stability_numbers'] ?? null) {
             $stabilityNumbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches['stability_numbers'])));
         }
 
@@ -80,7 +79,7 @@ final class Version
             $this->stabilityEqualTo($other);
     }
 
-    private function stabilityEqualTo(self $other)
+    private function stabilityEqualTo(self $other) : bool
     {
         // if we have no flags at all then stability parts are equal
         if ($this->flag == null && $other->flag == null) {
@@ -130,17 +129,17 @@ final class Version
         return false;
     }
 
-    private function isStabilityGreaterThan(self $other)
+    private function isStabilityGreaterThan(self $other) : int
     {
         if ($this->flag == null && $other->flag == null) {
             return 0;
         }
 
-        if ($this->flag == null && is_string($other->flag)) {
+        if ($this->flag == null && $other->flag != null) {
             return 1;
         }
 
-        if (is_string($this->flag) && $other->flag == null) {
+        if ($this->flag != 1 && $other->flag == null) {
             return -1;
         }
 
@@ -179,10 +178,10 @@ final class Version
     {
         $version = implode('.', $this->versionNumbers);
 
-        if ($this->flag) {
+        if ($this->flag != null) {
             $version .= '-'.$this->flag;
 
-            if ($this->stabilityNumbers) {
+            if ($this->stabilityNumbers != []) {
                 $version .= '.' . join('.', $this->stabilityNumbers);
             }
         }

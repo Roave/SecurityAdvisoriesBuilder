@@ -41,20 +41,20 @@ final class RegExp
 
     // pattern that ensures we have a correct boundary in the right place
     public const BOUNDARY_MATCHER = '/^\s*(?<boundary><|<=|=|>=|>)\s*' .
-                                                self::TAGGED_VERSION_MATCHER .
-                                                '\s*$/';
+                                    self::TAGGED_VERSION_MATCHER .
+                                    '\s*$/';
 
     public const CLOSED_RANGE_MATCHER = '/^>(=?)\s*' .
-                                                self::UNTAGGED_VERSION_MATCHER .
-                                                '\s*,\s*<(=?)\s*' .
-                                                self::UNTAGGED_VERSION_MATCHER .
-                                                '$/';
+                                        self::UNTAGGED_VERSION_MATCHER .
+                                        '\s*,\s*<(=?)\s*' .
+                                        self::UNTAGGED_VERSION_MATCHER .
+                                        '$/';
 
     public const LEFT_OPEN_RANGE_MATCHER = '/^<(=?)\s*' .
-                                                self::UNTAGGED_VERSION_MATCHER .
-                                                '$/';
+                                            self::UNTAGGED_VERSION_MATCHER .
+                                            '$/';
 
     public const RIGHT_OPEN_RANGE_MATCHER = '/^>(=?)\s*' .
-                                                self::UNTAGGED_VERSION_MATCHER .
-                                                '$/';
+                                            self::UNTAGGED_VERSION_MATCHER .
+                                            '$/';
 }

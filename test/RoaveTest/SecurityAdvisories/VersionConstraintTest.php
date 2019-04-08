@@ -67,7 +67,7 @@ final class VersionConstraintTest extends TestCase
     /**
      * @dataProvider leftOpenEndedRangeProvider
      */
-    public function testLeftOpenEndedRange($leftOpenedRange) : void
+    public function testLeftOpenEndedRange(string $leftOpenedRange) : void
     {
         $constraint = VersionConstraint::fromString($leftOpenedRange);
 

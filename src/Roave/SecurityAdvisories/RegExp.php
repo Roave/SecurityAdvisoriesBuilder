@@ -20,6 +20,9 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+/**
+ * @codeCoverageIgnore
+ */
 final class RegExp
 {
     // pattern that matches full version only, without boundary sign

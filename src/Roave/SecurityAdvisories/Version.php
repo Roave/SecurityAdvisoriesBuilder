@@ -113,14 +113,14 @@ final class Version
         // we can continue only when versions are equal
         $isGreater = count($this->versionNumbers) <=> count($other->versionNumbers);
 
-        if ($isGreater !== 0) {
+        if ($isGreater) {
             return $isGreater === 1 ? true : false;
         }
 
         // compare here stabilities - flags and versions
         $isGreater = $this->isStabilityGreaterThan($other);
 
-        if ($isGreater !== 0) {
+        if ($isGreater) {
             return $isGreater === 1 ? true : false;
         }
 
@@ -144,7 +144,7 @@ final class Version
 
         $isGreater = $this->compareFlags($other);
 
-        if ($isGreater !== 0) {
+        if ($isGreater) {
             return $isGreater;
         }
 

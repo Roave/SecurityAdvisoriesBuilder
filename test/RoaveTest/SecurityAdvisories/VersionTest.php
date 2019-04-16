@@ -317,6 +317,7 @@ final class VersionTest extends TestCase
             ['alpha'],
             ['beta'],
             ['12.z'],
+            ['.1'],
         ];
     }
 

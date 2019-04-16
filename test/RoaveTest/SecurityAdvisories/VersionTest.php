@@ -165,16 +165,6 @@ final class VersionTest extends TestCase
             ['1.0.0-alpha', '1-alpha'],
             ['1.0.0-alpha1', '1-alpha.1'],
             ['1.0.0-alpha.1.2.3.0.0.0', '1-alpha.1.2.3'],
-            ['1-beta6_bugfix', '1-beta.6'],
-            ['1-beta_6+feature1', '1-beta.6'],
-            ['1-beta.6.6+feature2.9.0', '1-beta.6.6'],
-            ['1-beta.6.6.0+meta.9.0', '1-beta.6.6'],
-            // todo: also valid versions we do not handle for now
-//            ['1.0.0-alpha.beta.1'],
-//            ['1.0.0-alpha.beta.1.2+preview1'],
-//            ['1.0.0-0.3.7'],
-//            ['1.0.0-x.7.z.92'],
-            // todo: find and implement more exotic versions ?
         ];
     }
 
@@ -326,8 +316,7 @@ final class VersionTest extends TestCase
             [''],
             ['alpha'],
             ['beta'],
-//            ['1.2.3-alpha.beta'], // it is actually a legit version, we just do not handle it for now
-//            ['4.5.6-8.9']
+            ['12.z'],
         ];
     }
 

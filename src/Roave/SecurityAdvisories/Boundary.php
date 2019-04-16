@@ -48,7 +48,7 @@ final class Boundary
             throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
         }
 
-        $boundary = str_replace('/' . $matches['boundary'] . '/', '', $boundary);
+        $boundary = str_replace($matches['boundary'], '', $boundary);
 
         return new self(
             Version::fromString($boundary),

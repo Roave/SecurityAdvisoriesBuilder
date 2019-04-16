@@ -23,13 +23,13 @@ namespace Roave\SecurityAdvisories;
 final class RegExp
 {
     // pattern that matches full version only, without boundary sign
-    public const TAGGED_VERSION_MATCHER = '(?<version>(?:\d+\.)*\d+)' .
+    public const TAGGED_VERSION_MATCHER = '\s*(?<version>(?:\d+\.)*\d+)' .
                                                 '[._-]?' .
                                                 '(?:' .
                                                     '(?<flag>stable|beta|b|rc|alpha|a|patch|p)' .
                                                     '[._-]?' .
                                                     '(?<stability_numbers>(?:\d+\.)*\d+)?' .
-                                                ')?';
+                                                ')?\s*';
 
     private const UNTAGGED_VERSION_MATCHER = '((?:\d+\.)*\d+)' .
                                                 '[._-]?' .

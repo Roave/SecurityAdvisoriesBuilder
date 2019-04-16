@@ -55,6 +55,17 @@ final class VersionConstraintSortTest extends TestCase
             ['>=2', '<=1', 1],
             ['>=1', '<=2', -1],
             ['>=1,<=2,>3', '>=1,<=2', 0],
+            ['>=1-alpha.9', '>=1-alpha.9', 0],
+            ['<=1-alpha.9', '<=1-alpha.9', 0],
+            ['>=1-alpha.9,<=2-alpha.9', '>=1-alpha.9,<=2-alpha.9', 0],
+            ['>=1-alpha.9,<=2-alpha.9', '>=3-alpha.9,<=4-alpha.9', -1],
+            ['>=3-alpha.9,<=4-alpha.9', '>=1-alpha.9,<=2-alpha.9', 1],
+            ['<=1-alpha.9', '<=2-alpha.9', -1],
+            ['<=2-alpha.9', '<=1-alpha.9', 1],
+            ['>=1-alpha.9', '<=1-alpha.9', 0],
+            ['>=2-alpha.9', '<=1-alpha.9', 1],
+            ['>=1-alpha.9', '<=2-alpha.9', -1],
+            ['>=1-alpha.9,<=2-alpha.9,>3-alpha.9', '>=1-alpha.9,<=2-alpha.9', 0],
         ];
 
         return array_combine(

@@ -178,7 +178,6 @@ final class VersionConstraintTest extends TestCase
         $expectation = $constraint2ContainsConstraint1 || $constraint1ContainsConstraint2;
 
         self::assertSame($expectation, $constraint1->canMergeWith($constraint2));
-        self::assertSame($expectation, $constraint1->canMergeWith($constraint2));
     }
 
     /**
@@ -277,6 +276,7 @@ final class VersionConstraintTest extends TestCase
             ['>1-a.2'],
             ['<1-a.2'],
             ['<1-a.2, >1-p.1.2'],
+            ['1-beta.2.0|1-rc.1.2.3'],
         ]);
     }
 
@@ -325,6 +325,53 @@ final class VersionConstraintTest extends TestCase
             ['>=2', '>2', true, false],
             ['>=2', '>1', false, true],
             ['>=2', '>3', true, false],
+            // just to be sure
+            ['>1-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<2-beta.1', '>1.1-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1,<2-beta.1', '>3-beta.1,<4-beta.1', false, false],
+            ['>1.1-beta.1,<2.1-beta.1', '>1.2-beta.1,<2-beta.1', true, false],
+            ['>100-beta.1,<200-beta.1', '>1.0.0-beta.1,<2.0.0-beta.1', false, false],
+            ['>1.10-beta.1,<2-beta.1', '>1.100-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1,<2.10-beta.1', '>1-beta.1,<2.100-beta.1', false, true],
+            ['>1.0-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<2.0-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1.0.0-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<2.0.0-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>=1-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>=1-beta.1,<2-beta.1', '>=1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1,<=2-beta.1', '>1-beta.1,<=2-beta.1', true, true],
+            ['>=1-beta.1,<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>=1-beta.1,<=2-beta.1', '>=1-beta.1,<=2-beta.1', true, true],
+            ['>=1-beta.1,<=2-beta.1', '>=1-beta.1,<=2-beta.1', true, true],
+            ['>=1-beta.1', '>=1-beta.1,<2-beta.1', true, false],
+            ['>=1-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1', '>=1-beta.1,<2-beta.1', false, false],
+            ['<=2-beta.1', '>1-beta.1,<=2-beta.1', true, false],
+            ['<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['<2-beta.1', '>1-beta.1,<=2-beta.1', false, false],
+            ['<2-beta.1', '<2-beta.1', true, true],
+            ['<=2-beta.1', '<=2-beta.1', true, true],
+            ['<=2-beta.1', '<2-beta.1', true, false],
+            ['<=2-beta.1', '<1-beta.1', true, false],
+            ['<=2-beta.1', '<3-beta.1', false, true],
+            ['>2-beta.1', '>2-beta.1', true, true],
+            ['>=2-beta.1', '>=2-beta.1', true, true],
+            ['>=2-beta.1', '>2-beta.1', true, false],
+            ['>=2-beta.1', '>1-beta.1', false, true],
+            ['>=2-beta.1', '>3-beta.1', true, false],
+            ['>1-stable', '<1-stable', false, false],
+            ['>1-stable', '>1-stable', true, true],
+
+            ['>1-stable.1.2.3', '>1-stable.1.2.3.4', true, false],
+            ['>=1-stable.1.2.3', '>=1-stable.1.2.3.4', true, false],
+            ['>1-stable.1.2.3', '<1-stable.1.2.3.4', false, false],
+            ['>=1-stable.1.2.3', '<=1-stable.1.2.3.4', false, false],
+            ['<1-stable.1.2.3', '<1-stable.1.2.3.4', false, true],
+            ['<=1-stable.1.2.3', '<=1-stable.1.2.3.4', false, true],
+            ['<1-stable.1.2.3', '>1-stable.1.2.3.4', false, false],
+            ['<=1-stable.1.2.3', '>=1-stable.1.2.3.4', false, false],
+
         ];
 
         return array_combine(
@@ -381,6 +428,51 @@ final class VersionConstraintTest extends TestCase
             ['>1.1,<2.1', '>1.2,<2.0', true, false],
             ['>1.2,<2.0', '>1.1,<2.1', true, false],
             ['>1,<2,>3', '>1,<2', false, false],
+
+            ['>1-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<2-beta.1', '>1.1-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1,<2-beta.1', '>3-beta.1,<4-beta.1', false, false],
+            ['>1.1-beta.1,<2.1-beta.1', '>1.2-beta.1,<2-beta.1', true, false],
+            ['>100-beta.1,<200-beta.1', '>1.0.0-beta.1,<2.0.0-beta.1', false, false],
+            ['>1.10-beta.1,<2-beta.1', '>1.100-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1,<2.10-beta.1', '>1-beta.1,<2.100-beta.1', false, true],
+            ['>1.0-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<2.0-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1.0.0-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<2.0.0-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>=1-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>=1-beta.1,<2-beta.1', '>=1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1,<=2-beta.1', '>1-beta.1,<=2-beta.1', true, true],
+            ['>=1-beta.1,<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>=1-beta.1,<=2-beta.1', '>=1-beta.1,<=2-beta.1', true, true],
+            ['>=1-beta.1,<=2-beta.1', '>=1-beta.1,<=2-beta.1', true, true],
+            ['>=1-beta.1', '>=1-beta.1,<2-beta.1', true, false],
+            ['>=1-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1', '>=1-beta.1,<2-beta.1', true, true],
+            ['<=2-beta.1', '>1-beta.1,<=2-beta.1', true, false],
+            ['<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['<2-beta.1', '>1-beta.1,<=2-beta.1', true, true],
+            ['<2-beta.1', '<2-beta.1', true, true],
+            ['<=2-beta.1', '<=2-beta.1', true, true],
+            ['<=2-beta.1', '<2-beta.1', true, false],
+            ['<=2-beta.1', '<1-beta.1', true, false],
+            ['<=2-beta.1', '<3-beta.1', false, true],
+            ['>2-beta.1', '>2-beta.1', true, true],
+            ['>=2-beta.1', '>=2-beta.1', true, true],
+            ['>=2-beta.1', '>2-beta.1', true, false],
+            ['>=2-beta.1', '>1-beta.1', false, true],
+            ['>=2-beta.1', '>3-beta.1', true, false],
+            ['>1.1-beta.1,<2.1-beta.1', '>1.2-beta.1,<2.0-beta.1', true, false],
+            ['>1.2-beta.1,<2.0-beta.1', '>1.1-beta.1,<2.1-beta.1', true, false],
+            ['>1-beta.1,<2-beta.1,>3-beta.1', '>1-beta.1,<2-beta.1', false, false],
+
+            ['>1-beta,<1-beta', '>1-beta,<1-beta', true, true],
+            ['>1-p,<1-stable', '>1-a,<1-b', true, false],
+            ['>1-p,<1-a', '>1-rc,<1-stable', false, false],
+
+            ['>=1-p,<1-stable', '>1-a,<=1-b', true, false],
+            ['>=1-p,<1-a', '>1-rc,<=1-stable', false, false],
         ];
 
         return array_combine(
@@ -416,6 +508,7 @@ final class VersionConstraintTest extends TestCase
             ['>=1.0', '>=1'],
             ['<1.0', '<1'],
             ['<=1.0', '<=1'],
+            ['<=1.0.3.0.5.0-beta.0.5.0.0', '<=1.0.3.0.5-beta.0.5'],
         ]);
     }
 
@@ -498,8 +591,8 @@ final class VersionConstraintTest extends TestCase
             ['foo', '>1-alpha.1,<2-alpha.1'],
             ['>2-alpha.1,<3', 'foo'],
             ['bar', 'foo'],
+            ['>1-p, <1-a', '>1-b,<1-rc'],
             ['>1-alpha.1,<4-alpha.1', '>2-beta.1,<3-beta.1'], // note: containing, not overlapping.
-            // more complex
         ];
 
         return array_combine(

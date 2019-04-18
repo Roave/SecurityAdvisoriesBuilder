@@ -142,10 +142,15 @@ final class BoundaryTest extends TestCase
             ['=<1.2'],
             ['1.2'],
             ['beta'],
+            [' beta '],
             ['>beta'],
+            ['> beta'],
+            ['< beta'],
             ['<beta'],
             ['<=beta'],
+            ['<= beta'],
             ['>=beta'],
+            ['>= beta'],
             ['>=.1'],
         ];
     }
@@ -215,10 +220,12 @@ final class BoundaryTest extends TestCase
             ['<1', '>=1'],
             ['<=1', '>1'],
             ['=1', '>1'],
+            ['<1-alpha', '=1-alpha'],
             ['<1-alpha.1', '=1-alpha.1'],
             ['<1-alpha.1', '>=1-alpha.1'],
             ['<=1-alpha.1', '>1-alpha.1'],
             ['=1-alpha.1', '>1-alpha.1'],
+            ['=1-alpha.1.1.1.1', '>1-alpha.1.1.1.1'],
         ];
     }
 

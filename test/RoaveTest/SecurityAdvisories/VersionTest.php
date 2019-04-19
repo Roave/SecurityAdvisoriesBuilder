@@ -318,6 +318,7 @@ final class VersionTest extends TestCase
             ['beta'],
             ['12.z'],
             ['.1'],
+            ['alpha.beta'],
         ];
     }
 
@@ -333,6 +334,7 @@ final class VersionTest extends TestCase
             ['1.0.0.0', '1.0.0'],
             ['2.0.1.0', '2.0.1'],
             ['2.0.1.0.0.0', '2.0.1'],
+            ['0.0.0-p', '0-p'],
             ['0.0.0-beta1', '0-beta1'],
         ];
     }

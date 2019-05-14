@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
-final class RegExp
+final class Matchers
 {
     // pattern that matches full version only, without boundary sign
     public const TAGGED_VERSION_MATCHER = '\s*(?<version>(?:\d+\.)*\d+)' .

@@ -23,7 +23,7 @@ namespace RoaveTest\SecurityAdvisories;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Boundary;
-use Roave\SecurityAdvisories\RegExp;
+use Roave\SecurityAdvisories\Matchers;
 use Roave\SecurityAdvisories\Version;
 use function Safe\preg_match;
 use function str_replace;
@@ -73,7 +73,7 @@ final class BoundaryTest extends TestCase
      */
     public function testGetVersion(string $boundaryString) : void
     {
-        preg_match(RegExp::BOUNDARY_MATCHER, $boundaryString, $matches);
+        preg_match(Matchers::BOUNDARY_MATCHER, $boundaryString, $matches);
         $boundary = str_replace($matches['boundary'], '', $matches[0]);
 
         self::assertTrue(

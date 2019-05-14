@@ -40,7 +40,7 @@ final class VersionConstraint
         $constraintString = $versionConstraint;
         $instance         = new self();
 
-        if (preg_match(RegExp::CLOSED_RANGE_MATCHER, $constraintString, $matches) === 1) {
+        if (preg_match(Matchers::CLOSED_RANGE_MATCHER, $constraintString, $matches) === 1) {
             [$left, $right] = explode(',', $constraintString);
 
             $instance->lowerBoundary = Boundary::fromString($left);
@@ -49,13 +49,13 @@ final class VersionConstraint
             return $instance;
         }
 
-        if (preg_match(RegExp::LEFT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
+        if (preg_match(Matchers::LEFT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
             $instance->upperBoundary = Boundary::fromString($constraintString);
 
             return $instance;
         }
 
-        if (preg_match(RegExp::RIGHT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
+        if (preg_match(Matchers::RIGHT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
             $instance->lowerBoundary = Boundary::fromString($constraintString);
 
             return $instance;

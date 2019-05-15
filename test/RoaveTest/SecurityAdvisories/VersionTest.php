@@ -153,8 +153,6 @@ final class VersionTest extends TestCase
             ['1.2.3.4.5.6.7.8.9.10', '1.2.3.4.5.6.7.8.9.10'],
             ['12345.12345.12345.12345.0', '12345.12345.12345.12345'],
             ['1-STABLE', '1-stable'], // uppercase test
-            ['1.b', '1-b'], // check dot in front of stability
-            ['1_beta', '1-beta'], // check underscore in front of stability
             ['1-stable', '1-stable'],
             ['1-beta', '1-beta'],
             ['1-rc', '1-rc'],
@@ -314,8 +312,13 @@ final class VersionTest extends TestCase
     {
         return [
             [''],
+            ['12.a'], // stability should be separated by dash
+            ['1.1.1.alpha.7'],
+            ['1.1.1alpha.7'],
+            ['1.1.1_alpha.7'],
             ['alpha'],
             ['beta'],
+            ['1.2.a'],
             ['12.z'],
             ['.1'],
             ['alpha.beta'],

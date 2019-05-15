@@ -24,16 +24,14 @@ final class Matchers
 {
     // pattern that matches full version only, without boundary sign
     public const TAGGED_VERSION_MATCHER = '\s*(?<version>(?:\d+\.)*\d+)' .
-                                                '[._-]?' .
-                                                '(?:' .
+                                                '(?:-' . // dash is required for correct version
                                                     '(?<flag>stable|beta|b|rc|alpha|a|patch|p)' .
                                                     '[._-]?' .
                                                     '(?<stability_numbers>(?:\d+\.)*\d+)?' .
                                                 ')?\s*';
 
     private const UNTAGGED_VERSION_MATCHER = '((?:\d+\.)*\d+)' .
-                                                '[._-]?' .
-                                                '(?:' .
+                                                '(?:-' .
                                                     '(stable|beta|b|rc|alpha|a|patch|p)' .
                                                     '[._-]?' .
                                                     '((?:\d+\.)*\d+)?' .

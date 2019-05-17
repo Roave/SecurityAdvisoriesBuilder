@@ -45,7 +45,6 @@ final class VersionConstraintTest extends TestCase
     {
         $constraint = VersionConstraint::fromString($stringConstraint);
 
-        self::assertTrue($constraint->isSimpleRangeString());
         self::assertInstanceOf(Version::class, $constraint->getLowerBound());
         self::assertInstanceOf(Version::class, $constraint->getUpperBound());
 
@@ -65,12 +64,14 @@ final class VersionConstraintTest extends TestCase
         self::assertSame($normalizedRange, VersionConstraint::fromString($originalRange)->getConstraintString());
     }
 
-    public function testLeftOpenEndedRange() : void
+    /**
+     * @dataProvider leftOpenEndedRangeProvider
+     */
+    public function testLeftOpenEndedRange(string $leftOpenedRange) : void
     {
-        $constraint = VersionConstraint::fromString('<1');
+        $constraint = VersionConstraint::fromString($leftOpenedRange);
 
-        self::assertTrue($constraint->isSimpleRangeString());
-        self::assertSame('<1', $constraint->getConstraintString());
+        self::assertSame($leftOpenedRange, $constraint->getConstraintString());
         self::assertNull($constraint->getLowerBound());
         self::assertInstanceOf(Version::class, $constraint->getUpperBound());
         self::assertFalse($constraint->isLowerBoundIncluded());
@@ -120,7 +121,6 @@ final class VersionConstraintTest extends TestCase
     {
         $constraint = VersionConstraint::fromString($stringConstraint);
 
-        self::assertFalse($constraint->isSimpleRangeString());
         self::assertSame($stringConstraint, $constraint->getConstraintString());
     }
 
@@ -128,6 +128,12 @@ final class VersionConstraintTest extends TestCase
     {
         $constraint1 = VersionConstraint::fromString('>1.2.3,<4.5.6');
         $constraint2 = VersionConstraint::fromString('>1.2.4,<4.5.5');
+
+        self::assertTrue($this->callContains($constraint1, $constraint2));
+        self::assertFalse($this->callContains($constraint2, $constraint1));
+
+        $constraint1 = VersionConstraint::fromString('>1.2.3-alpha.1,<4.5.6-beta.3.4');
+        $constraint2 = VersionConstraint::fromString('>1.2.4-rc,<4.5.5-patch.5.6.7.8');
 
         self::assertTrue($this->callContains($constraint1, $constraint2));
         self::assertFalse($this->callContains($constraint2, $constraint1));
@@ -171,7 +177,6 @@ final class VersionConstraintTest extends TestCase
         $constraint2 = VersionConstraint::fromString($constraintString2);
         $expectation = $constraint2ContainsConstraint1 || $constraint1ContainsConstraint2;
 
-        self::assertSame($expectation, $constraint1->canMergeWith($constraint2));
         self::assertSame($expectation, $constraint1->canMergeWith($constraint2));
     }
 
@@ -245,6 +250,7 @@ final class VersionConstraintTest extends TestCase
             ['>11.22.33,<44.55.66'],
             ['>11.22.33.44.55.66.77,<44.55.66.77.88.99.1010'],
             ['>1,<2'],
+            ['>1-stable.1.2,<1-rc.1.2'],
         ];
 
         return array_combine(
@@ -267,8 +273,10 @@ final class VersionConstraintTest extends TestCase
             ['>1,>2'],
             ['~2'],
             ['>1a2b3,<4c5d6'],
-            ['>1a2'],
-            ['<1a2'],
+            ['>1-a.2'],
+            ['<1-a.2'],
+            ['<1-a.2, >1-p.1.2'],
+            ['1-beta.2.0|1-rc.1.2.3'],
         ]);
     }
 
@@ -317,6 +325,53 @@ final class VersionConstraintTest extends TestCase
             ['>=2', '>2', true, false],
             ['>=2', '>1', false, true],
             ['>=2', '>3', true, false],
+            // just to be sure
+            ['>1-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<2-beta.1', '>1.1-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1,<2-beta.1', '>3-beta.1,<4-beta.1', false, false],
+            ['>1.1-beta.1,<2.1-beta.1', '>1.2-beta.1,<2-beta.1', true, false],
+            ['>100-beta.1,<200-beta.1', '>1.0.0-beta.1,<2.0.0-beta.1', false, false],
+            ['>1.10-beta.1,<2-beta.1', '>1.100-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1,<2.10-beta.1', '>1-beta.1,<2.100-beta.1', false, true],
+            ['>1.0-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<2.0-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1.0.0-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<2.0.0-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>=1-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>=1-beta.1,<2-beta.1', '>=1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1,<=2-beta.1', '>1-beta.1,<=2-beta.1', true, true],
+            ['>=1-beta.1,<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>=1-beta.1,<=2-beta.1', '>=1-beta.1,<=2-beta.1', true, true],
+            ['>=1-beta.1,<=2-beta.1', '>=1-beta.1,<=2-beta.1', true, true],
+            ['>=1-beta.1', '>=1-beta.1,<2-beta.1', true, false],
+            ['>=1-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1', '>=1-beta.1,<2-beta.1', false, false],
+            ['<=2-beta.1', '>1-beta.1,<=2-beta.1', true, false],
+            ['<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['<2-beta.1', '>1-beta.1,<=2-beta.1', false, false],
+            ['<2-beta.1', '<2-beta.1', true, true],
+            ['<=2-beta.1', '<=2-beta.1', true, true],
+            ['<=2-beta.1', '<2-beta.1', true, false],
+            ['<=2-beta.1', '<1-beta.1', true, false],
+            ['<=2-beta.1', '<3-beta.1', false, true],
+            ['>2-beta.1', '>2-beta.1', true, true],
+            ['>=2-beta.1', '>=2-beta.1', true, true],
+            ['>=2-beta.1', '>2-beta.1', true, false],
+            ['>=2-beta.1', '>1-beta.1', false, true],
+            ['>=2-beta.1', '>3-beta.1', true, false],
+            ['>1-stable', '<1-stable', false, false],
+            ['>1-stable', '>1-stable', true, true],
+
+            ['>1-stable.1.2.3', '>1-stable.1.2.3.4', true, false],
+            ['>=1-stable.1.2.3', '>=1-stable.1.2.3.4', true, false],
+            ['>1-stable.1.2.3', '<1-stable.1.2.3.4', false, false],
+            ['>=1-stable.1.2.3', '<=1-stable.1.2.3.4', false, false],
+            ['<1-stable.1.2.3', '<1-stable.1.2.3.4', false, true],
+            ['<=1-stable.1.2.3', '<=1-stable.1.2.3.4', false, true],
+            ['<1-stable.1.2.3', '>1-stable.1.2.3.4', false, false],
+            ['<=1-stable.1.2.3', '>=1-stable.1.2.3.4', false, false],
+
         ];
 
         return array_combine(
@@ -373,6 +428,51 @@ final class VersionConstraintTest extends TestCase
             ['>1.1,<2.1', '>1.2,<2.0', true, false],
             ['>1.2,<2.0', '>1.1,<2.1', true, false],
             ['>1,<2,>3', '>1,<2', false, false],
+
+            ['>1-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<2-beta.1', '>1.1-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1,<2-beta.1', '>3-beta.1,<4-beta.1', false, false],
+            ['>1.1-beta.1,<2.1-beta.1', '>1.2-beta.1,<2-beta.1', true, false],
+            ['>100-beta.1,<200-beta.1', '>1.0.0-beta.1,<2.0.0-beta.1', false, false],
+            ['>1.10-beta.1,<2-beta.1', '>1.100-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1,<2.10-beta.1', '>1-beta.1,<2.100-beta.1', false, true],
+            ['>1.0-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<2.0-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1.0.0-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<2.0.0-beta.1', '>1-beta.1,<2-beta.1', true, true],
+            ['>=1-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>=1-beta.1,<2-beta.1', '>=1-beta.1,<2-beta.1', true, true],
+            ['>1-beta.1,<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1,<=2-beta.1', '>1-beta.1,<=2-beta.1', true, true],
+            ['>=1-beta.1,<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>=1-beta.1,<=2-beta.1', '>=1-beta.1,<=2-beta.1', true, true],
+            ['>=1-beta.1,<=2-beta.1', '>=1-beta.1,<=2-beta.1', true, true],
+            ['>=1-beta.1', '>=1-beta.1,<2-beta.1', true, false],
+            ['>=1-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['>1-beta.1', '>=1-beta.1,<2-beta.1', true, true],
+            ['<=2-beta.1', '>1-beta.1,<=2-beta.1', true, false],
+            ['<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
+            ['<2-beta.1', '>1-beta.1,<=2-beta.1', true, true],
+            ['<2-beta.1', '<2-beta.1', true, true],
+            ['<=2-beta.1', '<=2-beta.1', true, true],
+            ['<=2-beta.1', '<2-beta.1', true, false],
+            ['<=2-beta.1', '<1-beta.1', true, false],
+            ['<=2-beta.1', '<3-beta.1', false, true],
+            ['>2-beta.1', '>2-beta.1', true, true],
+            ['>=2-beta.1', '>=2-beta.1', true, true],
+            ['>=2-beta.1', '>2-beta.1', true, false],
+            ['>=2-beta.1', '>1-beta.1', false, true],
+            ['>=2-beta.1', '>3-beta.1', true, false],
+            ['>1.1-beta.1,<2.1-beta.1', '>1.2-beta.1,<2.0-beta.1', true, false],
+            ['>1.2-beta.1,<2.0-beta.1', '>1.1-beta.1,<2.1-beta.1', true, false],
+            ['>1-beta.1,<2-beta.1,>3-beta.1', '>1-beta.1,<2-beta.1', false, false],
+
+            ['>1-beta,<1-beta', '>1-beta,<1-beta', true, true],
+            ['>1-p,<1-stable', '>1-a,<1-b', true, false],
+            ['>1-p,<1-a', '>1-rc,<1-stable', false, false],
+
+            ['>=1-p,<1-stable', '>1-a,<=1-b', true, false],
+            ['>=1-p,<1-a', '>1-rc,<=1-stable', false, false],
         ];
 
         return array_combine(
@@ -400,6 +500,15 @@ final class VersionConstraintTest extends TestCase
             ['>=1.0', '>=1'],
             ['<1.0', '<1'],
             ['<=1.0', '<=1'],
+            ['>1.0,<2.0', '>1,<2'],
+            ['>=1.0,<2.0', '>=1,<2'],
+            ['>1.0,<=2.0', '>1,<=2'],
+            ['>=1.0,<=2.0', '>=1,<=2'],
+            ['>1.0', '>1'],
+            ['>=1.0', '>=1'],
+            ['<1.0', '<1'],
+            ['<=1.0', '<=1'],
+            ['<=1.0.3.0.5.0-beta.0.5.0.0', '<=1.0.3.0.5-beta.0.5'],
         ]);
     }
 
@@ -421,6 +530,25 @@ final class VersionConstraintTest extends TestCase
             ['>1,<2', '>=2', '>1'],
             ['>1,<2', '<=1', '<2'],
             ['>=1,<2', '<1', '<2'],
+            // just to make sure we are compatible
+            ['>2-alpha.1,<3-alpha.1', '>2.1-alpha.1,<4-alpha.1', '>2-alpha.1,<4-alpha.1'],
+            ['>2-alpha.1,<3-alpha.1', '>1-alpha.1,<2.1-alpha.1', '>1-alpha.1,<3-alpha.1'],
+            ['<3-alpha.1', '>1-alpha.1,<3.1-alpha.1', '<3.1-alpha.1'],
+            ['>3-alpha.1', '>2.1-alpha.1,<3.1-alpha.1', '>2.1-alpha.1'],
+            ['>1-alpha.1,<2-alpha.1', '>=2-alpha.1,<3-alpha.1', '>1-alpha.1,<3-alpha.1'],
+            ['>1-alpha.1,<=2-alpha.1', '>2-alpha.1,<3-alpha.1', '>1-alpha.1,<3-alpha.1'],
+            ['>1-alpha.1,<2-alpha.1', '>0.1-alpha.1,<=1-alpha.1', '>0.1-alpha.1,<2-alpha.1'],
+            ['>=1-alpha.1,<2-alpha.1', '>0.1-alpha.1,<1-alpha.1', '>0.1-alpha.1,<2-alpha.1'],
+            ['>1-alpha.1,<=2-alpha.1', '>2-alpha.1', '>1-alpha.1'],
+            ['>1-alpha.1,<2-alpha.1', '>=2-alpha.1', '>1-alpha.1'],
+            ['>1-alpha.1,<2-alpha.1', '<=1-alpha.1', '<2-alpha.1'],
+            ['>=1-alpha.1,<2-alpha.1', '<1-alpha.1', '<2-alpha.1'],
+            // test overlapping of flags
+            ['>1-p,<1-beta', '>1-alpha,<1-stable', '>1-p,<1-stable'],
+            ['>1-a,<1-rc', '>1-beta,<1-rc', '>1-a,<1-rc'],
+            // overlapping of stability numbers
+            ['>1-a.1,<1-a.4', '>1-a.2,<1-a.5', '>1-a.1,<1-a.5'],
+            ['>1-a.1.0.1.0,<1-a.4.1', '>1-a.1.0.2,<1-a.5.8', '>1-a.1.0.1,<1-a.5.8'],
         ];
 
         return array_combine(
@@ -452,6 +580,19 @@ final class VersionConstraintTest extends TestCase
             ['>2,<3', 'foo'],
             ['bar', 'foo'],
             ['>1,<4', '>2,<3'], // note: containing, not overlapping.
+            ['>2-alpha.1,<3-alpha.1', '>3-alpha.1,<4-alpha.1'],
+            ['>2-alpha.1,<3-alpha.1', '>=3-alpha.1,<4-alpha.1'],
+            ['>2-alpha.1,<=3-alpha.1', '>3-alpha.1,<4-alpha.1'],
+            ['>2-alpha.1,<=3-alpha.1', '>=3-alpha.1,<4-alpha.1'],
+            ['>2-alpha.1,<3-alpha.1', '>1-alpha.1,<2-alpha.1'],
+            ['>2-alpha.1,<3-alpha.1', '>1-alpha.1,<=2-alpha.1'],
+            ['>=2-alpha.1,<3-alpha.1', '>1-alpha.1,<2-alpha.1'],
+            ['>=2-alpha.1,<3-alpha.1', '>1-alpha.1,<=2-alpha.1'],
+            ['foo', '>1-alpha.1,<2-alpha.1'],
+            ['>2-alpha.1,<3', 'foo'],
+            ['bar', 'foo'],
+            ['>1-p, <1-a', '>1-b,<1-rc'],
+            ['>1-alpha.1,<4-alpha.1', '>2-beta.1,<3-beta.1'], // note: containing, not overlapping.
         ];
 
         return array_combine(
@@ -505,5 +646,17 @@ final class VersionConstraintTest extends TestCase
         $mergeWithOverlappingReflection->setAccessible(true);
 
         return $mergeWithOverlappingReflection->invoke($versionConstraint, $other);
+    }
+
+    /**
+     * @return string[][]
+     */
+    public function leftOpenEndedRangeProvider() : array
+    {
+        return [
+            ['<1'],
+            ['<1-alpha'],
+            ['<1-alpha.1.2'],
+        ];
     }
 }

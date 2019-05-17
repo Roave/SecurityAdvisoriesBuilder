@@ -37,10 +37,10 @@ final class ComponentTest extends TestCase
             'reference' => 'composer://foo/bar',
             'branches' => [
                 '1.0.x' => [
-                    'versions' => ['>=1.0', '<1.1'],
+                    'versions' => ['>=1.0-beta.1.1', '<1.1-beta.1.1'],
                 ],
                 '2.0.x' => [
-                    'versions' => ['>=2.0', '<2.1'],
+                    'versions' => ['>=2.0-beta.1.1', '<2.1-beta.1.1'],
                 ],
             ],
         ]);
@@ -48,17 +48,19 @@ final class ComponentTest extends TestCase
             'reference' => 'composer://foo/bar',
             'branches' => [
                 '1.0.x' => [
-                    'versions' => ['>=3.0', '<3.1'],
+                    'versions' => ['>=3.0-beta.1.1', '<3.1-beta.1.1'],
                 ],
                 '2.0.x' => [
-                    'versions' => ['>=4.0', '<4.1'],
+                    'versions' => ['>=4.0-beta.1.1', '<4.1-beta.1.1'],
                 ],
             ],
         ]);
 
         $component = new Component('foo/bar', $advisory1, $advisory2);
 
-        self::assertSame('>=1,<1.1|>=2,<2.1|>=3,<3.1|>=4,<4.1', $component->getConflictConstraint());
+        $expected = '>=1-beta.1.1,<1.1-beta.1.1|>=2-beta.1.1,<2.1-beta.1.1|' .
+            '>=3-beta.1.1,<3.1-beta.1.1|>=4-beta.1.1,<4.1-beta.1.1';
+        self::assertSame($expected, $component->getConflictConstraint());
         self::assertSame('foo/bar', $component->getName());
     }
 
@@ -108,6 +110,52 @@ final class ComponentTest extends TestCase
         self::assertSame('foo/bar', $component->getName());
     }
 
+    public function testDeDuplicatesOverlappingComplexAdvisories() : void
+    {
+        $advisory1 = Advisory::fromArrayData([
+            'reference' => 'composer://foo/bar',
+            'branches' => [
+                '1.0.x' => [
+                    'versions' => ['>=1.0-p.1.1.2', '<1.1-b.1.1.3'],
+                ],
+                '2.0.x' => [
+                    'versions' => ['>=2.0-rc', '<2.1-p'],
+                ],
+            ],
+        ]);
+        $advisory2 = Advisory::fromArrayData([
+            'reference' => 'composer://foo/bar',
+            'branches' => [
+                '1.0.x' => [
+                    // this should not appear, as it is included in a previous advisory
+                    'versions' => ['>=1.0-p.1.1.3', '<1.1-b.1.1.2'],
+                ],
+                '2.0.x' => [
+                    // this should not appear, as it is included in a previous advisory
+                    'versions' => ['>=2.0.1', '<2.1'],
+                ],
+                '3.0.x' => [
+                    // this should appear, as it is not covered by previous advisories
+                    'versions' => ['>=3.0-stable.5', '<3.1'],
+                ],
+            ],
+        ]);
+        $advisory3 = Advisory::fromArrayData([
+            'reference' => 'composer://foo/bar',
+            'branches' => [
+                '3.0.x' => [
+                    // this should not appear, as it is included in the second advisory
+                    'versions' => ['>=3.0.1', '<3.0.99'],
+                ],
+            ],
+        ]);
+
+        $component = new Component('foo/bar', $advisory1, $advisory2, $advisory3);
+
+        self::assertSame('>=1-p.1.1.2,<1.1-b.1.1.3|>=2-rc,<2.1|>=3-stable.5,<3.1', $component->getConflictConstraint());
+        self::assertSame('foo/bar', $component->getName());
+    }
+
     public function testSortAdvisoriesWithRealCase() : void
     {
         $advisory1 = Advisory::fromArrayData([
@@ -134,5 +182,30 @@ final class ComponentTest extends TestCase
         $component = new Component('foo/bar', $advisory1, $advisory2, $advisory3);
 
         self::assertSame('>=3,<=3.0.11|>=3.1,<3.1.11', $component->getConflictConstraint());
+    }
+
+    public function testSortComplexAdvisoriesWithRealCase() : void
+    {
+        $advisory1 = Advisory::fromArrayData([
+            'reference' => 'composer://thelia/thelia',
+            'branches' => [
+                '2.1.x' => [
+                    'versions' => ['>=2.1.0', '<2.1.2'],
+                ],
+            ],
+        ]);
+        $advisory2 = clone $advisory1;
+        $advisory3 = Advisory::fromArrayData([
+            'reference' => 'composer://thelia/thelia',
+            'branches' => [
+                '2.1.x' => [
+                    'versions' => ['>=2.1.0-beta1', '<2.1.3'],
+                ],
+            ],
+        ]);
+
+        $component = new Component('foo/bar', $advisory1, $advisory2, $advisory3);
+
+        self::assertSame('>=2.1-beta.1,<2.1.3', $component->getConflictConstraint());
     }
 }

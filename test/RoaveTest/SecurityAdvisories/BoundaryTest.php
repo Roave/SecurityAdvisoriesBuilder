@@ -23,8 +23,10 @@ namespace RoaveTest\SecurityAdvisories;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Boundary;
+use Roave\SecurityAdvisories\Matchers;
 use Roave\SecurityAdvisories\Version;
 use function Safe\preg_match;
+use function str_replace;
 use function strpos;
 
 /**
@@ -71,10 +73,11 @@ final class BoundaryTest extends TestCase
      */
     public function testGetVersion(string $boundaryString) : void
     {
-        preg_match('/((?:\d+\.)*\d+)\s*$/', $boundaryString, $matches);
+        preg_match(Matchers::BOUNDARY_MATCHER, $boundaryString, $matches);
+        $boundary = str_replace($matches['boundary'], '', $matches[0]);
 
         self::assertTrue(
-            Version::fromString($matches[1])->equalTo(Boundary::fromString($boundaryString)->getVersion())
+            Version::fromString($boundary)->equalTo(Boundary::fromString($boundaryString)->getVersion())
         );
     }
 
@@ -138,6 +141,17 @@ final class BoundaryTest extends TestCase
             ['=>1.2'],
             ['=<1.2'],
             ['1.2'],
+            ['beta'],
+            [' beta '],
+            ['>beta'],
+            ['> beta'],
+            ['< beta'],
+            ['<beta'],
+            ['<=beta'],
+            ['<= beta'],
+            ['>=beta'],
+            ['>= beta'],
+            ['>=.1'],
         ];
     }
 
@@ -172,6 +186,27 @@ final class BoundaryTest extends TestCase
             ['  =  1.2.3   ', '=1.2.3'],
             ['  <=  1.2.3   ', '<=1.2.3'],
             ['  <  1.2.3   ', '<1.2.3'],
+            ['>1.2.3-beta', '>1.2.3-beta'],
+            ['>=1.2.3-beta', '>=1.2.3-beta'],
+            ['=1.2.3-beta', '=1.2.3-beta'],
+            ['<=1.2.3-beta', '<=1.2.3-beta'],
+            ['<1.2.3-beta', '<1.2.3-beta'],
+            ['>1.2.3-beta', '>1.2.3-beta'],
+            ['>=1.2.3-beta', '>=1.2.3-beta'],
+            ['=1.2.3-beta', '=1.2.3-beta'],
+            ['<=1.2.3-beta', '<=1.2.3-beta'],
+            ['<1.2.3-beta', '<1.2.3-beta'],
+            ['>  1.2.3-patch', '>1.2.3-patch'],
+            ['>=  1.2.3-patch', '>=1.2.3-patch'],
+            ['=  1.2.3-patch', '=1.2.3-patch'],
+            ['<=  1.2.3-patch', '<=1.2.3-patch'],
+            ['<  1.2.3-patch', '<1.2.3-patch'],
+            ['  >  1.2.3-patch   ', '>1.2.3-patch'],
+            ['  >=  1.2.3-patch   ', '>=1.2.3-patch'],
+            ['  =  1.2.3-patch   ', '=1.2.3-patch'],
+            ['  <=  1.2.3-patch   ', '<=1.2.3-patch'],
+            ['  <  1.2.3-patch   ', '<1.2.3-patch'],
+            ['  <  1.2.3-patch.1.2.3.0  ', '<1.2.3-patch.1.2.3'],
         ];
     }
 
@@ -185,6 +220,12 @@ final class BoundaryTest extends TestCase
             ['<1', '>=1'],
             ['<=1', '>1'],
             ['=1', '>1'],
+            ['<1-alpha', '=1-alpha'],
+            ['<1-alpha.1', '=1-alpha.1'],
+            ['<1-alpha.1', '>=1-alpha.1'],
+            ['<=1-alpha.1', '>1-alpha.1'],
+            ['=1-alpha.1', '>1-alpha.1'],
+            ['=1-alpha.1.1.1.1', '>1-alpha.1.1.1.1'],
         ];
     }
 
@@ -205,6 +246,17 @@ final class BoundaryTest extends TestCase
             ['<1', '>=1.1'],
             ['<=1', '>1.1'],
             ['=1', '>1.1'],
+            ['<1-beta.1.1', '<1-beta.1.1'],
+            ['<1-beta.1.1', '<=1-beta.1.1'],
+            ['<=1-beta.1.1', '<=1-beta.1.1'],
+            ['<=1-beta.1.1', '>=1-beta.1.1'],
+            ['=1-beta.1.1', '=1-beta.1.1'],
+            ['=1-beta.1.1', '<=1-beta.1.1'],
+            ['=1-beta.1.1', '>=1-beta.1.1'],
+            ['<1-beta.1.1', '=1.1-beta.1.1'],
+            ['<1-beta.1.1', '>=1.1-beta.1.1'],
+            ['<=1-beta.1.1', '>1.1-beta.1.1'],
+            ['=1-beta.1.1', '>1.1-beta.1.1'],
         ];
     }
 }

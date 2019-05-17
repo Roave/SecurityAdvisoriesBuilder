@@ -19,10 +19,6 @@ use function Safe\sprintf;
  */
 final class VersionConstraint
 {
-    private const CLOSED_RANGE_MATCHER     = '/^>(=?)\s*((?:\d+\.)*\d+)\s*,\s*<(=?)\s*((?:\d+\.)*\d+)$/';
-    private const LEFT_OPEN_RANGE_MATCHER  = '/^<(=?)\s*((?:\d+\.)*\d+)$/';
-    private const RIGHT_OPEN_RANGE_MATCHER = '/^>(=?)\s*((?:\d+\.)*\d+)$/';
-
     /** @var string|null */
     private $constraintString;
 
@@ -44,7 +40,7 @@ final class VersionConstraint
         $constraintString = $versionConstraint;
         $instance         = new self();
 
-        if (preg_match(self::CLOSED_RANGE_MATCHER, $constraintString, $matches) === 1) {
+        if (preg_match(Matchers::CLOSED_RANGE_MATCHER, $constraintString, $matches) === 1) {
             [$left, $right] = explode(',', $constraintString);
 
             $instance->lowerBoundary = Boundary::fromString($left);
@@ -53,13 +49,13 @@ final class VersionConstraint
             return $instance;
         }
 
-        if (preg_match(self::LEFT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
+        if (preg_match(Matchers::LEFT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
             $instance->upperBoundary = Boundary::fromString($constraintString);
 
             return $instance;
         }
 
-        if (preg_match(self::RIGHT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
+        if (preg_match(Matchers::RIGHT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
             $instance->lowerBoundary = Boundary::fromString($constraintString);
 
             return $instance;

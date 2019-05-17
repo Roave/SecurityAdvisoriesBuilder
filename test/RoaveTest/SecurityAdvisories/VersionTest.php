@@ -22,6 +22,7 @@ namespace RoaveTest\SecurityAdvisories;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 use Roave\SecurityAdvisories\Version;
 use function array_map;
 use function Safe\array_combine;
@@ -110,6 +111,33 @@ final class VersionTest extends TestCase
     }
 
     /**
+     * @dataProvider stabilitiesToCompare
+     */
+    public function testStabilityIsGreaterThan(
+        string $version1String,
+        string $version2String,
+        int $version1vs2Expected,
+        int $version2vs1Expected
+    ) : void {
+        $version1 = Version::fromString($version1String);
+        $version2 = Version::fromString($version2String);
+
+        self::assertEquals($version1vs2Expected, $this->callIsStabilityGreaterThan($version1, $version2));
+        self::assertEquals($version2vs1Expected, $this->callIsStabilityGreaterThan($version2, $version1));
+    }
+
+    private function callIsStabilityGreaterThan(
+        Version $version1,
+        Version $version2
+    ) : int {
+        $method = new ReflectionMethod($version1, 'isStabilityGreaterThan');
+
+        $method->setAccessible(true);
+
+        return $method->invoke($version1, $version2);
+    }
+
+    /**
      * @return string[][]
      */
     public function validVersionStringProvider() : array
@@ -124,6 +152,17 @@ final class VersionTest extends TestCase
             ['1.2.3.4', '1.2.3.4'],
             ['1.2.3.4.5.6.7.8.9.10', '1.2.3.4.5.6.7.8.9.10'],
             ['12345.12345.12345.12345.0', '12345.12345.12345.12345'],
+            ['1-STABLE', '1-stable'], // uppercase test
+            ['1-stable', '1-stable'],
+            ['1-beta', '1-beta'],
+            ['1-rc', '1-rc'],
+            ['1-alpha', '1-alpha'],
+            ['1-a', '1-a'],
+            ['1-patch', '1-patch'],
+            ['1-p', '1-p'],
+            ['1.0.0-alpha', '1-alpha'],
+            ['1.0.0-alpha1', '1-alpha.1'],
+            ['1.0.0-alpha.1.2.3.0.0.0', '1-alpha.1.2.3'],
         ];
     }
 
@@ -147,6 +186,41 @@ final class VersionTest extends TestCase
             ['1.1', '1.1.0.0.1', false, true],
             ['1.0.0.0.0.0.2', '1.0.0.0.0.2', false, true],
             ['1.0.12', '1.0.11', true, false],
+            // stability vs simple versions
+            ['1-stable', '1', false, true],
+            ['1-rc', '1', false, true],
+            ['1-beta', '1', false, true],
+            ['1-b', '1', false, true],
+            ['1-alpha', '1', false, true],
+            ['1-a', '1', false, true],
+            ['1-patch', '1', false, true],
+            ['1-p', '1', false, true],
+            // stabilities vs stabilities
+            ['1-stable', '1-rc', true, false],
+            ['1-rc', '1-beta', true, false],
+            ['1-beta', '1-alpha', true, false],
+            ['1-b', '1-alpha', true, false],
+            ['1-alpha', '1-patch', true, false],
+            ['1-a', '1-patch', true, false],
+            ['1-patch', '1', false, true],
+            ['1-p', '1', false, true],
+            // more complex comparisons
+            ['1-stable.1', '1-stable.1', false, false],
+            ['1-stable.1.2', '1-stable.1', true, false],
+            ['1-stable.1.2.3', '1-stable.1.2', true, false],
+            ['1-stable.1.2.3.4.5.6.7.8', '1-stable.1.2.3.4.5.6.7', true, false],
+            // equal examples
+            ['1-stable', '1-stable', false, false],
+            ['1-rc', '1-rc', false, false],
+            ['1-beta', '1-beta', false, false],
+            ['1-b', '1-b', false, false],
+            ['1-alpha', '1-alpha', false, false],
+            ['1-a', '1-a', false, false],
+            ['1-patch', '1-patch', false, false],
+            ['1-p', '1-p', false, false],
+            ['1-stable.1.1.1.1', '1-stable.1.1.1.1', false, false],
+            // 0 strip check
+            ['1-stable.1.1.1.1', '1-stable.1.1.1.1.0', false, false],
         ];
 
         return array_combine(
@@ -182,6 +256,42 @@ final class VersionTest extends TestCase
             ['1.1', '1.1.0.0.1', false, true],
             ['1.0.0.0.0.0.2', '1.0.0.0.0.2', false, true],
             ['1.0.12', '1.0.11', true, false],
+            // stability vs simple versions
+            ['1-stable', '1', false, true],
+            ['1-rc', '1', false, true],
+            ['1-beta', '1', false, true],
+            ['1-b', '1', false, true],
+            ['1-alpha', '1', false, true],
+            ['1-a', '1', false, true],
+            ['1-patch', '1', false, true],
+            ['1-p', '1', false, true],
+            // stabilities vs stabilities
+            ['1-stable', '1-rc', true, false],
+            ['1-rc', '1-beta', true, false],
+            ['1-beta', '1-alpha', true, false],
+            ['1-b', '1-alpha', true, false],
+            ['1-alpha', '1-patch', true, false],
+            ['1-a', '1-patch', true, false],
+            ['1-patch', '1', false, true],
+            ['1-p', '1', false, true],
+            // more complex comparisons
+            ['1-stable.1', '1-stable.1', true, true],
+            ['1-stable.1.2', '1-stable.1', true, false],
+            ['1-stable.1.2.3', '1-stable.1.2', true, false],
+            ['1-stable.1.2.3.4.5.6.7.8', '1-stable.1.2.3.4.5.6.7', true, false],
+            ['2.1.0-beta1', '2.1', false, true],
+            // equal examples
+            ['1-stable', '1-stable', true, true],
+            ['1-rc', '1-rc', true, true],
+            ['1-beta', '1-beta', true, true],
+            ['1-b', '1-b', true, true],
+            ['1-alpha', '1-alpha', true, true],
+            ['1-a', '1-a', true, true],
+            ['1-patch', '1-patch', true, true],
+            ['1-p', '1-p', true, true],
+            ['1-stable.1.1.1.1', '1-stable.1.1.1.1', true, true],
+            // 0 strip check
+            ['1-stable.1.1.1.1', '1-stable.1.1.1.1.0', true, true],
         ];
 
         return array_combine(
@@ -202,13 +312,16 @@ final class VersionTest extends TestCase
     {
         return [
             [''],
-            ['12.a'],
-            ['12a3'],
+            ['12.a'], // stability should be separated by dash
+            ['1.1.1.alpha.7'],
+            ['1.1.1alpha.7'],
+            ['1.1.1_alpha.7'],
             ['alpha'],
             ['beta'],
-            ['1-a'],
             ['1.2.a'],
+            ['12.z'],
             ['.1'],
+            ['alpha.beta'],
         ];
     }
 
@@ -224,6 +337,8 @@ final class VersionTest extends TestCase
             ['1.0.0.0', '1.0.0'],
             ['2.0.1.0', '2.0.1'],
             ['2.0.1.0.0.0', '2.0.1'],
+            ['0.0.0-p', '0-p'],
+            ['0.0.0-beta1', '0-beta1'],
         ];
     }
 
@@ -239,6 +354,49 @@ final class VersionTest extends TestCase
             ['1.0.0.1', '1.0.0'],
             ['2.0.1.1', '2.0.1'],
             ['2.0.1.0.0.0', '2.0.2'],
+            ['0.1-patch-3.4', '0.0-patch-3.4'],
+            ['1.0.1-patch-3.4', '1.0-patch-3.4'],
+            ['1-patch-3.4', '1.0.2-patch-3.4'],
+            ['1.0.0.1-patch-3.4', '1.0.0-patch-3.4'],
+            ['2.0.1.1-patch-3.4', '2.0.1-patch-3.4'],
+            ['2.0.1.0.0.0-patch-3.4', '2.0.2-patch-3.4'],
+            ['1-rc', '1-stable'],
+            ['1-stable', '1-beta'],
+            ['1-beta', '1-b.1'],
+            ['1-b', '1-alpha'],
+            ['1-alpha', '1-a.1'],
+            ['1-a.1', '1-patch'],
+            ['1-patch', '1-p.1'],
+            ['1-alpha.1', '1-alpha.1.2'],
+            ['1-alpha.1.2', '1-alpha.1'],
+            ['1-alpha.1.2.3.4.5', '1-alpha.1'],
+        ];
+    }
+
+    /**
+     * @return mixed[]
+     */
+    public function stabilitiesToCompare() : array
+    {
+        return [
+            ['1', '1', 0, 0],
+            ['1-beta', '1', -1, 1],
+            ['1-beta', '1-beta', 0, 0],
+            ['1-beta.1', '1-beta.1', 0, 0],
+            ['1-beta.1.1.1.1.1', '1-beta.1.1.1.1.1', 0, 0],
+
+            ['1-stable', '1-rc', 1, -1],
+            ['1-stable', '1-beta', 1, -1],
+            ['1-beta', '1-alpha', 1, -1],
+            ['1-b', '1-alpha', 1, -1],
+            ['1-alpha', '1-patch', 1, -1],
+            ['1-a', '1-patch', 1, -1],
+            ['1-alpha', '1-p', 1, -1],
+
+            ['1-alpha.1.1', '1-alpha.1.0', 1, -1],
+            ['1-alpha.1.2', '1-alpha.1.1', 1, -1],
+            ['1-alpha.1.2.1', '1-alpha.1.1', 1, -1],
+            ['1-alpha', '1-alpha.1.2', -1, 1],
         ];
     }
 }

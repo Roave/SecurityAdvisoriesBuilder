@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use function in_array;
 use function Safe\preg_match;
 use function Safe\sprintf;
+use function str_replace;
 use function strpos;
 
 /**
@@ -15,8 +16,8 @@ use function strpos;
  */
 final class Boundary
 {
-    private const IN_ARRAY_STRICT     = true;
-    private const MATCHER             = '/^\s*(<|<=|=|>=|>)\s*((?:\d+\.)*\d+)\s*$/';
+    private const IN_ARRAY_STRICT = true;
+
     private const VALID_ADJACENCY_MAP = [
         ['<', '='],
         ['<', '>='],
@@ -43,13 +44,15 @@ final class Boundary
      */
     public static function fromString(string $boundary) : self
     {
-        if (preg_match(self::MATCHER, $boundary, $matches) !== 1) {
+        if (preg_match(Matchers::BOUNDARY_MATCHER, $boundary, $matches) !== 1) {
             throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
         }
 
+        $boundary = str_replace($matches['boundary'], '', $boundary);
+
         return new self(
-            Version::fromString($matches[2]),
-            $matches[1]
+            Version::fromString($boundary),
+            $matches['boundary']
         );
     }
 

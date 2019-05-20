@@ -1979,23 +1979,23 @@
         },
         {
             "name": "phpstan/phpstan-phpunit",
-            "version": "0.11",
+            "version": "0.11.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-phpunit.git",
-                "reference": "70c22d44b96a21a4952fc13021a5a63cc83f5c81"
+                "reference": "fbf2ad56c3b13189d29655e226c9b1da47c2fad9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/70c22d44b96a21a4952fc13021a5a63cc83f5c81",
-                "reference": "70c22d44b96a21a4952fc13021a5a63cc83f5c81",
+                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/fbf2ad56c3b13189d29655e226c9b1da47c2fad9",
+                "reference": "fbf2ad56c3b13189d29655e226c9b1da47c2fad9",
                 "shasum": ""
             },
             "require": {
                 "nikic/php-parser": "^4.0",
                 "php": "~7.1",
                 "phpstan/phpdoc-parser": "^0.3",
-                "phpstan/phpstan": "^0.11"
+                "phpstan/phpstan": "^0.11.4"
             },
             "conflict": {
                 "phpunit/phpunit": "<7.0"
@@ -2010,10 +2010,16 @@
                 "satooshi/php-coveralls": "^1.0",
                 "slevomat/coding-standard": "^4.5.2"
             },
-            "type": "library",
+            "type": "phpstan-extension",
             "extra": {
                 "branch-alias": {
                     "dev-master": "0.11-dev"
+                },
+                "phpstan": {
+                    "includes": [
+                        "extension.neon",
+                        "rules.neon"
+                    ]
                 }
             },
             "autoload": {
@@ -2026,7 +2032,7 @@
                 "MIT"
             ],
             "description": "PHPUnit extensions and rules for PHPStan",
-            "time": "2018-12-22T14:05:04+00:00"
+            "time": "2019-05-17T17:50:16+00:00"
         },
         {
             "name": "phpstan/phpstan-strict-rules",

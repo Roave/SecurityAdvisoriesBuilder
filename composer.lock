@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8c1e36022d911df7c1e0a3743a869aa5",
+    "content-hash": "c3adea6e98919555e9506c6c5468bc8a",
     "packages": [
         {
             "name": "symfony/polyfill-ctype",
@@ -125,16 +125,16 @@
         },
         {
             "name": "thecodingmachine/safe",
-            "version": "v0.1.15",
+            "version": "v0.1.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thecodingmachine/safe.git",
-                "reference": "9a4dbc54e397e0bfb152f4b38f8a03040a1e9e3e"
+                "reference": "4e8f840f0a0a2ea167813c3994a7fc527c3c2182"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thecodingmachine/safe/zipball/9a4dbc54e397e0bfb152f4b38f8a03040a1e9e3e",
-                "reference": "9a4dbc54e397e0bfb152f4b38f8a03040a1e9e3e",
+                "url": "https://api.github.com/repos/thecodingmachine/safe/zipball/4e8f840f0a0a2ea167813c3994a7fc527c3c2182",
+                "reference": "4e8f840f0a0a2ea167813c3994a7fc527c3c2182",
                 "shasum": ""
             },
             "require": {
@@ -253,7 +253,7 @@
                 "MIT"
             ],
             "description": "PHP core functions that throw exceptions instead of returning FALSE on error",
-            "time": "2019-04-17T16:09:50+00:00"
+            "time": "2019-06-25T08:45:33+00:00"
         }
     ],
     "packages-dev": [

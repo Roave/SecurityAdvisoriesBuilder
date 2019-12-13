@@ -185,6 +185,9 @@ final class ComponentTest extends TestCase
     }
 
     /**
+     * @param string[][] $advisory1Branches
+     * @param string[][] $advisory2Branches
+     *
      * @dataProvider complexRealAdvisoriesProvider
      */
     public function testSortComplexAdvisoriesWithRealCase(
@@ -208,6 +211,9 @@ final class ComponentTest extends TestCase
         self::assertSame($expected, $component->getConflictConstraint());
     }
 
+    /**
+     * @return string[][]
+     */
     public function complexRealAdvisoriesProvider() : array
     {
         return [
@@ -250,8 +256,7 @@ final class ComponentTest extends TestCase
                     ],
                 ],
                 '>=2,<2.2.10|>=2.3,<2.3.2-p.2',
-            ]
+            ],
         ];
     }
-
 }

@@ -15,6 +15,7 @@ use function array_slice;
 use function count;
 use function explode;
 use function implode;
+use function in_array;
 use function Safe\preg_match;
 use function Safe\sprintf;
 use function strtolower;
@@ -87,7 +88,7 @@ final class Version
             return false;
         }
 
-        return $this->compareFlags($other) == 0 && $this->stabilityNumbers === $other->stabilityNumbers;
+        return $this->compareFlags($other) === 0 && $this->stabilityNumbers === $other->stabilityNumbers;
     }
 
     /**
@@ -114,21 +115,21 @@ final class Version
          * Continue only when versions are equal, as in <=> returns 0
          */
         $isGreater = count($this->versionNumbers) <=> count($other->versionNumbers);
-        if ($isGreater != 0) {
-            return $isGreater == 1 ? true : false;
+        if ($isGreater !== 0) {
+            return $isGreater === 1 ? true : false;
         }
 
         // may be they have stability flags and we can compare them?
         $isGreater = $this->isStabilityGreaterThan($other);
 
-        return $isGreater == 1;
+        return $isGreater === 1;
     }
 
     private function isStabilityGreaterThan(self $other) : int
     {
         // does not make sense to continue without flag,
         // if no flags exist then it will be parsed like a long version
-        if ($this->flag == null && $other->flag == null) {
+        if ($this->flag === null && $other->flag === null) {
             return 0;
         }
 
@@ -191,12 +192,9 @@ final class Version
     }
 
     /**
-     *
      * Bear in mind that we compare flags only when versions are equal
      *
      * @param Version $other
-     *
-     * @return int
      */
     private function compareFlags(self $other) : int
     {
@@ -206,32 +204,29 @@ final class Version
         ];
 
         // patch is greater than any other version
-        if (
-            in_array($this->flag, $patchLiterals) &&
-            !in_array($other->flag, $patchLiterals)
+        if (in_array($this->flag, $patchLiterals, true) &&
+            ! in_array($other->flag, $patchLiterals, true)
         ) {
             return 1;
         }
 
-        if (
-            !in_array($this->flag, $patchLiterals) &&
-            in_array($other->flag, $patchLiterals)
+        if (! in_array($this->flag, $patchLiterals, true) &&
+            in_array($other->flag, $patchLiterals, true)
         ) {
             return -1;
         }
 
-        if (
-            in_array($this->flag, $patchLiterals) &&
-            in_array($other->flag, $patchLiterals)
+        if (in_array($this->flag, $patchLiterals, true) &&
+            in_array($other->flag, $patchLiterals, true)
         ) {
             return 0;
         }
 
-        if ($this->flag == null && $other->flag != null) {
+        if ($this->flag === null && $other->flag !== null) {
             return 1;
         }
 
-        if ($this->flag != null && $other->flag == null) {
+        if ($this->flag !== null && $other->flag === null) {
             return -1;
         }
 

@@ -193,17 +193,17 @@ final class VersionTest extends TestCase
             ['1-b', '1', false, true],
             ['1-alpha', '1', false, true],
             ['1-a', '1', false, true],
-            ['1-patch', '1', false, true],
-            ['1-p', '1', false, true],
+            ['1-patch', '1', true, false],
+            ['1-p', '1', true, false],
             // stabilities vs stabilities
             ['1-stable', '1-rc', true, false],
             ['1-rc', '1-beta', true, false],
             ['1-beta', '1-alpha', true, false],
             ['1-b', '1-alpha', true, false],
-            ['1-alpha', '1-patch', true, false],
-            ['1-a', '1-patch', true, false],
-            ['1-patch', '1', false, true],
-            ['1-p', '1', false, true],
+            ['1-alpha', '1-patch', false, true],
+            ['1-a', '1-patch', false, true],
+            ['1-patch', '1', true, false],
+            ['1-p', '1', true, false],
             // more complex comparisons
             ['1-stable.1', '1-stable.1', false, false],
             ['1-stable.1.2', '1-stable.1', true, false],
@@ -221,6 +221,27 @@ final class VersionTest extends TestCase
             ['1-stable.1.1.1.1', '1-stable.1.1.1.1', false, false],
             // 0 strip check
             ['1-stable.1.1.1.1', '1-stable.1.1.1.1.0', false, false],
+            // issue 91
+            ['2.3.2-p2', '2.3.2', true, false],
+            ['2.3.2-alpha1', '2.3.2-beta1', false, true],
+            ['2.3.2-beta1', '2.3.2-rc1', false, true],
+            ['2.3.2-rc1', '2.3.2', false, true],
+            ['2.3.2', '2.3.3-alpha1', false, true],
+            ['2.3.2-p2', '2.3.2-alpha1', true, false],
+            ['2.3.2-p2', '2.3.2-alpha1', true, false],
+            // compare with version higher
+            ['2.3.2-p2', '2.3.3', false, true],
+            // compare with version lower
+            ['2.3.2-p2', '2.3.1', true, false],
+            // compare two patches but with additional stability versions like 1-p1 and 1-p2 so the p2 will be greater
+            ['2.3.2-p1', '2.3.2-p2', false, true],
+            ['2.3.2-p2', '2.3.2-p2', false, false],
+            // @stof example
+            // 2.3.2-alpha1 < 2.3.2-beta1 < 2.3.2-rc1 < 2.3.2 < 2.3.2-p2 < 2.3.3-alpha1
+            ['2.3.2-alpha1', '2.3.2-beta1', false, true],
+            ['2.3.2-beta1', '2.3.2-rc1', false, true],
+            ['2.3.2-rc1', '2.3.2', false, true],
+            ['2.3.2-p2', '2.3.3-alpha1', false, true],
         ];
 
         return array_combine(

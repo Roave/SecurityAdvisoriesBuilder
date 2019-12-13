@@ -37,8 +37,6 @@ final class Version
         'b'         => 2,
         'alpha'     => 1,
         'a'         => 1,
-        'patch'     => 0,
-        'p'         => 0,
     ];
 
     private function __construct()
@@ -94,9 +92,10 @@ final class Version
     }
 
     /**
-     * Compares two versions and sees if this one is greater than the given one
-     *
-     * @todo may become a simple array comparison (if PHP supports it)
+     * Mode of operation is the following:
+     *      - compare version numbers (if equal try to compare stabilities)
+     *      - compare flags
+     *      - compare stability versions
      */
     public function isGreaterThan(self $other) : bool
     {
@@ -108,33 +107,30 @@ final class Version
             if ($this->versionNumbers[$index] < $other->versionNumbers[$index]) {
                 return false;
             }
-        }
+        } // note: I do not see where I use -1 probably we can get rid of it
 
-        // we can continue only when versions are equal
+        /*
+         * Check case when we have 1.2.3 vs. 1.2.3.4.
+         * Here the latter is greater than the former so it will return false.
+         * Continue only when versions are equal, as in <=> returns 0
+         */
         $isGreater = count($this->versionNumbers) <=> count($other->versionNumbers);
-
-        if ($isGreater !== 0) {
-            return $isGreater === 1 ? true : false;
+        if ($isGreater != 0) {
+            return $isGreater == 1 ? true : false;
         }
 
-        // compare here stabilities - flags and versions
+        // may be they have stability flags and we can compare them?
         $isGreater = $this->isStabilityGreaterThan($other);
 
-        return $isGreater === 1;
+        return $isGreater == 1;
     }
 
     private function isStabilityGreaterThan(self $other) : int
     {
-        if ($this->flag === null && $other->flag === null) {
+        // does not make sense to continue without flag,
+        // if no flags exist then it will be parsed like a long version
+        if ($this->flag == null && $other->flag == null) {
             return 0;
-        }
-
-        if ($this->flag === null && $other->flag !== null) {
-            return 1;
-        }
-
-        if ($this->flag !== null && $other->flag === null) {
-            return -1;
         }
 
         $isGreater = $this->compareFlags($other);
@@ -195,8 +191,51 @@ final class Version
         return [0];
     }
 
+    /**
+     *
+     * Bear in mind that we compare flags only when versions are equal
+     *
+     * @param Version $other
+     *
+     * @return int
+     */
     private function compareFlags(self $other) : int
     {
+        $patchLiterals = [
+            'p',
+            'patch',
+        ];
+
+        // patch is greater than any other version
+        if (
+            in_array($this->flag, $patchLiterals) &&
+            !in_array($other->flag, $patchLiterals)
+        ) {
+            return 1;
+        }
+
+        if (
+            !in_array($this->flag, $patchLiterals) &&
+            in_array($other->flag, $patchLiterals)
+        ) {
+            return -1;
+        }
+
+        if (
+            in_array($this->flag, $patchLiterals) &&
+            in_array($other->flag, $patchLiterals)
+        ) {
+            return 0;
+        }
+
+        if ($this->flag == null && $other->flag != null) {
+            return 1;
+        }
+
+        if ($this->flag != null && $other->flag == null) {
+            return -1;
+        }
+
         return self::FLAGS_HIERARCHY[$this->flag] <=> self::FLAGS_HIERARCHY[$other->flag];
     }
 }

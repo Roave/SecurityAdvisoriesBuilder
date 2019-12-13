@@ -325,7 +325,7 @@ final class VersionConstraintTest extends TestCase
             ['>=2', '>2', true, false],
             ['>=2', '>1', false, true],
             ['>=2', '>3', true, false],
-            // just to be sure
+            // stabilities
             ['>1-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
             ['>1-beta.1,<2-beta.1', '>1.1-beta.1,<2-beta.1', true, false],
             ['>1-beta.1,<2-beta.1', '>3-beta.1,<4-beta.1', false, false],

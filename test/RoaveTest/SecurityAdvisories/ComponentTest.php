@@ -212,9 +212,9 @@ final class ComponentTest extends TestCase
     }
 
     /**
-     * @return string[][]
+     * @return mixed
      */
-    public function complexRealAdvisoriesProvider() : array
+    public function complexRealAdvisoriesProvider()
     {
         return [
             'Case: thelia/thelia' => [

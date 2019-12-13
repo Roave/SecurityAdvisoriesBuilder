@@ -84,10 +84,6 @@ final class Version
             return true;
         }
 
-        if ($this->flag === null || $other->flag === null) {
-            return false;
-        }
-
         return $this->compareFlags($other) === 0 && $this->stabilityNumbers === $other->stabilityNumbers;
     }
 

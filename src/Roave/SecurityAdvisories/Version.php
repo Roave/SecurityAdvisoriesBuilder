@@ -87,8 +87,7 @@ final class Version
             return false;
         }
 
-        return self::FLAGS_HIERARCHY[$this->flag] === self::FLAGS_HIERARCHY[$other->flag] &&
-            $this->stabilityNumbers === $other->stabilityNumbers;
+        return $this->compareFlags($other) == 0 && $this->stabilityNumbers === $other->stabilityNumbers;
     }
 
     /**

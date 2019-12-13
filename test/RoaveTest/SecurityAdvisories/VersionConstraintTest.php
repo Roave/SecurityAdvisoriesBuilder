@@ -468,11 +468,12 @@ final class VersionConstraintTest extends TestCase
             ['>1-beta.1,<2-beta.1,>3-beta.1', '>1-beta.1,<2-beta.1', false, false],
 
             ['>1-beta,<1-beta', '>1-beta,<1-beta', true, true],
-            ['>1-p,<1-stable', '>1-a,<1-b', true, false],
-            ['>1-p,<1-a', '>1-rc,<1-stable', false, false],
-
-            ['>=1-p,<1-stable', '>1-a,<=1-b', true, false],
-            ['>=1-p,<1-a', '>1-rc,<=1-stable', false, false],
+            ['>1-a,<1-stable', '>1-b,<1-rc', true, false], // first contains second
+            ['>1-a,<1-b', '>1-rc,<1-stable', false, false], // totally not overlapping versions
+            // patch versions
+            ['>1-p,<1-p', '>1-p,<1-p', true, true],
+            ['>1-a,<1-p', '>1-a,<1-b', true, false],
+            ['>1,<1-p', '>1-a,<1-b', false, false],
         ];
 
         return array_combine(

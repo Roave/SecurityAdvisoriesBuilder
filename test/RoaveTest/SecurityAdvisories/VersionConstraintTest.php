@@ -545,7 +545,9 @@ final class VersionConstraintTest extends TestCase
             ['>1-alpha.1,<2-alpha.1', '<=1-alpha.1', '<2-alpha.1'],
             ['>=1-alpha.1,<2-alpha.1', '<1-alpha.1', '<2-alpha.1'],
             // test overlapping of flags
-            ['>1-p,<1-beta', '>1-alpha,<1-stable', '>1-p,<1-stable'],
+            ['>1-a,<1-rc', '>1-b,<1-stable', '>1-a,<1-stable'],
+            ['>1-b,<1-stable', '>1-rc,<1', '>1-b,<1'],
+            ['>1-rc,<1', '>1-stable,<1-patch', '>1-rc,<1-patch'],
             ['>1-a,<1-rc', '>1-beta,<1-rc', '>1-a,<1-rc'],
             // overlapping of stability numbers
             ['>1-a.1,<1-a.4', '>1-a.2,<1-a.5', '>1-a.1,<1-a.5'],

@@ -38,11 +38,6 @@ final class Flag
         'a'         => 0,
     ];
 
-    private const PATCH_LITERALS = [
-        'p',
-        'patch',
-    ];
-
     /** @var string|null */
     private $literal;
 
@@ -51,7 +46,7 @@ final class Flag
         $this->literal = $literal;
     }
 
-    public static function build(?string $literal): self
+    public static function build(?string $literal) : self
     {
         return new self($literal);
     }
@@ -70,5 +65,4 @@ final class Flag
     {
         return $this->literal;
     }
-
 }

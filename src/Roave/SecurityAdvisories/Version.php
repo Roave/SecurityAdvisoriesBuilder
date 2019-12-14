@@ -15,7 +15,6 @@ use function array_slice;
 use function count;
 use function explode;
 use function implode;
-use function in_array;
 use function Safe\preg_match;
 use function Safe\sprintf;
 use function strtolower;
@@ -31,13 +30,16 @@ final class Version
     /** @var int[]  */
     private $stabilityNumbers;
 
+    /**
+     * @param string[] $matches
+     */
     private function __construct(array $matches)
     {
         $this->versionNumbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches['version'])));
 
         $this->flag = Flag::build($matches['flag'] ?? null);
 
-        if ($matches['stability_numbers'] ?? null) {
+        if (isset($matches['stability_numbers'])) {
             $numbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches['stability_numbers'])));
         }
 
@@ -98,7 +100,6 @@ final class Version
             return $this->flag->isGreaterThan($other->flag);
         }
 
-        // compare versions here
         foreach (array_keys(array_intersect_key($this->stabilityNumbers, $other->stabilityNumbers)) as $index) {
             if ($this->stabilityNumbers[$index] > $other->stabilityNumbers[$index]) {
                 return true;
@@ -150,5 +151,4 @@ final class Version
 
         return [0];
     }
-
 }

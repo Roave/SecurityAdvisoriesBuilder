@@ -152,7 +152,8 @@ final class ComponentTest extends TestCase
 
         $component = new Component('foo/bar', $advisory1, $advisory2, $advisory3);
 
-        self::assertSame('>=1-p.1.1.2,<1.1-b.1.1.3|>=2-rc,<2.1-p|>=3-stable.5,<3.1', $component->getConflictConstraint());
+        $expected = '>=1-p.1.1.2,<1.1-b.1.1.3|>=2-rc,<2.1-p|>=3-stable.5,<3.1';
+        self::assertSame($expected, $component->getConflictConstraint());
         self::assertSame('foo/bar', $component->getName());
     }
 

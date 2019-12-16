@@ -29,7 +29,7 @@ final class Flag
     private const PRIORITY = [
         'patch'     => 5,
         'p'         => 5,
-        null        => 4, // special case of clean version, e.g. 1.2.3
+        ''          => 4, // special case of clean version, e.g. 1.2.3
         'stable'    => 3,
         'rc'        => 2,
         'beta'      => 1,
@@ -38,15 +38,15 @@ final class Flag
         'a'         => 0,
     ];
 
-    /** @var string|null */
+    /** @var string */
     private $literal;
 
-    private function __construct(?string $literal)
+    private function __construct(string $literal)
     {
         $this->literal = $literal;
     }
 
-    public static function build(?string $literal) : self
+    public static function build(string $literal) : self
     {
         return new self($literal);
     }
@@ -61,7 +61,7 @@ final class Flag
         return self::PRIORITY[$this->literal] > self::PRIORITY[$flag->literal];
     }
 
-    public function getLiteral() : ?string
+    public function getLiteral() : string
     {
         return $this->literal;
     }

@@ -37,7 +37,7 @@ final class Version
     {
         $this->versionNumbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches['version'])));
 
-        $this->flag = Flag::build($matches['flag'] ?? null);
+        $this->flag = Flag::build($matches['flag'] ?? '');
 
         if (isset($matches['stability_numbers'])) {
             $numbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches['stability_numbers'])));
@@ -129,7 +129,7 @@ final class Version
         $version = implode('.', $this->versionNumbers);
 
         $flagLiteral = $this->flag->getLiteral();
-        if ($flagLiteral !== null) {
+        if ($flagLiteral !== '') {
             $version .= '-' . $flagLiteral;
 
             if ($this->stabilityNumbers !== []) {

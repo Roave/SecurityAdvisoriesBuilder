@@ -34,8 +34,8 @@ final class FlagTest extends TestCase
      * @dataProvider isGreaterFlagDataProvider
      */
     public function testFlagIsGreaterThanOther(
-        ?string $firstFlag,
-        ?string $otherFlag,
+        string $firstFlag,
+        string $otherFlag,
         bool $firstExpected,
         bool $secondExpected
     ) : void {
@@ -50,8 +50,8 @@ final class FlagTest extends TestCase
      * @dataProvider isEqualDataProvider
      */
     public function testFlagIsEqualThanOther(
-        ?string $firstFlag,
-        ?string $otherFlag,
+        string $firstFlag,
+        string $otherFlag,
         bool $firstExpected,
         bool $secondExpected
     ) : void {
@@ -66,8 +66,8 @@ final class FlagTest extends TestCase
      * @dataProvider getterTestDataProvider
      */
     public function testThatGetterWorks(
-        ?string $literal,
-        ?string $expected
+        string $literal,
+        string $expected
     ) : void {
         $flag = Flag::build($literal);
 
@@ -81,7 +81,7 @@ final class FlagTest extends TestCase
     {
         return [
             ['patch', 'p', false, false],
-            ['patch', null, true, false],
+            ['patch', '', true, false],
             ['patch', 'stable', true, false],
             ['patch', 'rc', true, false],
             ['patch', 'beta', true, false],
@@ -89,7 +89,7 @@ final class FlagTest extends TestCase
             ['patch', 'alpha', true, false],
             ['patch', 'a', true, false],
 
-            ['p', null, true, false],
+            ['p', '', true, false],
             ['p', 'stable', true, false],
             ['p', 'rc', true, false],
             ['p', 'beta', true, false],
@@ -97,12 +97,12 @@ final class FlagTest extends TestCase
             ['p', 'alpha', true, false],
             ['p', 'a', true, false],
 
-            [null, 'stable', true, false],
-            [null, 'rc', true, false],
-            [null, 'beta', true, false],
-            [null, 'b', true, false],
-            [null, 'alpha', true, false],
-            [null, 'a', true, false],
+            ['', 'stable', true, false],
+            ['', 'rc', true, false],
+            ['', 'beta', true, false],
+            ['', 'b', true, false],
+            ['', 'alpha', true, false],
+            ['', 'a', true, false],
 
             ['stable', 'rc', true, false],
             ['stable', 'beta', true, false],
@@ -136,7 +136,7 @@ final class FlagTest extends TestCase
             ['patch', 'p', true, true],
             ['beta', 'b', true, true],
             ['alpha', 'a', true, true],
-            [null, null, true, true],
+            ['', '', true, true],
         ];
     }
 
@@ -148,7 +148,7 @@ final class FlagTest extends TestCase
         return [
             ['patch', 'patch'],
             ['p', 'p'],
-            [null, null],
+            ['', ''],
             ['stable', 'stable'],
             ['rc', 'rc'],
             ['beta', 'beta'],

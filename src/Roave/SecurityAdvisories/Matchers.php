@@ -20,6 +20,12 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+/**
+ * @see https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+ *
+ * @fixme: throw this garbage away and use existing regexp from semver.org
+ * @fixme: we could declare it directly in build-conflicts.php
+ */
 final class Matchers
 {
     // pattern that matches full version only, without boundary sign

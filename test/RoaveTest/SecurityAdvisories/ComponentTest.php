@@ -152,7 +152,8 @@ final class ComponentTest extends TestCase
 
         $component = new Component('foo/bar', $advisory1, $advisory2, $advisory3);
 
-        self::assertSame('>=1-p.1.1.2,<1.1-b.1.1.3|>=2-rc,<2.1|>=3-stable.5,<3.1', $component->getConflictConstraint());
+        $expected = '>=1-p.1.1.2,<1.1-b.1.1.3|>=2-rc,<2.1-p|>=3-stable.5,<3.1';
+        self::assertSame($expected, $component->getConflictConstraint());
         self::assertSame('foo/bar', $component->getName());
     }
 
@@ -184,28 +185,79 @@ final class ComponentTest extends TestCase
         self::assertSame('>=3,<=3.0.11|>=3.1,<3.1.11', $component->getConflictConstraint());
     }
 
-    public function testSortComplexAdvisoriesWithRealCase() : void
-    {
+    /**
+     * @param string[][] $advisory1Branches
+     * @param string[][] $advisory2Branches
+     *
+     * @dataProvider complexRealAdvisoriesProvider
+     */
+    public function testSortComplexAdvisoriesWithRealCase(
+        string $reference,
+        array $advisory1Branches,
+        array $advisory2Branches,
+        string $expected
+    ) : void {
         $advisory1 = Advisory::fromArrayData([
-            'reference' => 'composer://thelia/thelia',
-            'branches' => [
-                '2.1.x' => [
-                    'versions' => ['>=2.1.0', '<2.1.2'],
-                ],
-            ],
+            'reference' => $reference,
+            'branches' => $advisory1Branches,
         ]);
         $advisory2 = clone $advisory1;
         $advisory3 = Advisory::fromArrayData([
-            'reference' => 'composer://thelia/thelia',
-            'branches' => [
-                '2.1.x' => [
-                    'versions' => ['>=2.1.0-beta1', '<2.1.3'],
-                ],
-            ],
+            'reference' => $reference,
+            'branches' => $advisory2Branches,
         ]);
 
         $component = new Component('foo/bar', $advisory1, $advisory2, $advisory3);
 
-        self::assertSame('>=2.1-beta.1,<2.1.3', $component->getConflictConstraint());
+        self::assertSame($expected, $component->getConflictConstraint());
+    }
+
+    /**
+     * @return mixed
+     */
+    public function complexRealAdvisoriesProvider()
+    {
+        return [
+            'Case: thelia/thelia' => [
+                'composer://thelia/thelia',
+                [
+                    '2.1.x' => [
+                        'versions' => ['>=2.1.0', '<2.1.2'],
+                    ],
+                ],
+                [
+                    '2.1.x' => [
+                        'versions' => ['>=2.1.0-beta1', '<2.1.3'],
+                    ],
+                ],
+                '>=2.1-beta.1,<2.1.3',
+            ],
+            'Case: magento/product-community-edition' => [
+                'composer://thelia/thelia',
+                // taken from CVE-2016-6485.yaml
+                [
+                    '2.0' => [
+                        'versions' => ['>=2.0', '<2.1'],
+                    ],
+                    '2.1' => [
+                        'versions' => ['>=2.1', '<2.2'],
+                    ],
+                    '2.2' => [
+                        'versions' => ['>=2.2', '<2.2.6'],
+                    ],
+                ],
+                // have to skip a lot of branches here as magento has many CVE
+                // taken from CVE-2019-8159.yaml
+                [
+                    '2.2' => [
+                        'versions' => ['>=2.2', '<2.2.10'],
+                    ],
+                    '2.3' => [
+                        'versions' => ['>=2.3', '<2.3.2-p2'],
+                    ],
+                ],
+                '>=2,<2.2.10|>=2.3,<2.3.2-p.2',
+            ],
+        ];
     }
 }

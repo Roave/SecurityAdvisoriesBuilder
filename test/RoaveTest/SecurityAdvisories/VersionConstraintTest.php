@@ -325,7 +325,7 @@ final class VersionConstraintTest extends TestCase
             ['>=2', '>2', true, false],
             ['>=2', '>1', false, true],
             ['>=2', '>3', true, false],
-            // just to be sure
+            // stabilities
             ['>1-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
             ['>1-beta.1,<2-beta.1', '>1.1-beta.1,<2-beta.1', true, false],
             ['>1-beta.1,<2-beta.1', '>3-beta.1,<4-beta.1', false, false],
@@ -468,11 +468,12 @@ final class VersionConstraintTest extends TestCase
             ['>1-beta.1,<2-beta.1,>3-beta.1', '>1-beta.1,<2-beta.1', false, false],
 
             ['>1-beta,<1-beta', '>1-beta,<1-beta', true, true],
-            ['>1-p,<1-stable', '>1-a,<1-b', true, false],
-            ['>1-p,<1-a', '>1-rc,<1-stable', false, false],
-
-            ['>=1-p,<1-stable', '>1-a,<=1-b', true, false],
-            ['>=1-p,<1-a', '>1-rc,<=1-stable', false, false],
+            ['>1-a,<1-stable', '>1-b,<1-rc', true, false], // first contains second
+            ['>1-a,<1-b', '>1-rc,<1-stable', false, false], // totally not overlapping versions
+            // patch versions
+            ['>1-p,<1-p', '>1-p,<1-p', true, true],
+            ['>1-a,<1-p', '>1-a,<1-b', true, false],
+            ['>1,<1-p', '>1-a,<1-b', false, false],
         ];
 
         return array_combine(
@@ -544,7 +545,9 @@ final class VersionConstraintTest extends TestCase
             ['>1-alpha.1,<2-alpha.1', '<=1-alpha.1', '<2-alpha.1'],
             ['>=1-alpha.1,<2-alpha.1', '<1-alpha.1', '<2-alpha.1'],
             // test overlapping of flags
-            ['>1-p,<1-beta', '>1-alpha,<1-stable', '>1-p,<1-stable'],
+            ['>1-a,<1-rc', '>1-b,<1-stable', '>1-a,<1-stable'],
+            ['>1-b,<1-stable', '>1-rc,<1', '>1-b,<1'],
+            ['>1-rc,<1', '>1-stable,<1-patch', '>1-rc,<1-patch'],
             ['>1-a,<1-rc', '>1-beta,<1-rc', '>1-a,<1-rc'],
             // overlapping of stability numbers
             ['>1-a.1,<1-a.4', '>1-a.2,<1-a.5', '>1-a.1,<1-a.5'],

@@ -137,6 +137,90 @@ use function set_error_handler;
         ));
     };
 
+    $getGitHubAdvisories = function() use($token){
+        $query = <<<QUERY
+        {
+            securityVulnerabilities(ecosystem: COMPOSER, first: 100, orderBy: {field: UPDATED_AT, direction: ASC} %s) {
+                edges {
+                    cursor
+                    node {
+                        updatedAt
+                        vulnerableVersionRange
+                        package {
+                            name
+                        }
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                }
+                totalCount
+            }
+        }
+        QUERY;
+
+        $result = [];
+
+        do {
+//            var_dump($data ?? null);
+            if (!empty($data)) {
+                $after = sprintf(', after: "%s"', end($data)['cursor']);
+            } else {
+                $after = '';
+            }
+
+            $context = stream_context_create([
+                'http' => [
+                    'header' => [
+                        'Authorization: bearer ' . $token,
+                        'Content-Type: application/json',
+                        'User-Agent: no-agent'
+                    ],
+                    'content' => json_encode(['query' => sprintf($query, $after)]),
+                    'method' => 'POST'
+                ]
+            ]);
+
+            $response = (json_decode(file_get_contents('https://api.github.com/graphql', false, $context), true));
+
+            $data = $response['data']['securityVulnerabilities']['edges'] ?? [];
+            $result = array_merge($data, $result);
+        } while (!empty($data));
+
+//        print_r($result); die;
+
+        $advisories = [];
+        foreach ($result as $item) {
+            $packageName = $item['node']['package']['name'];
+//            var_dump($packageName);
+//            print_r($item);
+//            die;
+
+                $advisories[$packageName]['branches'][] = [
+                    'versions' => explode(',', $item['node']['vulnerableVersionRange'])
+                ];
+
+        }
+
+//        print_r($advisories);
+//        die;
+
+        return array_map(
+            function ($branches, $packageName) {
+//                print_r($branches['branches']);die('ok');
+                return Advisory::fromArrayData(
+                    [
+                        'reference' => $packageName,
+                        'branches' => $branches['branches'],
+                    ]
+                );
+            },
+            $advisories,
+            array_keys($advisories)
+        );
+    };
+
     /** @return Advisory[] */
     $findAdvisories = static function (string $path) use ($advisoriesExtension) : array {
         return array_map(
@@ -307,7 +391,9 @@ use function set_error_handler;
             $baseComposerJson,
             $buildConflicts(
                 $buildComponents(
-                    $findAdvisories($buildDir . '/security-advisories')
+                    array_merge(
+                        $findAdvisories($buildDir . '/security-advisories'),
+                        $getGitHubAdvisories())
                 )
             )
         ),

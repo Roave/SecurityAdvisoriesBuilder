@@ -145,22 +145,16 @@ use function stream_context_create;
     $getGitHubAdvisories = static function () use ($token) : array {
         $query = <<<QUERY
         {
-            securityVulnerabilities(ecosystem: COMPOSER, first: 100, orderBy: {field: UPDATED_AT, direction: ASC} %s) {
+            securityVulnerabilities(ecosystem: COMPOSER, first: 100 %s) {
                 edges {
                     cursor
                     node {
-                        updatedAt
                         vulnerableVersionRange
                         package {
                             name
                         }
                     }
                 }
-                pageInfo {
-                    endCursor
-                    hasNextPage
-                }
-                totalCount
             }
         }
         QUERY;

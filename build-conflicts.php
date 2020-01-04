@@ -137,7 +137,8 @@ use function set_error_handler;
         ));
     };
 
-    $getGitHubAdvisories = function() use($token){
+    /** @return Advisory[] */
+    $getGitHubAdvisories = static function () use ($token) : array {
         $query = <<<QUERY
         {
             securityVulnerabilities(ecosystem: COMPOSER, first: 100, orderBy: {field: UPDATED_AT, direction: ASC} %s) {
@@ -160,20 +161,15 @@ use function set_error_handler;
         }
         QUERY;
 
-        $result = [];
+        $vulnerabilities = [];
 
         do {
-//            var_dump($data ?? null);
-            if (!empty($data)) {
-                $after = sprintf(', after: "%s"', end($data)['cursor']);
-            } else {
-                $after = '';
-            }
+            $after = empty($data) ? '' : sprintf(', after: "%s"', end($data)['cursor']);
 
             $context = stream_context_create([
                 'http' => [
                     'header' => [
-                        'Authorization: bearer ' . $token,
+                        sprintf('Authorization: bearer %s', $token),
                         'Content-Type: application/json',
                         'User-Agent: no-agent'
                     ],
@@ -185,39 +181,19 @@ use function set_error_handler;
             $response = (json_decode(file_get_contents('https://api.github.com/graphql', false, $context), true));
 
             $data = $response['data']['securityVulnerabilities']['edges'] ?? [];
-            $result = array_merge($data, $result);
+            $vulnerabilities = array_merge($data, $vulnerabilities);
         } while (!empty($data));
 
-//        print_r($result); die;
-
-        $advisories = [];
-        foreach ($result as $item) {
-            $packageName = $item['node']['package']['name'];
-//            var_dump($packageName);
-//            print_r($item);
-//            die;
-
-                $advisories[$packageName]['branches'][] = [
-                    'versions' => explode(',', $item['node']['vulnerableVersionRange'])
-                ];
-
-        }
-
-//        print_r($advisories);
-//        die;
-
         return array_map(
-            function ($branches, $packageName) {
-//                print_r($branches['branches']);die('ok');
+            function ($item) {
                 return Advisory::fromArrayData(
                     [
-                        'reference' => $packageName,
-                        'branches' => $branches['branches'],
+                        'reference' => $item['node']['package']['name'],
+                        'branches' => [['versions' => explode(',', $item['node']['vulnerableVersionRange'])]],
                     ]
                 );
             },
-            $advisories,
-            array_keys($advisories)
+            $vulnerabilities,
         );
     };
 

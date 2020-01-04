@@ -41,9 +41,11 @@ use function array_filter;
 use function array_map;
 use function array_merge;
 use function assert;
+use function count;
 use function dirname;
 use function escapeshellarg;
 use function exec;
+use function explode;
 use function getenv;
 use function implode;
 use function is_string;
@@ -52,11 +54,13 @@ use function Safe\chdir;
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;
 use function Safe\getcwd;
+use function Safe\json_decode;
 use function Safe\json_encode;
 use function Safe\ksort;
 use function Safe\realpath;
 use function Safe\sprintf;
 use function set_error_handler;
+use function stream_context_create;
 
 (static function () : void {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -164,28 +168,30 @@ use function set_error_handler;
         $vulnerabilities = [];
 
         do {
-            $after = empty($data) ? '' : sprintf(', after: "%s"', end($data)['cursor']);
+            if (isset($data) && count($data) !== 0) {
+                $after = sprintf(', after: "%s"', $data[count($data) - 1]['cursor']);
+            }
 
             $context = stream_context_create([
                 'http' => [
                     'header' => [
                         sprintf('Authorization: bearer %s', $token),
                         'Content-Type: application/json',
-                        'User-Agent: no-agent'
+                        'User-Agent: no-agent',
                     ],
-                    'content' => json_encode(['query' => sprintf($query, $after)]),
-                    'method' => 'POST'
-                ]
+                    'content' => json_encode(['query' => sprintf($query, $after ?? '')]),
+                    'method' => 'POST',
+                ],
             ]);
 
-            $response = (json_decode(file_get_contents('https://api.github.com/graphql', false, $context), true));
+            $response = json_decode(file_get_contents('https://api.github.com/graphql', false, $context), true);
 
-            $data = $response['data']['securityVulnerabilities']['edges'] ?? [];
+            $data            = $response['data']['securityVulnerabilities']['edges'] ?? [];
             $vulnerabilities = array_merge($data, $vulnerabilities);
-        } while (!empty($data));
+        } while (count($data) > 0);
 
         return array_map(
-            function ($item) {
+            static function ($item) {
                 return Advisory::fromArrayData(
                     [
                         'reference' => $item['node']['package']['name'],
@@ -369,7 +375,8 @@ use function set_error_handler;
                 $buildComponents(
                     array_merge(
                         $findAdvisories($buildDir . '/security-advisories'),
-                        $getGitHubAdvisories())
+                        $getGitHubAdvisories()
+                    )
                 )
             )
         ),

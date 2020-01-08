@@ -18,25 +18,24 @@
 
 declare(strict_types=1);
 
-namespace Roave\SecurityAdvisories\AdvisorySources;
+namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 
-use Generator;
+use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Advisory;
+use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 
-final class GetAdvisoriesFromMultipleSources implements GetAdvisories
+class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
 {
-    /** @var Generator|Advisory[] */
-    private $sources;
-
-    public function __construct(GetAdvisories ...$sources)
+    public function testThatAdvisoriesAreBuiltFromYamlFiles(): void
     {
-        foreach($sources as $source) {
-            $this->sources = yield from $source();
+        $advisories = new GetAdvisoriesFromFriendsOfPhp(
+            getcwd().'/test/RoaveTest/SecurityAdvisories/AdvisorySources/security-advisories'
+        );
+
+        foreach ($advisories() as $advisory) {
+            $this->assertInstanceOf(Advisory::class, $advisory);
         }
+
     }
 
-    public function __invoke() : Generator
-    {
-        return $this->sources;
-    }
 }

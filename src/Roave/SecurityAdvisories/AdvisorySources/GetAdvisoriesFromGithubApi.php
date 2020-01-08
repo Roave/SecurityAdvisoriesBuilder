@@ -29,6 +29,7 @@ use Roave\SecurityAdvisories\Advisory;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
 use stdClass;
+use Webmozart\Assert\Assert;
 use function array_map;
 use function array_merge;
 use function end;
@@ -118,8 +119,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      */
     private function getRequest(?string $cursor = null) : RequestInterface
     {
-        // is there any way to handle pagination more elegant?
-        $after = $cursor ? sprintf(', after: "%s"', $cursor) : '';
+        $after = is_null($cursor) ? sprintf(', after: "%s"', $cursor) : '';
 
         return new Request(
             'POST',

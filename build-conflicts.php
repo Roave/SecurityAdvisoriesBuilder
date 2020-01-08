@@ -31,6 +31,7 @@ use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 use UnexpectedValueException;
+use Webmozart\Assert\Assert;
 use const E_NOTICE;
 use const E_STRICT;
 use const E_WARNING;
@@ -66,8 +67,8 @@ use function set_error_handler;
         E_STRICT | E_NOTICE | E_WARNING
     );
 
-    $token                     = getenv('GITHUB_TOKEN');
-    $authentication            = $token === false ? '' : $token . ':x-oauth-basic@';
+    $token                     = getenv('GITHUB_TOKEN') ?? null;
+    $authentication            = $token === null ? '' : $token . ':x-oauth-basic@';
     $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';
     $buildDir                  = __DIR__ . '/build';
@@ -90,15 +91,6 @@ use function set_error_handler;
             ],
         ],
     ];
-
-//    var_dump(iterator_to_array((new GetAdvisoriesFromGithubApi(
-//        new Client(),
-//        Psr17FactoryDiscovery::findRequestFactory(),
-//        $token,
-//    ))()));
-//
-//
-//    die;
 
     $execute = static function (string $commandString) : array {
         // may the gods forgive me for this in-lined command addendum, but I CBA to fix proc_open's handling
@@ -144,7 +136,7 @@ use function set_error_handler;
     };
 
     /**
-     * @param Generator $advisories
+     * @param Generator $getAdvisories
      *
      * @return Component[]
      */
@@ -282,7 +274,7 @@ use function set_error_handler;
     $cloneAdvisories();
     $cloneRoaveAdvisories();
 
-    $advisories = (new GetAdvisoriesFromMultipleSources(
+    $getAdvisories = (new GetAdvisoriesFromMultipleSources(
         (new GetAdvisoriesFromFriendsOfPhp($buildDir . '/security-advisories')),
         (new GetAdvisoriesFromGithubApi(
             new Client(),
@@ -296,7 +288,7 @@ use function set_error_handler;
             $baseComposerJson,
             $buildConflicts(
                 $buildComponents(
-                    $advisories()
+                    $getAdvisories()
                 )
             )
         ),

@@ -20,15 +20,16 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
-use CallbackFilterIterator;
+require 'vendor/autoload.php';
+
 use DateTime;
 use DateTimeZone;
 use ErrorException;
-use FilesystemIterator;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use SplFileInfo;
-use Symfony\Component\Yaml\Yaml;
+use Generator;
+use Http\Client\Curl\Client;
+use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
+use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
+use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 use UnexpectedValueException;
 use const E_NOTICE;
 use const E_STRICT;
@@ -38,29 +39,22 @@ use const JSON_UNESCAPED_SLASHES;
 use const JSON_UNESCAPED_UNICODE;
 use const PHP_EOL;
 use function array_filter;
-use function array_map;
 use function array_merge;
 use function assert;
-use function count;
 use function dirname;
 use function escapeshellarg;
 use function exec;
-use function explode;
 use function getenv;
 use function implode;
 use function is_string;
-use function iterator_to_array;
 use function Safe\chdir;
-use function Safe\file_get_contents;
 use function Safe\file_put_contents;
 use function Safe\getcwd;
-use function Safe\json_decode;
 use function Safe\json_encode;
 use function Safe\ksort;
 use function Safe\realpath;
 use function Safe\sprintf;
 use function set_error_handler;
-use function stream_context_create;
 
 (static function () : void {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -76,7 +70,6 @@ use function stream_context_create;
     $authentication            = $token === false ? '' : $token . ':x-oauth-basic@';
     $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';
-    $advisoriesExtension       = 'yaml';
     $buildDir                  = __DIR__ . '/build';
     $baseComposerJson          = [
         'name'        => 'roave/security-advisories',
@@ -97,6 +90,15 @@ use function stream_context_create;
             ],
         ],
     ];
+
+//    var_dump(iterator_to_array((new GetAdvisoriesFromGithubApi(
+//        new Client(),
+//        Psr17FactoryDiscovery::findRequestFactory(),
+//        $token,
+//    ))()));
+//
+//
+//    die;
 
     $execute = static function (string $commandString) : array {
         // may the gods forgive me for this in-lined command addendum, but I CBA to fix proc_open's handling
@@ -141,93 +143,12 @@ use function stream_context_create;
         ));
     };
 
-    /** @return Advisory[] */
-    $getGitHubAdvisories = static function () use ($token) : array {
-        $query = <<<QUERY
-        {
-            securityVulnerabilities(ecosystem: COMPOSER, first: 100 %s) {
-                edges {
-                    cursor
-                    node {
-                        vulnerableVersionRange
-                        package {
-                            name
-                        }
-                    }
-                }
-            }
-        }
-        QUERY;
-
-        $vulnerabilities = [];
-
-        do {
-            if (isset($data) && count($data) !== 0) {
-                $after = sprintf(', after: "%s"', $data[count($data) - 1]['cursor']);
-            }
-
-            $context = stream_context_create([
-                'http' => [
-                    'header' => [
-                        sprintf('Authorization: bearer %s', $token),
-                        'Content-Type: application/json',
-                        'User-Agent: no-agent',
-                    ],
-                    'content' => json_encode(['query' => sprintf($query, $after ?? '')]),
-                    'method' => 'POST',
-                ],
-            ]);
-
-            $response = json_decode(file_get_contents('https://api.github.com/graphql', false, $context), true);
-
-            $data            = $response['data']['securityVulnerabilities']['edges'] ?? [];
-            $vulnerabilities = array_merge($data, $vulnerabilities);
-        } while (count($data) > 0);
-
-        return array_map(
-            static function ($item) {
-                return Advisory::fromArrayData(
-                    [
-                        'reference' => $item['node']['package']['name'],
-                        'branches' => [['versions' => explode(',', $item['node']['vulnerableVersionRange'])]],
-                    ]
-                );
-            },
-            $vulnerabilities,
-        );
-    };
-
-    /** @return Advisory[] */
-    $findAdvisories = static function (string $path) use ($advisoriesExtension) : array {
-        return array_map(
-            static function (SplFileInfo $advisoryFile) {
-                $filePath = $advisoryFile->getRealPath();
-
-                assert(is_string($filePath));
-
-                return Advisory::fromArrayData(
-                    Yaml::parse(file_get_contents($filePath), Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE)
-                );
-            },
-            iterator_to_array(new CallbackFilterIterator(
-                new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
-                    RecursiveIteratorIterator::SELF_FIRST
-                ),
-                static function (SplFileInfo $advisoryFile) use ($advisoriesExtension) {
-                    // @todo skip `vendor` dir
-                    return $advisoryFile->isFile() && $advisoryFile->getExtension() === $advisoriesExtension;
-                }
-            ))
-        );
-    };
-
     /**
-     * @param Advisory[] $advisories
+     * @param Generator $advisories
      *
      * @return Component[]
      */
-    $buildComponents = static function (array $advisories) : array {
+    $buildComponents = static function (Generator $advisories) : array {
         // @todo need a functional way to do this, somehow
         $indexedAdvisories = [];
         $components        = [];
@@ -361,16 +282,21 @@ use function stream_context_create;
     $cloneAdvisories();
     $cloneRoaveAdvisories();
 
+    $advisories = (new GetAdvisoriesFromMultipleSources(
+        (new GetAdvisoriesFromFriendsOfPhp($buildDir . '/security-advisories')),
+        (new GetAdvisoriesFromGithubApi(
+            new Client(),
+            $token,
+        )),
+    ));
+
 // actual work:
     $writeJson(
         $buildConflictsJson(
             $baseComposerJson,
             $buildConflicts(
                 $buildComponents(
-                    array_merge(
-                        $findAdvisories($buildDir . '/security-advisories'),
-                        $getGitHubAdvisories()
-                    )
+                    $advisories()
                 )
             )
         ),

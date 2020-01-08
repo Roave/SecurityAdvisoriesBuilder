@@ -21,12 +21,115 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories\AdvisorySources;
 
 use Generator;
+use Nyholm\Psr7\Request;
+use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestInterface;
+use Roave\SecurityAdvisories\Advisory;
+use Safe\Exceptions\JsonException;
+use Safe\Exceptions\StringsException;
+use stdClass;
+use function array_map;
+use function array_merge;
+use function end;
+use function explode;
+use function Safe\json_decode;
+use function Safe\json_encode;
+use function Safe\sprintf;
 
 final class GetAdvisoriesFromGithubApi implements GetAdvisories
 {
+    private const GRAPHQL_QUERY = 'query {
+            securityVulnerabilities(ecosystem: COMPOSER, first: 100 %s) {
+                edges {
+                    cursor
+                    node {
+                        vulnerableVersionRange
+                        package {
+                            name
+                        }
+                    }
+                }
+                pageInfo {
+                    hasNextPage
+                }
+            }
+        }';
 
-    public function __invoke(): Generator
+    /** @var ClientInterface */
+    private $client;
+
+    /** @var string */
+    private $token;
+
+    public function __construct(
+        ClientInterface $client,
+        string $token
+    ) {
+        $this->client = $client;
+        $this->token  = $token;
+    }
+
+    public function __invoke() : Generator
     {
-        // TODO: Implement __invoke() method.
+        return yield from array_map(
+            static function (stdClass $item) {
+                return Advisory::fromArrayData(
+                    [
+                        'reference' => $item->node->package->name,
+                        'branches' => [['versions' => explode(',', $item->node->vulnerableVersionRange)]],
+                    ]
+                );
+            },
+            $this->getAdvisories()
+        );
+    }
+
+    /**
+     * @return stdClass[]
+     *
+     * @throws ClientExceptionInterface
+     * @throws JsonException
+     * @throws StringsException
+     */
+    private function getAdvisories() : array
+    {
+        $advisories = [];
+        $cursor     = null;
+        do {
+            $response        = $this->client->sendRequest($this->getRequest($cursor));
+            $data            = json_decode($response->getBody()->getContents());
+            $vulnerabilities = $data->data->securityVulnerabilities;
+
+            $advisories = array_merge($advisories, $vulnerabilities->edges);
+            if (! $hasNextPage = $vulnerabilities->pageInfo->hasNextPage) {
+                continue;
+            }
+
+            $cursor = end($advisories)->cursor;
+        } while ($hasNextPage);
+
+        return $advisories;
+    }
+
+    /**
+     * @throws JsonException
+     * @throws StringsException
+     */
+    private function getRequest(?string $cursor = null) : RequestInterface
+    {
+        // is there any way to handle pagination more elegant?
+        $after = $cursor ? sprintf(', after: "%s"', $cursor) : '';
+
+        return new Request(
+            'POST',
+            'https://api.github.com/graphql',
+            [
+                'Authorization' => sprintf('bearer %s', $this->token),
+                'Content-Type' => 'application/json',
+                'User-Agent' => 'Curl',
+            ],
+            json_encode(['query' => sprintf(self::GRAPHQL_QUERY, $after)])
+        );
     }
 }

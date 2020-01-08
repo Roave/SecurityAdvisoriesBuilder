@@ -24,14 +24,18 @@ use Generator;
 
 final class GetAdvisoriesFromMultipleSources implements GetAdvisories
 {
-    private $concrete;
+    /** @var Generator[] */
+    private $sources;
 
-    // here I'd have to call like this new GetAdvisoriesFromMultipleSource([GetAdvisoriesFromGithubApi, GetAdvisories]);
-    public function __construct(GetAdvisories ...$concrete) { $this->concrete = $concrete; }
+    public function __construct(GetAdvisories ...$sources)
+    {
+        $this->sources = $sources;
+    }
 
-    public function __invoke() : Generator {
-        foreach ($this->concrete as $concrete) {
-            yield from $concrete();
+    public function __invoke() : Generator
+    {
+        foreach ($this->sources as $source) {
+            yield from $source();
         }
     }
 }

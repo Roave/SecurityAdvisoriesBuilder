@@ -25,18 +25,21 @@ use Roave\SecurityAdvisories\Advisory;
 
 final class GetAdvisoriesFromMultipleSources implements GetAdvisories
 {
-    /** @var Generator|Advisory[] */
+    /** @var Advisory[] */
     private $sources;
 
     public function __construct(GetAdvisories ...$sources)
     {
-        foreach($sources as $source) {
-            $this->sources = yield from $source();
-        }
+        $this->sources = $sources;
     }
 
+    /**
+     * @return Generator<Advisory>
+     */
     public function __invoke() : Generator
     {
-        return $this->sources;
+        foreach ($this->sources as $source) {
+            yield from $source();
+        }
     }
 }

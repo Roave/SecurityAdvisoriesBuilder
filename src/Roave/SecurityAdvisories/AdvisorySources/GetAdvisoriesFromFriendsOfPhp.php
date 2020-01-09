@@ -46,6 +46,9 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
         $this->advisoriesPath = $advisoriesPath;
     }
 
+    /**
+     * @return Generator<Advisory>
+     */
     public function __invoke() : Generator
     {
         return yield from array_map(

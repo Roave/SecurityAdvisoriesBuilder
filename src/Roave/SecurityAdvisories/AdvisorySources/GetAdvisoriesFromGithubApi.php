@@ -67,18 +67,27 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
         ClientInterface $client,
         string $token
     ) {
+        Assert::stringNotEmpty($token);
+
         $this->client = $client;
         $this->token  = $token;
     }
 
+    /**
+     * @return Generator<Advisory>
+     *
+     * @throws ClientExceptionInterface
+     * @throws JsonException
+     * @throws StringsException
+     */
     public function __invoke() : Generator
     {
         return yield from array_map(
-            static function (stdClass $item) {
+            static function (array $item) {
                 return Advisory::fromArrayData(
                     [
-                        'reference' => $item->node->package->name,
-                        'branches' => [['versions' => explode(',', $item->node->vulnerableVersionRange)]],
+                        'reference' => $item['node']['package']['name'],
+                        'branches' => [['versions' => explode(',', $item['node']['vulnerableVersionRange'])]],
                     ]
                 );
             },
@@ -87,7 +96,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
     }
 
     /**
-     * @return stdClass[]
+     * @return array
      *
      * @throws ClientExceptionInterface
      * @throws JsonException
@@ -96,18 +105,18 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
     private function getAdvisories() : array
     {
         $advisories = [];
-        $cursor     = null;
+        $cursor     = '';
         do {
             $response        = $this->client->sendRequest($this->getRequest($cursor));
-            $data            = json_decode($response->getBody()->getContents());
-            $vulnerabilities = $data->data->securityVulnerabilities;
+            $data            = json_decode($response->getBody()->getContents(), true); // fix this as we will use array structure here
+            $vulnerabilities = $data['data']['securityVulnerabilities'];
 
-            $advisories = array_merge($advisories, $vulnerabilities->edges);
-            if (! $hasNextPage = $vulnerabilities->pageInfo->hasNextPage) {
+            $advisories = array_merge($advisories, $vulnerabilities['edges']);
+            if (! $hasNextPage = $vulnerabilities['pageInfo']['hasNextPage']) {
                 continue;
             }
 
-            $cursor = end($advisories)->cursor;
+            $cursor = end($advisories)['cursor'];
         } while ($hasNextPage);
 
         return $advisories;
@@ -117,9 +126,9 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      * @throws JsonException
      * @throws StringsException
      */
-    private function getRequest(?string $cursor = null) : RequestInterface
+    private function getRequest(string $cursor) : RequestInterface
     {
-        $after = is_null($cursor) ? sprintf(', after: "%s"', $cursor) : '';
+        $after = $cursor == '' ? '' : sprintf(', after: "%s"', $cursor);
 
         return new Request(
             'POST',

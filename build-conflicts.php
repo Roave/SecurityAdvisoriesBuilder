@@ -67,8 +67,8 @@ use function set_error_handler;
         E_STRICT | E_NOTICE | E_WARNING
     );
 
-    $token                     = getenv('GITHUB_TOKEN') ?? null;
-    $authentication            = $token === null ? '' : $token . ':x-oauth-basic@';
+    $token                     = getenv('GITHUB_TOKEN');
+    $authentication            = $token === false ? '' : $token . ':x-oauth-basic@';
     $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';
     $buildDir                  = __DIR__ . '/build';
@@ -136,7 +136,7 @@ use function set_error_handler;
     };
 
     /**
-     * @param Generator $getAdvisories
+     * @param Generator<Advisory> $getAdvisories
      *
      * @return Component[]
      */
@@ -146,6 +146,7 @@ use function set_error_handler;
         $components        = [];
 
         foreach ($advisories as $advisory) {
+            var_dump($advisory);
             if (! isset($indexedAdvisories[$advisory->getComponentName()])) {
                 $indexedAdvisories[$advisory->getComponentName()] = [];
             }

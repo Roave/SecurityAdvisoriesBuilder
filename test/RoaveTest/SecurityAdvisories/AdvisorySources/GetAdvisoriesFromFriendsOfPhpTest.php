@@ -26,16 +26,14 @@ use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 
 class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
 {
-    public function testThatAdvisoriesAreBuiltFromYamlFiles(): void
+    public function testThatAdvisoriesAreBuiltFromYamlFiles() : void
     {
         $advisories = new GetAdvisoriesFromFriendsOfPhp(
-            getcwd().'/test/RoaveTest/SecurityAdvisories/AdvisorySources/security-advisories'
+            __DIR__ . '/security-advisories'
         );
 
         foreach ($advisories() as $advisory) {
             $this->assertInstanceOf(Advisory::class, $advisory);
         }
-
     }
-
 }

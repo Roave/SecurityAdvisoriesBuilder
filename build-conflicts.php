@@ -31,7 +31,6 @@ use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 use UnexpectedValueException;
-use Webmozart\Assert\Assert;
 use const E_NOTICE;
 use const E_STRICT;
 use const E_WARNING;
@@ -146,7 +145,6 @@ use function set_error_handler;
         $components        = [];
 
         foreach ($advisories as $advisory) {
-            var_dump($advisory);
             if (! isset($indexedAdvisories[$advisory->getComponentName()])) {
                 $indexedAdvisories[$advisory->getComponentName()] = [];
             }

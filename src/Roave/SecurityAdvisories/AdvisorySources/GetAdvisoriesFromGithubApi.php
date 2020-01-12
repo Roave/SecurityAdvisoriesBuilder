@@ -28,7 +28,6 @@ use Psr\Http\Message\RequestInterface;
 use Roave\SecurityAdvisories\Advisory;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
-use stdClass;
 use Webmozart\Assert\Assert;
 use function array_map;
 use function array_merge;
@@ -40,6 +39,7 @@ use function Safe\sprintf;
 
 final class GetAdvisoriesFromGithubApi implements GetAdvisories
 {
+    // fixme: how to query it differently, should we just use GraphQl client ?
     private const GRAPHQL_QUERY = 'query {
             securityVulnerabilities(ecosystem: COMPOSER, first: 100 %s) {
                 edges {
@@ -108,7 +108,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
         $cursor     = '';
         do {
             $response        = $this->client->sendRequest($this->getRequest($cursor));
-            $data            = json_decode($response->getBody()->getContents(), true); // fix this as we will use array structure here
+            $data            = json_decode($response->getBody()->getContents(), true);
             $vulnerabilities = $data['data']['securityVulnerabilities'];
 
             $advisories = array_merge($advisories, $vulnerabilities['edges']);
@@ -128,7 +128,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      */
     private function getRequest(string $cursor) : RequestInterface
     {
-        $after = $cursor == '' ? '' : sprintf(', after: "%s"', $cursor);
+        $after = $cursor === '' ? '' : sprintf(', after: "%s"', $cursor);
 
         return new Request(
             'POST',

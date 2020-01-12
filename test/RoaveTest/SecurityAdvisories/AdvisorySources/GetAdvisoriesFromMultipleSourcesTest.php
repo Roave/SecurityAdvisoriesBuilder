@@ -18,29 +18,22 @@
 
 declare(strict_types=1);
 
-namespace Roave\SecurityAdvisories\AdvisorySources;
+namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 
-use Generator;
-use Roave\SecurityAdvisories\Advisory;
+use PHPStan\Testing\TestCase;
+use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 
-final class GetAdvisoriesFromMultipleSources implements GetAdvisories
+class GetAdvisoriesFromMultipleSourcesTest extends TestCase
 {
-    /** @var Advisory[] */
-    private $sources;
-
-    public function __construct(GetAdvisories ...$sources)
+    public function testMultipleAdvisoriesSources(...$advisories) : void
     {
-        $this->sources = $sources;
+        new GetAdvisoriesFromMultipleSources();
     }
 
-    /**
-     * @return Generator<Advisory>
-     */
-    // "This is testable by using multiple GetAdvisories mocks"
-    public function __invoke() : Generator
+    public function advisoriesProvider() : array
     {
-        foreach ($this->sources as $source) {
-            yield from $source();
-        }
+        return [
+            [], // todo: not super clear how would I mock this ?
+        ];
     }
 }

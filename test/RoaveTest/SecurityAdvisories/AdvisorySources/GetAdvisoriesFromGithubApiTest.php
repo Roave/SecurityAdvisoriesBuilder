@@ -31,7 +31,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     /**
      * fixme: should we test private methods ? people on internet say NO
      *
-     * @dataProvider testProvider
+     * @dataProvider responsesDataProvider
      */
     public function testRequest($apiResponses) : void
     {
@@ -50,6 +50,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
 
     /**
      * There is an "discussion" about Stream body pointer placement
+     *
      * @see https://github.com/Nyholm/psr7/issues/99
      *
      * @return array

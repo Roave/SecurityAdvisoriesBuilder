@@ -21,19 +21,45 @@ declare(strict_types=1);
 namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 
 use PHPStan\Testing\TestCase;
+use Roave\SecurityAdvisories\Advisory;
+use Roave\SecurityAdvisories\AdvisorySources\GetAdvisories;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 
 class GetAdvisoriesFromMultipleSourcesTest extends TestCase
 {
+    /**
+     * @dataProvider advisoriesProvider
+     */
     public function testMultipleAdvisoriesSources(...$advisories) : void
     {
-        new GetAdvisoriesFromMultipleSources();
+        $advisories = new GetAdvisoriesFromMultipleSources(...$advisories);
+
+        foreach ($advisories() as $advisory) {
+            $this->assertInstanceOf(Advisory::class, $advisory);
+        }
     }
 
     public function advisoriesProvider() : array
     {
+        $someAdvisories = $this->createMock(GetAdvisories::class);
+
+        $someAdvisories->expects($this->once())
+            ->method('__invoke')
+            ->willReturn($this->getGenerator());
+
         return [
-            [], // todo: not super clear how would I mock this ?
+            [$someAdvisories],
         ];
+    }
+
+    private function getGenerator()
+    {
+        return yield Advisory::fromArrayData([
+            'reference' => 'test_package',
+            'branches' => [[
+                'versions' =>  ['<1'],
+            ],
+            ],
+        ]);
     }
 }

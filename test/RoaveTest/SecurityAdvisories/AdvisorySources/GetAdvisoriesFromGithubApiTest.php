@@ -29,11 +29,9 @@ use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 class GetAdvisoriesFromGithubApiTest extends TestCase
 {
     /**
-     * fixme: should we test private methods ? people on internet say NO
-     *
-     * @dataProvider responsesDataProvider
+     * @dataProvider correctResponsesSequenceDataProvider
      */
-    public function testRequest($apiResponses) : void
+    public function testGithubAdvisoriesIsAbleToProduceAdvisories($apiResponses) : void
     {
         $client = $this->createMock(Client::class);
 
@@ -48,6 +46,14 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         }
     }
 
+    public function testGithubAdvisoriesFailToCompileGettingIncorrectRanges() : void
+    {
+        // todo: test here
+        // fixme: should we really double test constraints here ?
+        // fixme: bc we already do this in a multiple places
+        // so we could only check that we do have non-empty strings and that is it
+    }
+
     /**
      * There is an "discussion" about Stream body pointer placement
      *
@@ -55,7 +61,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
      *
      * @return array
      */
-    public function responsesDataProvider() : array
+    public function correctResponsesSequenceDataProvider() : array
     {
         $responseBodies = [
             <<<'F'
@@ -74,7 +80,8 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                         }
                       ],
                       "pageInfo": {
-                        "hasNextPage": true
+                        "hasNextPage": true,
+                        "endCursor": "Y3Vyc29yOnYyOpK5MjAyMC0wMS0wOFQxOToxNTowNiswMjowMM0LdA=="
                       }
                     }
                   }
@@ -98,8 +105,8 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         $first  = new Response(200, [], $responseBodies[0]);
         $second = new Response(200, [], $responseBodies[1]);
 
-        $first->getBody()->rewind();
-        $second->getBody()->rewind();
+        print $first->getBody()->rewind();
+        print $second->getBody()->rewind();
 
         return [
             [
@@ -109,5 +116,59 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                 ],
             ],
         ];
+    }
+
+    public function responsesWithIncorrectRangesProvider() : array
+    {
+        $query = <<<'QUERY'
+                {
+                  "data": {
+                    "securityVulnerabilities": {
+                      "edges": [
+                        {
+                          "cursor": "Y3Vyc29yOnYyOpK5MjAyMC0wMS0wOFQxOToxNTowNiswMjowMM0LdA==",
+                          "node": {
+                            "vulnerableVersionRange": "%s",
+                            "package": {
+                              "name": "enshrined/svg-sanitize"
+                            }
+                          }
+                        }
+                      ],
+                      "pageInfo": {
+                        "hasNextPage": true,
+                        "endCursor": "Y3Vyc29yOnYyOpK5MjAyMC0wMS0wOFQxOToxNTowNiswMjowMM0LdA=="
+                      }
+                    }
+                  }
+                }
+            QUERY;
+
+        $incorrectRanges = [
+            '',
+            '<12.a',
+            '< 1.1.1.alpha.7',
+            '< 1.1.1alpha.7',
+            '< 1.1.1_alpha.7',
+            '< alpha',
+            '< beta',
+            '< 1.2.a',
+            '< 12.z',
+            '< .1',
+            '< alpha.beta',
+            ',',
+            '> 1,', // correct open constraint, but empty closing constraint
+            '> 1, < alpha',  // correct open constraint, but wrong closing constraint
+        ];
+
+        $responses = [];
+        foreach ($incorrectRanges as $range) {
+            $response = new Response(200, [], sprintf($query, $range));
+            $response->getBody()->rewind();
+
+            $responses[] = [$response];
+        }
+
+        return $responses;
     }
 }

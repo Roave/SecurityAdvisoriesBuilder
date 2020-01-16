@@ -21,25 +21,26 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories\AdvisorySources;
 
 use Generator;
+use InvalidArgumentException;
 use Nyholm\Psr7\Request;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Roave\SecurityAdvisories\Advisory;
+use Roave\SecurityAdvisories\Matchers;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
 use Webmozart\Assert\Assert;
 use function array_map;
 use function array_merge;
-use function end;
 use function explode;
 use function Safe\json_decode;
 use function Safe\json_encode;
+use function Safe\preg_match;
 use function Safe\sprintf;
 
 final class GetAdvisoriesFromGithubApi implements GetAdvisories
 {
-    // fixme: how to query it differently, should we just use GraphQl client ?
     private const GRAPHQL_QUERY = 'query {
             securityVulnerabilities(ecosystem: COMPOSER, first: 100 %s) {
                 edges {
@@ -52,7 +53,8 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                     }
                 }
                 pageInfo {
-                    hasNextPage
+                      hasNextPage
+                      endCursor
                 }
             }
         }';
@@ -84,10 +86,19 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
     {
         return yield from array_map(
             static function (array $item) {
+                $versions = array_map(
+                    function(string $githubVersion) {
+                        if (preg_match(Matchers::BOUNDARY_MATCHER, $githubVersion, $matches) !== 1) {
+                            throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $githubVersion));
+                        }
+
+                        return $githubVersion;
+                    }, explode(',', $item['node']['vulnerableVersionRange']));
+
                 return Advisory::fromArrayData(
                     [
                         'reference' => $item['node']['package']['name'],
-                        'branches' => [['versions' => explode(',', $item['node']['vulnerableVersionRange'])]],
+                        'branches' => [['versions' => $versions]],
                     ]
                 );
             },
@@ -115,8 +126,8 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
             if (! $hasNextPage = $vulnerabilities['pageInfo']['hasNextPage']) {
                 continue;
             }
-
-            $cursor = end($advisories)['cursor'];
+            // endCursor contains the least cursor in the given batch
+            $cursor = $vulnerabilities['pageInfo']['endCursor'];
         } while ($hasNextPage);
 
         return $advisories;

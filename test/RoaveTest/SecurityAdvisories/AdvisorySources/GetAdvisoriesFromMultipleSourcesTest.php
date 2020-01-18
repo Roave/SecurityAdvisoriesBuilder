@@ -21,7 +21,7 @@ declare(strict_types=1);
 namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 
 use Generator;
-use PHPStan\Testing\TestCase;
+use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisories;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
@@ -36,7 +36,7 @@ class GetAdvisoriesFromMultipleSourcesTest extends TestCase
         $advisories = new GetAdvisoriesFromMultipleSources($advisories);
 
         foreach ($advisories() as $advisory) {
-            $this->assertInstanceOf(Advisory::class, $advisory);
+            self::assertInstanceOf(Advisory::class, $advisory);
         }
     }
 
@@ -47,7 +47,7 @@ class GetAdvisoriesFromMultipleSourcesTest extends TestCase
     {
         $someAdvisories = $this->createMock(GetAdvisories::class);
 
-        $someAdvisories->expects($this->once())
+        $someAdvisories->expects(self::once())
             ->method('__invoke')
             ->willReturn($this->getGenerator());
 
@@ -62,7 +62,8 @@ class GetAdvisoriesFromMultipleSourcesTest extends TestCase
             'reference' => 'test_package',
             'branches' => [[
                 'versions' =>  ['<1'],
-            ]],
+            ],
+            ],
         ]);
     }
 }

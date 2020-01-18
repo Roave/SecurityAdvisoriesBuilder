@@ -23,7 +23,7 @@ namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 use Http\Client\Curl\Client;
 use InvalidArgumentException;
 use Nyholm\Psr7\Response;
-use PHPStan\Testing\TestCase;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Roave\SecurityAdvisories\Advisory;

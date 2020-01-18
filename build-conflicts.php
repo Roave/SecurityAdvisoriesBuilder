@@ -64,7 +64,11 @@ use function set_error_handler;
         E_STRICT | E_NOTICE | E_WARNING
     );
 
-    $token                     = getenv('GITHUB_TOKEN');
+    $token = getenv('GITHUB_TOKEN');
+    if ($token === false) {
+        $token = '';
+    }
+
     $authentication            = $token === false ? '' : $token . ':x-oauth-basic@';
     $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';

@@ -21,11 +21,10 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories\AdvisorySources;
 
 use Generator;
-use Roave\SecurityAdvisories\Advisory;
 
 final class GetAdvisoriesFromMultipleSources implements GetAdvisories
 {
-    /** @var Advisory[] */
+    /** @var array[GetAdvisories] */
     private $sources;
 
     public function __construct(GetAdvisories ...$sources)

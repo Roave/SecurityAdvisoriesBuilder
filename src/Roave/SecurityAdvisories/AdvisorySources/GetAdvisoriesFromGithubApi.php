@@ -21,22 +21,20 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories\AdvisorySources;
 
 use Generator;
-use InvalidArgumentException;
 use Nyholm\Psr7\Request;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Roave\SecurityAdvisories\Advisory;
-use Roave\SecurityAdvisories\Matchers;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
 use Webmozart\Assert\Assert;
 use function array_map;
 use function array_merge;
+use function count;
 use function explode;
 use function Safe\json_decode;
 use function Safe\json_encode;
-use function Safe\preg_match;
 use function Safe\sprintf;
 
 final class GetAdvisoriesFromGithubApi implements GetAdvisories
@@ -102,7 +100,11 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
     }
 
     /**
-     * @return array
+     * GitHub response will always contain 'pageInfo' element
+     * that is used to do a sequence of "paged" requests.
+     * Note: 'endCursor' contains the least cursor in the given batch
+     *
+     * @return Advisory[]
      *
      * @throws ClientExceptionInterface
      * @throws JsonException
@@ -116,13 +118,9 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
             $response        = $this->client->sendRequest($this->getRequest($cursor));
             $data            = json_decode($response->getBody()->__toString(), true);
             $vulnerabilities = $data['data']['securityVulnerabilities'];
-
-            $advisories = array_merge($advisories, $vulnerabilities['edges']);
-            if (! $hasNextPage = $vulnerabilities['pageInfo']['hasNextPage']) {
-                continue;
-            }
-            // endCursor contains the least cursor in the given batch
-            $cursor = $vulnerabilities['pageInfo']['endCursor'];
+            $advisories      = array_merge($advisories, $vulnerabilities['edges']);
+            $hasNextPage     = $vulnerabilities['pageInfo']['hasNextPage'];
+            $cursor          = $vulnerabilities['pageInfo']['endCursor'];
         } while ($hasNextPage);
 
         return $advisories;

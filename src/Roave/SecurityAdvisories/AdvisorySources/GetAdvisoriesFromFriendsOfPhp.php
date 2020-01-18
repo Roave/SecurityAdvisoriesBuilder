@@ -65,6 +65,9 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
         );
     }
 
+    /**
+     * @return SplFileInfo[]
+     */
     private function getAdvisoryFiles() : array
     {
         return iterator_to_array(new CallbackFilterIterator(

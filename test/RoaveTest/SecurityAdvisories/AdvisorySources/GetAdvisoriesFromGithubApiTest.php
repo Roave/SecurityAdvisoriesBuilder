@@ -24,15 +24,27 @@ use Http\Client\Curl\Client;
 use InvalidArgumentException;
 use Nyholm\Psr7\Response;
 use PHPStan\Testing\TestCase;
+use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Http\Message\ResponseInterface;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
+use Safe\Exceptions\JsonException;
+use Safe\Exceptions\StringsException;
+use function array_map;
+use function sprintf;
 
 class GetAdvisoriesFromGithubApiTest extends TestCase
 {
     /**
+     * @param ResponseInterface[] $apiResponses
+     *
+     * @throws ClientExceptionInterface
+     * @throws JsonException
+     * @throws StringsException
+     *
      * @dataProvider correctResponsesSequenceDataProvider
      */
-    public function testGithubAdvisoriesIsAbleToProduceAdvisories($apiResponses): void
+    public function testGithubAdvisoriesIsAbleToProduceAdvisories(array $apiResponses) : void
     {
         $client = $this->createMock(Client::class);
 
@@ -48,9 +60,13 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /**
+     * @throws ClientExceptionInterface
+     * @throws JsonException
+     * @throws StringsException
+     *
      * @dataProvider responsesWithIncorrectRangesProvider
      */
-    public function testGithubAdvisoriesFailToCompileGettingIncorrectRanges($response): void
+    public function testGithubAdvisoriesFailToCompileGettingIncorrectRanges(ResponseInterface $response) : void
     {
         $client = $this->createMock(Client::class);
 
@@ -64,13 +80,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /**
-     * There is an "discussion" about Stream body pointer placement
-     *
-     * @see https://github.com/Nyholm/psr7/issues/99
-     *
-     * @return array
+     * @return ResponseInterface[]
      */
-    public function correctResponsesSequenceDataProvider(): array
+    public function correctResponsesSequenceDataProvider() : array
     {
         $responseBodies = [
             <<<'F'
@@ -111,7 +123,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
             S,
         ];
 
-        $first = new Response(200, [], $responseBodies[0]);
+        $first  = new Response(200, [], $responseBodies[0]);
         $second = new Response(200, [], $responseBodies[1]);
 
         return [
@@ -124,6 +136,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         ];
     }
 
+    /**
+     * @return ResponseInterface[][]
+     */
     public function responsesWithIncorrectRangesProvider() : array
     {
         $query = <<<'QUERY'
@@ -159,7 +174,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
 
         return [
             array_map(
-                function ($range) use ($query) {
+                static function ($range) use ($query) {
                     return new Response(200, [], sprintf($query, $range));
                 },
                 $incorrectRanges

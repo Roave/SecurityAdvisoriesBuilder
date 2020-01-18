@@ -36,7 +36,6 @@ final class GetAdvisoriesFromMultipleSources implements GetAdvisories
     /**
      * @return Generator<Advisory>
      */
-    // "This is testable by using multiple GetAdvisories mocks"
     public function __invoke() : Generator
     {
         foreach ($this->sources as $source) {

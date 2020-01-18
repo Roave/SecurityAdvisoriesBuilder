@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 
 use Http\Client\Curl\Client;
+use InvalidArgumentException;
 use Nyholm\Psr7\Response;
 use PHPStan\Testing\TestCase;
 use Roave\SecurityAdvisories\Advisory;
@@ -31,7 +32,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     /**
      * @dataProvider correctResponsesSequenceDataProvider
      */
-    public function testGithubAdvisoriesIsAbleToProduceAdvisories($apiResponses) : void
+    public function testGithubAdvisoriesIsAbleToProduceAdvisories($apiResponses): void
     {
         $client = $this->createMock(Client::class);
 
@@ -46,12 +47,20 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         }
     }
 
-    public function testGithubAdvisoriesFailToCompileGettingIncorrectRanges() : void
+    /**
+     * @dataProvider responsesWithIncorrectRangesProvider
+     */
+    public function testGithubAdvisoriesFailToCompileGettingIncorrectRanges($response): void
     {
-        // todo: test here
-        // fixme: should we really double test constraints here ?
-        // fixme: bc we already do this in a multiple places
-        // so we could only check that we do have non-empty strings and that is it
+        $client = $this->createMock(Client::class);
+
+        $client->expects($this->once())
+            ->method('sendRequest')
+            ->willReturn($response);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        (new GetAdvisoriesFromGithubApi($client, 'some_token'))()->next();
     }
 
     /**
@@ -61,7 +70,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
      *
      * @return array
      */
-    public function correctResponsesSequenceDataProvider() : array
+    public function correctResponsesSequenceDataProvider(): array
     {
         $responseBodies = [
             <<<'F'
@@ -102,11 +111,8 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
             S,
         ];
 
-        $first  = new Response(200, [], $responseBodies[0]);
+        $first = new Response(200, [], $responseBodies[0]);
         $second = new Response(200, [], $responseBodies[1]);
-
-        print $first->getBody()->rewind();
-        print $second->getBody()->rewind();
 
         return [
             [
@@ -136,7 +142,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                         }
                       ],
                       "pageInfo": {
-                        "hasNextPage": true,
+                        "hasNextPage": false,
                         "endCursor": "Y3Vyc29yOnYyOpK5MjAyMC0wMS0wOFQxOToxNTowNiswMjowMM0LdA=="
                       }
                     }
@@ -146,29 +152,18 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
 
         $incorrectRanges = [
             '',
-            '<12.a',
-            '< 1.1.1.alpha.7',
-            '< 1.1.1alpha.7',
-            '< 1.1.1_alpha.7',
-            '< alpha',
-            '< beta',
-            '< 1.2.a',
-            '< 12.z',
-            '< .1',
-            '< alpha.beta',
             ',',
             '> 1,', // correct open constraint, but empty closing constraint
-            '> 1, < alpha',  // correct open constraint, but wrong closing constraint
+            'a,b,c', // we may have a max of 2 versions
         ];
 
-        $responses = [];
-        foreach ($incorrectRanges as $range) {
-            $response = new Response(200, [], sprintf($query, $range));
-            $response->getBody()->rewind();
-
-            $responses[] = [$response];
-        }
-
-        return $responses;
+        return [
+            array_map(
+                function ($range) use ($query) {
+                    return new Response(200, [], sprintf($query, $range));
+                },
+                $incorrectRanges
+            ),
+        ];
     }
 }

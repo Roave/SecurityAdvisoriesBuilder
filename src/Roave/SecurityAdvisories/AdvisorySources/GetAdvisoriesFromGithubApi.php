@@ -86,14 +86,9 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
     {
         return yield from array_map(
             static function (array $item) {
-                $versions = array_map(
-                    function(string $githubVersion) {
-                        if (preg_match(Matchers::BOUNDARY_MATCHER, $githubVersion, $matches) !== 1) {
-                            throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $githubVersion));
-                        }
-
-                        return $githubVersion;
-                    }, explode(',', $item['node']['vulnerableVersionRange']));
+                $versions = explode(',', $item['node']['vulnerableVersionRange']);
+                Assert::range(count($versions), 1, 2);
+                Assert::allStringNotEmpty($versions);
 
                 return Advisory::fromArrayData(
                     [
@@ -119,7 +114,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
         $cursor     = '';
         do {
             $response        = $this->client->sendRequest($this->getRequest($cursor));
-            $data            = json_decode($response->getBody()->getContents(), true);
+            $data            = json_decode($response->getBody()->__toString(), true);
             $vulnerabilities = $data['data']['securityVulnerabilities'];
 
             $advisories = array_merge($advisories, $vulnerabilities['edges']);

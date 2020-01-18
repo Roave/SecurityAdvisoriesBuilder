@@ -21,21 +21,20 @@ declare(strict_types=1);
 namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 
 use PHPUnit\Framework\TestCase;
-use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 
 class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
 {
     public function testThatAdvisoriesAreBuiltFromYamlFiles() : void
     {
-        $advisories = new GetAdvisoriesFromFriendsOfPhp(
+        $advisories = (new GetAdvisoriesFromFriendsOfPhp(
             __DIR__ . '/security-advisories'
-        );
+        ))();
 
         $counter = 0;
-        foreach ($advisories() as $advisory) {
+        while ($advisories->current()) {
+            $advisories->next();
             $counter++;
-            $this->assertInstanceOf(Advisory::class, $advisory);
         }
 
         self::assertEquals($counter, 1); // we expect only one yaml file

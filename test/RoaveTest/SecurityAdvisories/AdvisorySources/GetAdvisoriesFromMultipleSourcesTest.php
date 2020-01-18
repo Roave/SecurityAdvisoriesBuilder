@@ -28,8 +28,6 @@ use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 
 class GetAdvisoriesFromMultipleSourcesTest extends TestCase
 {
-    /**
-     */
     public function testMultipleAdvisoriesSources() : void
     {
         $someAdvisories = $this->createMock(GetAdvisories::class);
@@ -38,7 +36,6 @@ class GetAdvisoriesFromMultipleSourcesTest extends TestCase
             ->method('__invoke')
             ->willReturn($this->getGenerator());
 
-
         $advisories = new GetAdvisoriesFromMultipleSources($someAdvisories);
 
         foreach ($advisories() as $advisory) {
@@ -46,19 +43,11 @@ class GetAdvisoriesFromMultipleSourcesTest extends TestCase
         }
     }
 
-    /**
-     * @return GetAdvisories[]
-     */
-    public function advisoriesProvider() : array
-    {
-
-    }
-
     private function getGenerator() : Generator
     {
         return yield Advisory::fromArrayData([
             'reference' => 'test_package',
-            'branches' => [['versions' =>  ['<1']]],
+            'branches' => [['versions' => ['<1']]],
         ]);
     }
 }

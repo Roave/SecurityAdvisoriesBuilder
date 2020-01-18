@@ -33,7 +33,7 @@ final class GetAdvisoriesFromMultipleSources implements GetAdvisories
     }
 
     /**
-     * @return Generator<Advisory>
+     * @return Generator[Advisory]
      */
     public function __invoke() : Generator
     {

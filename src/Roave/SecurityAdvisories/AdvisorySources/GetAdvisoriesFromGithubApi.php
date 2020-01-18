@@ -113,7 +113,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
     private function getAdvisories() : array
     {
         $advisories = [];
-        $cursor = '';
+        $cursor     = '';
 
         do {
             $response        = $this->client->sendRequest($this->getRequest($cursor));
@@ -142,14 +142,10 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                 'User-Agent' => 'Curl',
             ],
             $this->queryWithCursor($cursor)
-
         );
     }
 
     /**
-     * @param string $cursor
-     *
-     * @return string
      * @throws JsonException
      * @throws StringsException
      */

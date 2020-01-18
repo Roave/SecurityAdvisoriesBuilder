@@ -69,7 +69,7 @@ use function set_error_handler;
         $token = '';
     }
 
-    $authentication            = $token === false ? '' : $token . ':x-oauth-basic@';
+    $authentication            = $token === '' ? '' : $token . ':x-oauth-basic@';
     $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';
     $buildDir                  = __DIR__ . '/build';

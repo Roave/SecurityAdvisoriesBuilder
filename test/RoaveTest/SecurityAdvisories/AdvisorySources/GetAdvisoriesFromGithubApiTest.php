@@ -28,11 +28,11 @@ use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use ReflectionException;
 use ReflectionMethod;
-use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
-use function sprintf;
+use function Safe\json_decode;
+use function Safe\sprintf;
 
 class GetAdvisoriesFromGithubApiTest extends TestCase
 {
@@ -46,14 +46,11 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /**
-     * @param $cursor
-     * @param $shouldContainCursor
-     *
      * @throws ReflectionException
-     * @dataProvider cursorProvider
      *
+     * @dataProvider cursorProvider
      */
-    public function testGithubAdvisoriesQueryMethod($cursor, $shouldContainCursor) : void
+    public function testGithubAdvisoriesQueryMethod(string $cursor, bool $shouldContainCursor) : void
     {
         $client = $this->createMock(Client::class);
 
@@ -89,15 +86,16 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     {
         $client = $this->createMock(Client::class);
 
-        $client->expects($this->exactly(2))
+        $client->expects(self::exactly(2))
             ->method('sendRequest')
             ->willReturnOnConsecutiveCalls(...$apiResponses);
 
         $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token');
 
-        foreach ($advisories() as $item) {
-            $this->assertInstanceOf(Advisory::class, $item);
-        }
+        self::assertSame(
+            $advisories()->current()->getConstraint(),
+            '> 0.12.0, < 0.12.1 '
+        );
     }
 
     /**
@@ -111,17 +109,17 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     {
         $client = $this->createMock(Client::class);
 
-        $client->expects($this->once())
+        $client->expects(self::once())
             ->method('sendRequest')
             ->willReturn($response);
 
-        $this->expectException(InvalidArgumentException::class);
+        self::expectException(InvalidArgumentException::class);
 
         (new GetAdvisoriesFromGithubApi($client, 'some_token'))()->next();
     }
 
     /**
-     * @return ResponseInterface[]
+     * @return mixed[]
      */
     public function correctResponsesSequenceDataProvider() : array
     {
@@ -178,7 +176,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /**
-     * @return ResponseInterface[][]
+     * @return mixed[]
+     *
+     * @throws StringsException
      */
     public function responsesWithIncorrectRangesProvider() : array
     {
@@ -219,22 +219,22 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
             $responses[] = [new Response(200, [], sprintf($query, $range))];
         }
 
-        return  $responses;
+        return $responses;
     }
 
     /**
-     * @return string[][]
+     * @return mixed[]
      */
     public function cursorProvider() : array
     {
         return [
             [
                 '',
-                false
+                false,
             ],
             [
                 'abc',
-                true
+                true,
             ],
         ];
     }

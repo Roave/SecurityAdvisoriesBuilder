@@ -32,8 +32,12 @@ class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
             __DIR__ . '/security-advisories'
         );
 
+        $counter = 0;
         foreach ($advisories() as $advisory) {
+            $counter++;
             $this->assertInstanceOf(Advisory::class, $advisory);
         }
+
+        self::assertEquals($counter, 1); // we expect only one yaml file
     }
 }

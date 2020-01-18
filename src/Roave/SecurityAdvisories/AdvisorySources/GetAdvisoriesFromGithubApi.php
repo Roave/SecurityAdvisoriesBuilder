@@ -85,7 +85,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
         return yield from array_map(
             static function (array $item) {
                 $versions = explode(',', $item['node']['vulnerableVersionRange']);
-                Assert::range(count($versions), 1, 2);
+                Assert::lessThanEq(count($versions), 2);
                 Assert::allStringNotEmpty($versions);
 
                 return Advisory::fromArrayData(
@@ -113,7 +113,8 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
     private function getAdvisories() : array
     {
         $advisories = [];
-        $cursor     = '';
+        $cursor = '';
+
         do {
             $response        = $this->client->sendRequest($this->getRequest($cursor));
             $data            = json_decode($response->getBody()->__toString(), true);
@@ -132,8 +133,6 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      */
     private function getRequest(string $cursor) : RequestInterface
     {
-        $after = $cursor === '' ? '' : sprintf(', after: "%s"', $cursor);
-
         return new Request(
             'POST',
             'https://api.github.com/graphql',
@@ -142,7 +141,22 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                 'Content-Type' => 'application/json',
                 'User-Agent' => 'Curl',
             ],
-            json_encode(['query' => sprintf(self::GRAPHQL_QUERY, $after)])
+            $this->queryWithCursor($cursor)
+
         );
+    }
+
+    /**
+     * @param string $cursor
+     *
+     * @return string
+     * @throws JsonException
+     * @throws StringsException
+     */
+    private function queryWithCursor(string $cursor) : string
+    {
+        $after = $cursor === '' ? '' : sprintf(', after: "%s"', $cursor);
+
+        return json_encode(['query' => sprintf(self::GRAPHQL_QUERY, $after)]);
     }
 }

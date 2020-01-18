@@ -26,15 +26,56 @@ use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
+use ReflectionException;
+use ReflectionMethod;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
-use function array_map;
 use function sprintf;
 
 class GetAdvisoriesFromGithubApiTest extends TestCase
 {
+    public function testGithubAdvisoriesHasToken() : void
+    {
+        $client = $this->createMock(Client::class);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        new GetAdvisoriesFromGithubApi($client, '');
+    }
+
+    /**
+     * @param $cursor
+     * @param $shouldContainCursor
+     *
+     * @throws ReflectionException
+     * @dataProvider cursorProvider
+     *
+     */
+    public function testGithubAdvisoriesQueryMethod($cursor, $shouldContainCursor) : void
+    {
+        $client = $this->createMock(Client::class);
+
+        $githubAdvisories = new GetAdvisoriesFromGithubApi($client, 'token');
+
+        $overlapsWithReflection = new ReflectionMethod($githubAdvisories, 'queryWithCursor');
+
+        $overlapsWithReflection->setAccessible(true);
+
+        $jsonEncodedQuery = $overlapsWithReflection->invoke($githubAdvisories, $cursor);
+
+        $decodedQuery = json_decode($jsonEncodedQuery, true);
+
+        self::assertArrayHasKey('query', $decodedQuery);
+
+        if ($shouldContainCursor) {
+            self::assertStringContainsString(sprintf('after: "%s"', $cursor), $decodedQuery['query']);
+        } else {
+            self::assertStringNotContainsString('after: ""', $decodedQuery['query']);
+        }
+    }
+
     /**
      * @param ResponseInterface[] $apiResponses
      *
@@ -93,7 +134,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                         {
                           "cursor": "Y3Vyc29yOnYyOpK5MjAyMC0wMS0wOFQxOToxNTowNiswMjowMM0LdA==",
                           "node": {
-                            "vulnerableVersionRange": "< 0.12.0",
+                            "vulnerableVersionRange": "> 0.12.0, < 0.12.1 ",
                             "package": {
                               "name": "enshrined/svg-sanitize"
                             }
@@ -172,13 +213,29 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
             'a,b,c', // we may have a max of 2 versions
         ];
 
+        $responses = [];
+
+        foreach ($incorrectRanges as $range) {
+            $responses[] = [new Response(200, [], sprintf($query, $range))];
+        }
+
+        return  $responses;
+    }
+
+    /**
+     * @return string[][]
+     */
+    public function cursorProvider() : array
+    {
         return [
-            array_map(
-                static function ($range) use ($query) {
-                    return new Response(200, [], sprintf($query, $range));
-                },
-                $incorrectRanges
-            ),
+            [
+                '',
+                false
+            ],
+            [
+                'abc',
+                true
+            ],
         ];
     }
 }

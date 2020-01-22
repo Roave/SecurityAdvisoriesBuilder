@@ -80,11 +80,17 @@ use function set_error_handler;
         'description' => 'Prevents installation of composer packages with known security vulnerabilities: '
             . 'no API, simply require it',
         'license'     => 'MIT',
-        'authors'     => [[
-            'name'  => 'Marco Pivetta',
-            'role'  => 'maintainer',
-            'email' => 'ocramius@gmail.com',
-        ],
+        'authors'     => [
+            [
+                'name'  => 'Marco Pivetta',
+                'role'  => 'maintainer',
+                'email' => 'ocramius@gmail.com',
+            ],
+            [
+                'name'  => 'Ilya Tribusean',
+                'role'  => 'maintainer',
+                'email' => 'slash3b@gmail.com',
+            ],
         ],
     ];
 

@@ -8,6 +8,11 @@
             "name": "Marco Pivetta",
             "role": "maintainer",
             "email": "ocramius@gmail.com"
+        },
+        {
+            "name": "Ilya Tribusean",
+            "role": "maintainer",
+            "email": "slash3b@gmail.com"
         }
     ],
     "require": {

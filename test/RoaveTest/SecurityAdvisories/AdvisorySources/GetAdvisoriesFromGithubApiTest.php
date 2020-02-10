@@ -25,12 +25,15 @@ use InvalidArgumentException;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use ReflectionException;
 use ReflectionMethod;
+use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
+use function iterator_to_array;
 use function Safe\json_decode;
 use function Safe\sprintf;
 
@@ -92,9 +95,18 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
 
         $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token');
 
-        self::assertSame(
-            $advisories()->current()->getConstraint(),
-            '> 0.12.0, < 0.12.1 '
+        self::assertEquals(
+            [
+                Advisory::fromArrayData([
+                    'reference' => 'enshrined/svg-sanitize',
+                    'branches'  => [['versions' => ['> 0.12.0, < 0.12.1 ']]],
+                ]),
+                Advisory::fromArrayData([
+                    'reference' => 'foo/bar',
+                    'branches'  => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
+                ]),
+            ],
+            iterator_to_array($advisories(), false)
         );
     }
 
@@ -111,6 +123,15 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
 
         $client->expects(self::once())
             ->method('sendRequest')
+            ->with(self::callback(static function (RequestInterface $request) {
+                $headers = $request->getHeaders();
+
+                self::assertArrayHasKey('Authorization', $headers);
+                self::assertArrayHasKey('Content-Type', $headers);
+                self::assertArrayHasKey('User-Agent', $headers);
+
+                return true;
+            }))
             ->willReturn($response);
 
         self::expectException(InvalidArgumentException::class);
@@ -135,6 +156,15 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                             "vulnerableVersionRange": "> 0.12.0, < 0.12.1 ",
                             "package": {
                               "name": "enshrined/svg-sanitize"
+                            }
+                          }
+                        },
+                        {
+                          "cursor": "Y3Vyc29yOnYyOpK5MjAyMC0wMS0wOFQxOToxNTowNiswMjowMM0LdB==",
+                          "node": {
+                            "vulnerableVersionRange": "> 1.2.3, < 4.5.6 ",
+                            "package": {
+                              "name": "foo/bar"
                             }
                           }
                         }

@@ -20,15 +20,14 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
-use CallbackFilterIterator;
 use DateTime;
 use DateTimeZone;
 use ErrorException;
-use FilesystemIterator;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use SplFileInfo;
-use Symfony\Component\Yaml\Yaml;
+use Generator;
+use Http\Client\Curl\Client;
+use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
+use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
+use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 use UnexpectedValueException;
 use const E_NOTICE;
 use const E_STRICT;
@@ -38,7 +37,6 @@ use const JSON_UNESCAPED_SLASHES;
 use const JSON_UNESCAPED_UNICODE;
 use const PHP_EOL;
 use function array_filter;
-use function array_map;
 use function array_merge;
 use function assert;
 use function dirname;
@@ -47,9 +45,7 @@ use function exec;
 use function getenv;
 use function implode;
 use function is_string;
-use function iterator_to_array;
 use function Safe\chdir;
-use function Safe\file_get_contents;
 use function Safe\file_put_contents;
 use function Safe\getcwd;
 use function Safe\json_encode;
@@ -68,11 +64,14 @@ use function set_error_handler;
         E_STRICT | E_NOTICE | E_WARNING
     );
 
-    $token                     = getenv('GITHUB_TOKEN');
-    $authentication            = $token === false ? '' : $token . ':x-oauth-basic@';
+    $token = getenv('GITHUB_TOKEN');
+    if ($token === false) {
+        $token = '';
+    }
+
+    $authentication            = $token === '' ? '' : $token . ':x-oauth-basic@';
     $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';
-    $advisoriesExtension       = 'yaml';
     $buildDir                  = __DIR__ . '/build';
     $baseComposerJson          = [
         'name'        => 'roave/security-advisories',
@@ -137,37 +136,12 @@ use function set_error_handler;
         ));
     };
 
-    /** @return Advisory[] */
-    $findAdvisories = static function (string $path) use ($advisoriesExtension) : array {
-        return array_map(
-            static function (SplFileInfo $advisoryFile) {
-                $filePath = $advisoryFile->getRealPath();
-
-                assert(is_string($filePath));
-
-                return Advisory::fromArrayData(
-                    Yaml::parse(file_get_contents($filePath), Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE)
-                );
-            },
-            iterator_to_array(new CallbackFilterIterator(
-                new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
-                    RecursiveIteratorIterator::SELF_FIRST
-                ),
-                static function (SplFileInfo $advisoryFile) use ($advisoriesExtension) {
-                    // @todo skip `vendor` dir
-                    return $advisoryFile->isFile() && $advisoryFile->getExtension() === $advisoriesExtension;
-                }
-            ))
-        );
-    };
-
     /**
-     * @param Advisory[] $advisories
+     * @param Generator<Advisory> $getAdvisories
      *
      * @return Component[]
      */
-    $buildComponents = static function (array $advisories) : array {
+    $buildComponents = static function (Generator $advisories) : array {
         // @todo need a functional way to do this, somehow
         $indexedAdvisories = [];
         $components        = [];
@@ -301,13 +275,21 @@ use function set_error_handler;
     $cloneAdvisories();
     $cloneRoaveAdvisories();
 
+    $getAdvisories = (new GetAdvisoriesFromMultipleSources(
+        (new GetAdvisoriesFromFriendsOfPhp($buildDir . '/security-advisories')),
+        (new GetAdvisoriesFromGithubApi(
+            new Client(),
+            $token,
+        )),
+    ));
+
 // actual work:
     $writeJson(
         $buildConflictsJson(
             $baseComposerJson,
             $buildConflicts(
                 $buildComponents(
-                    $findAdvisories($buildDir . '/security-advisories')
+                    $getAdvisories()
                 )
             )
         ),

@@ -24,7 +24,10 @@ use Generator;
 
 final class GetAdvisoriesFromMultipleSources implements GetAdvisories
 {
-    /** @var array[GetAdvisories] */
+    /**
+     * @var GetAdvisories[]
+     * @psalm-var list<GetAdvisories>
+     */
     private $sources;
 
     public function __construct(GetAdvisories ...$sources)
@@ -32,9 +35,7 @@ final class GetAdvisoriesFromMultipleSources implements GetAdvisories
         $this->sources = $sources;
     }
 
-    /**
-     * @return Generator[Advisory]
-     */
+    /** {@inheritDoc} */
     public function __invoke() : Generator
     {
         foreach ($this->sources as $source) {

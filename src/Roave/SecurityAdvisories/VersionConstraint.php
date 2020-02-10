@@ -19,14 +19,11 @@ use function Safe\sprintf;
  */
 final class VersionConstraint
 {
-    /** @var string|null */
-    private $constraintString;
+    private ?string $constraintString = null;
 
-    /** @var Boundary|null */
-    private $lowerBoundary;
+    private ?Boundary $lowerBoundary = null;
 
-    /** @var Boundary|null */
-    private $upperBoundary;
+    private ?Boundary $upperBoundary = null;
 
     private function __construct()
     {
@@ -214,14 +211,9 @@ final class VersionConstraint
             return true;
         }
 
-        if ($this->upperBoundary !== null
+        return $this->upperBoundary !== null
             && $other->lowerBoundary !== null
-            && $this->upperBoundary->adjacentTo($other->lowerBoundary)
-        ) {
-            return true;
-        }
-
-        return false;
+            && $this->upperBoundary->adjacentTo($other->lowerBoundary);
     }
 
     /**
@@ -255,7 +247,6 @@ final class VersionConstraint
 
         return $instance;
     }
-
 
     /**
      * @throws LogicException

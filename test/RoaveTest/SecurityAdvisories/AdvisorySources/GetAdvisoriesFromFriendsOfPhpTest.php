@@ -42,7 +42,8 @@ class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
                     ],
                 ],
                 'reference' => 'composer://3f/pygmentize',
-            ])],
+            ]),
+            ],
             iterator_to_array($advisories, false)
         );
     }

@@ -25,6 +25,7 @@ use InvalidArgumentException;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use ReflectionException;
 use ReflectionMethod;
@@ -122,6 +123,15 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
 
         $client->expects(self::once())
             ->method('sendRequest')
+            ->with(self::callback(static function (RequestInterface $request) {
+                $headers = $request->getHeaders();
+
+                self::assertArrayHasKey('Authorization', $headers);
+                self::assertArrayHasKey('Content-Type', $headers);
+                self::assertArrayHasKey('User-Agent', $headers);
+
+                return true;
+            }))
             ->willReturn($response);
 
         self::expectException(InvalidArgumentException::class);

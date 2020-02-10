@@ -24,7 +24,7 @@
         "thecodingmachine/safe": "^0.1.16"
     },
     "require-dev": {
-        "doctrine/coding-standard": "^5.0",
+        "doctrine/coding-standard": "^6.0",
         "infection/infection": "^0.12.2",
         "phpstan/phpstan": "^0.11.8",
         "phpstan/phpstan-phpunit": "^0.11.0",

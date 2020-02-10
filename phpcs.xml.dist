@@ -13,7 +13,10 @@
     <!-- Show progress of the run -->
     <arg value="p"/>
 
-    <rule ref="Doctrine"/>
+    <rule ref="Doctrine">
+        <!-- return type mismatch is detected by static analysis tools, not by phpcs tools -->
+        <exclude name="SlevomatCodingStandard.TypeHints.TypeHintDeclaration.IncorrectReturnTypeHint"/>
+    </rule>
 
     <file>build-conflicts.php</file>
     <file>public</file>

@@ -21,4 +21,4 @@ script:
   - vendor/bin/phpcs
   - vendor/bin/infection --min-msi=99 --min-covered-msi=100
   - vendor/bin/roave-no-leaks
-  - composer global require maglnet/composer-require-checker:^2.1.0 && composer-require-checker check composer.json
+  - mkdir -p /tmp/dependency-check && composer require --dev -d/tmp/dependency-check maglnet/composer-require-checker:^2.1.0 && /tmp/dependency-check/vendor/bin/composer-require-checker check composer.json

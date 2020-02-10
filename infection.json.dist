@@ -11,6 +11,8 @@
     "mutators": {
         "@default": true,
         "IdenticalEqual": false,
-        "NotIdenticalNotEqual": false
+        "NotIdenticalNotEqual": false,
+        "UnwrapArrayFilter": false,
+        "UnwrapArrayValues": false
     }
 }

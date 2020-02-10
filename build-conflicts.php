@@ -29,13 +29,6 @@ use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 use UnexpectedValueException;
-use const E_NOTICE;
-use const E_STRICT;
-use const E_WARNING;
-use const JSON_PRETTY_PRINT;
-use const JSON_UNESCAPED_SLASHES;
-use const JSON_UNESCAPED_UNICODE;
-use const PHP_EOL;
 use function array_filter;
 use function array_merge;
 use function assert;
@@ -53,6 +46,13 @@ use function Safe\ksort;
 use function Safe\realpath;
 use function Safe\sprintf;
 use function set_error_handler;
+use const E_NOTICE;
+use const E_STRICT;
+use const E_WARNING;
+use const JSON_PRETTY_PRINT;
+use const JSON_UNESCAPED_SLASHES;
+use const JSON_UNESCAPED_UNICODE;
+use const PHP_EOL;
 
 (static function () : void {
     require_once __DIR__ . '/vendor/autoload.php';

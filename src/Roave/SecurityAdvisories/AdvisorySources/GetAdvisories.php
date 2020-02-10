@@ -21,11 +21,12 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories\AdvisorySources;
 
 use Generator;
+use Roave\SecurityAdvisories\Advisory;
 
 interface GetAdvisories
 {
     /**
-     * @return Generator[Advisory]
+     * @return Generator<Advisory>
      */
     public function __invoke() : Generator;
 }

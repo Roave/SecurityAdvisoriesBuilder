@@ -214,14 +214,9 @@ final class VersionConstraint
             return true;
         }
 
-        if ($this->upperBoundary !== null
+        return $this->upperBoundary !== null
             && $other->lowerBoundary !== null
-            && $this->upperBoundary->adjacentTo($other->lowerBoundary)
-        ) {
-            return true;
-        }
-
-        return false;
+            && $this->upperBoundary->adjacentTo($other->lowerBoundary);
     }
 
     /**
@@ -255,7 +250,6 @@ final class VersionConstraint
 
         return $instance;
     }
-
 
     /**
      * @throws LogicException

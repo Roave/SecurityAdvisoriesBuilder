@@ -25,11 +25,10 @@ final class Boundary
         ['=', '>'],
     ];
 
-    /** @var Version */
-    private $version;
+    private Version $version;
 
     /** @var string one of "<", "<=", "=", ">=", ">" */
-    private $limitType;
+    private string $limitType;
 
     private function __construct(Version $version, string $limitType)
     {

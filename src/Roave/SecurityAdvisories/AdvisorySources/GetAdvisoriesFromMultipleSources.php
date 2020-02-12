@@ -28,7 +28,7 @@ final class GetAdvisoriesFromMultipleSources implements GetAdvisories
      * @var GetAdvisories[]
      * @psalm-var list<GetAdvisories>
      */
-    private $sources;
+    private array $sources;
 
     public function __construct(GetAdvisories ...$sources)
     {

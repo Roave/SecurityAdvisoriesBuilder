@@ -38,8 +38,7 @@ final class Flag
         'a'         => 0,
     ];
 
-    /** @var string */
-    private $literal;
+    private string $literal;
 
     private function __construct(string $literal)
     {

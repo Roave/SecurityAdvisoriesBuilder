@@ -30,11 +30,13 @@ use function Safe\usort;
 
 final class Component
 {
-    /** @var string */
-    private $name;
+    private string $name;
 
-    /** @var Advisory[] */
-    private $advisories;
+    /**
+     * @var Advisory[]
+     * @psalm-var list<Advisory>
+     */
+    private array $advisories;
 
     public function __construct(string $name, Advisory ...$advisories)
     {

@@ -57,11 +57,9 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
             }
         }';
 
-    /** @var ClientInterface */
-    private $client;
+    private ClientInterface $client;
 
-    /** @var string */
-    private $token;
+    private string $token;
 
     public function __construct(
         ClientInterface $client,

@@ -21,14 +21,19 @@ use function strtolower;
 
 final class Version
 {
-    /** @var int[] */
-    private $versionNumbers;
+    private Flag $flag;
 
-    /** @var Flag */
-    private $flag;
+    /**
+     * @var int[]
+     * @psalm-param list<int>
+     */
+    private array $versionNumbers;
 
-    /** @var int[]  */
-    private $stabilityNumbers;
+    /**
+     * @var int[]
+     * @psalm-param list<int>
+     */
+    private array $stabilityNumbers;
 
     /**
      * @param string[] $matches

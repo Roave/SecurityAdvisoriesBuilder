@@ -121,19 +121,14 @@ use function set_error_handler;
     $cloneAdvisories = static fn () : array  =>
         $execute($argsToString('git clone', $advisoriesRepository, $buildDir . '/security-advisories'));
 
-    $cloneRoaveAdvisories = static function () use ($roaveAdvisoriesRepository, $buildDir, $execute) : void {
-        $execute(
-            'git clone '
-            . escapeshellarg($roaveAdvisoriesRepository)
-            . ' ' . escapeshellarg($buildDir . '/roave-security-advisories')
+    $cloneRoaveAdvisories = static fn () : array =>
+        array_map(
+            $execute,
+            [
+                $argsToString('git clone', $roaveAdvisoriesRepository, $buildDir . '/roave-security-advisories'),
+                $argsToString('cp -r', $buildDir . '/roave-security-advisories', $buildDir . '/roave-security-advisories-original')
+            ]
         );
-
-        $execute(sprintf(
-            'cp -r %s %s',
-            escapeshellarg($buildDir . '/roave-security-advisories'),
-            escapeshellarg($buildDir . '/roave-security-advisories-original')
-        ));
-    };
 
     /**
      * @param Generator<Advisory> $getAdvisories

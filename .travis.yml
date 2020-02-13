@@ -7,7 +7,7 @@ cache:
     - $HOME/.composer/cache/files
 
 php:
-  - 7.3
+  - 7.4
 
 before_script:
   - composer install
@@ -16,6 +16,7 @@ before_script:
 
 script:
   - vendor/bin/phpstan analyse
+  - vendor/bin/psalm
   - vendor/bin/phpunit
   - php build-conflicts.php
   - vendor/bin/phpcs

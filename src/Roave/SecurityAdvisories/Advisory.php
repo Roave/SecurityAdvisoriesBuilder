@@ -49,7 +49,7 @@ final class Advisory
     {
         static $checkType;
 
-        $checkType = $checkType ?: static function (VersionConstraint ...$versionConstraints) {
+        $checkType = $checkType ?: static function (VersionConstraint ...$versionConstraints) : array {
             return $versionConstraints;
         };
 

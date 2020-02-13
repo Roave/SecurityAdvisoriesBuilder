@@ -54,6 +54,8 @@ final class Version
     /**
      * @return Version
      *
+     * @psalm-suppress PossiblyNullArgument
+     *
      * @throws PcreException
      * @throws StringsException
      */

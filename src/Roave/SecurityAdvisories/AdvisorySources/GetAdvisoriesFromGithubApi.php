@@ -81,7 +81,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
     public function __invoke() : Generator
     {
         return yield from array_map(
-            static function (array $item) {
+            static function (array $item) : Advisory {
                 $versions = explode(',', $item['node']['vulnerableVersionRange']);
                 Assert::lessThanEq(count($versions), 2);
                 Assert::allStringNotEmpty($versions);
@@ -103,6 +103,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      * Note: 'endCursor' contains the least cursor in the given batch
      *
      * @return Advisory[]
+     * @psalm-return array<Advisory>
      *
      * @throws ClientExceptionInterface
      * @throws JsonException

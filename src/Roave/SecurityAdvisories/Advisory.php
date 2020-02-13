@@ -21,10 +21,12 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories;
 
 use InvalidArgumentException;
-use Webmozart\Assert\Assert;
 use function array_map;
 use function array_values;
+use function assert;
 use function implode;
+use function is_array;
+use function is_string;
 use function Safe\usort;
 use function str_replace;
 
@@ -64,8 +66,8 @@ final class Advisory
         $componentName = str_replace('composer://', '', $config['reference']);
         $branches      = $config['branches'];
 
-        Assert::stringNotEmpty($componentName);
-        Assert::isArray($branches);
+        assert(is_string($componentName));
+        assert(is_array($branches));
 
         return new self(
             $componentName,

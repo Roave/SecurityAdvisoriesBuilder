@@ -33,11 +33,13 @@ use function array_filter;
 use function array_map;
 use function array_merge;
 use function array_shift;
+use function assert;
 use function dirname;
 use function escapeshellarg;
 use function exec;
 use function getenv;
 use function implode;
+use function is_string;
 use function Safe\chdir;
 use function Safe\file_put_contents;
 use function Safe\getcwd;
@@ -157,6 +159,8 @@ use const PHP_EOL;
         }
 
         foreach ($indexedAdvisories as $componentName => $componentAdvisories) {
+            assert(is_string($componentName));
+
             $components[$componentName] = new Component($componentName, ...$componentAdvisories);
         }
 

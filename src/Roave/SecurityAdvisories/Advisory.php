@@ -24,16 +24,12 @@ use InvalidArgumentException;
 use Webmozart\Assert\Assert;
 use function array_map;
 use function array_values;
-use function assert;
 use function implode;
-use function is_array;
-use function is_string;
 use function Safe\usort;
 use function str_replace;
 
 final class Advisory
 {
-    /** @var string */
     private string $componentName;
 
     /**

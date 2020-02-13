@@ -54,10 +54,10 @@ final class Version
     /**
      * @return Version
      *
-     * @psalm-suppress PossiblyNullArgument
-     *
      * @throws PcreException
      * @throws StringsException
+     *
+     * @psalm-suppress PossiblyNullArgument
      */
     public static function fromString(string $version) : self
     {

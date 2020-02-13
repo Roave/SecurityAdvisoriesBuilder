@@ -39,10 +39,10 @@ final class Boundary
     /**
      * @return Boundary
      *
+     * @throws InvalidArgumentException
+     *
      * @psalm-suppress PossiblyNullArgument
      * @psalm-suppress PossiblyNullArrayAccess
-     *
-     * @throws InvalidArgumentException
      */
     public static function fromString(string $boundary) : self
     {

@@ -29,22 +29,15 @@ use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 use UnexpectedValueException;
-use const E_NOTICE;
-use const E_STRICT;
-use const E_WARNING;
-use const JSON_PRETTY_PRINT;
-use const JSON_UNESCAPED_SLASHES;
-use const JSON_UNESCAPED_UNICODE;
-use const PHP_EOL;
 use function array_filter;
+use function array_map;
 use function array_merge;
-use function assert;
+use function array_shift;
 use function dirname;
 use function escapeshellarg;
 use function exec;
 use function getenv;
 use function implode;
-use function is_string;
 use function Safe\chdir;
 use function Safe\file_put_contents;
 use function Safe\getcwd;
@@ -53,6 +46,13 @@ use function Safe\ksort;
 use function Safe\realpath;
 use function Safe\sprintf;
 use function set_error_handler;
+use const E_NOTICE;
+use const E_STRICT;
+use const E_WARNING;
+use const JSON_PRETTY_PRINT;
+use const JSON_UNESCAPED_SLASHES;
+use const JSON_UNESCAPED_UNICODE;
+use const PHP_EOL;
 
 (static function () : void {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -90,8 +90,8 @@ use function set_error_handler;
         ],
     ];
 
-    $argsToString = fn(string ...$args) : string =>
-        sprintf('%s %s' , array_shift($args), join(' ', array_map('escapeshellarg', $args)));
+    $argsToString = static fn(string ...$args) : string =>
+        sprintf('%s %s', array_shift($args), implode(' ', array_map('escapeshellarg', $args)));
 
     $execute = static function (string $commandString) : array {
         // may the gods forgive me for this in-lined command addendum, but I CBA to fix proc_open's handling
@@ -109,12 +109,12 @@ use function set_error_handler;
         return $output;
     };
 
-    $cleanBuildDir = static fn ()  : array =>
+    $cleanBuildDir = static fn () : array =>
         array_map(
             $execute,
             [
                 $argsToString('rm -rf', $buildDir),
-                $argsToString('mkdir', $buildDir)
+                $argsToString('mkdir', $buildDir),
             ]
         );
 
@@ -125,8 +125,16 @@ use function set_error_handler;
         array_map(
             $execute,
             [
-                $argsToString('git clone', $roaveAdvisoriesRepository, $buildDir . '/roave-security-advisories'),
-                $argsToString('cp -r', $buildDir . '/roave-security-advisories', $buildDir . '/roave-security-advisories-original')
+                $argsToString(
+                    'git clone',
+                    $roaveAdvisoriesRepository,
+                    $buildDir . '/roave-security-advisories'
+                ),
+                $argsToString(
+                    'cp -r',
+                    $buildDir . '/roave-security-advisories',
+                    $buildDir . '/roave-security-advisories-original'
+                ),
             ]
         );
 

@@ -102,8 +102,8 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      * that is used to do a sequence of "paged" requests.
      * Note: 'endCursor' contains the least cursor in the given batch
      *
-     * @return Advisory[]
-     * @psalm-return array<Advisory>
+     * @return array
+     * @psalm-return array<int, array>
      *
      * @throws ClientExceptionInterface
      * @throws JsonException

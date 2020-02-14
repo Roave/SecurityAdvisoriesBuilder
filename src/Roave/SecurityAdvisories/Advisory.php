@@ -66,7 +66,6 @@ final class Advisory
         $componentName = str_replace('composer://', '', $config['reference']);
         $branches      = $config['branches'];
 
-        assert(is_string($componentName));
         assert(is_array($branches));
 
         return new self(

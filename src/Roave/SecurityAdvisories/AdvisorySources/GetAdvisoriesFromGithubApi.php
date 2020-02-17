@@ -102,13 +102,12 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      * that is used to do a sequence of "paged" requests.
      * Note: 'endCursor' contains the least cursor in the given batch
      *
-     * @return mixed[]
+     * @return string[]
+     * @psalm-return array<int,array{cursor: string, node: array{vulnerableVersionRange: string, package: array{name: string}}}>
      *
      * @throws ClientExceptionInterface
      * @throws JsonException
      * @throws StringsException
-     *
-     * @psalm-return array<int, array>
      */
     private function getAdvisories() : array
     {

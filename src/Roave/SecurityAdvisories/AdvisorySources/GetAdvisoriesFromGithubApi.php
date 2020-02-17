@@ -103,11 +103,18 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      * Note: 'endCursor' contains the least cursor in the given batch
      *
      * @return string[]
-     * @psalm-return array<int,array{cursor: string, node: array{vulnerableVersionRange: string, package: array{name: string}}}>
      *
      * @throws ClientExceptionInterface
      * @throws JsonException
      * @throws StringsException
+     *
+     * @psalm-return array<int, array{
+     *      cursor: string,
+     *      node: array{
+     *          vulnerableVersionRange: string,
+     *          package: array{name: string}
+     *      }
+     * }>
      */
     private function getAdvisories() : array
     {

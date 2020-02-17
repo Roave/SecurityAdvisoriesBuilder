@@ -21,12 +21,12 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories;
 
 use InvalidArgumentException;
-use Webmozart\Assert\Assert;
 use function array_map;
 use function array_values;
 use function assert;
 use function implode;
 use function is_array;
+use function is_string;
 use function Safe\usort;
 use function str_replace;
 
@@ -58,13 +58,14 @@ final class Advisory
     /**
      * @param string[]|string[][][]|string[][][][] $config
      *
+     * @return Advisory
+     *
      * @throws InvalidArgumentException
+     *
+     * @psalm-suppress RedundantCondition
      */
     public static function fromArrayData(array $config) : self
     {
-        Assert::keyExists($config, 'reference');
-        Assert::keyExists($config, 'branches');
-
         $componentName = str_replace('composer://', '', $config['reference']);
         $branches      = $config['branches'];
 

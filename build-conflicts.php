@@ -30,9 +30,7 @@ use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 use UnexpectedValueException;
 use function array_filter;
-use function array_map;
 use function array_merge;
-use function array_shift;
 use function assert;
 use function dirname;
 use function escapeshellarg;
@@ -66,8 +64,7 @@ use const PHP_EOL;
         E_STRICT | E_NOTICE | E_WARNING
     );
 
-    $token = getenv('GITHUB_TOKEN') ?: '';
-
+    $token                     = getenv('GITHUB_TOKEN') ?: '';
     $authentication            = $token === '' ? '' : $token . ':x-oauth-basic@';
     $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';
@@ -92,9 +89,6 @@ use const PHP_EOL;
         ],
     ];
 
-    $argsToString = static fn(string ...$args) : string =>
-        sprintf('%s %s', array_shift($args), implode(' ', array_map('escapeshellarg', $args)));
-
     $execute = static function (string $commandString) : array {
         // may the gods forgive me for this in-lined command addendum, but I CBA to fix proc_open's handling
         // of exit codes.
@@ -111,34 +105,32 @@ use const PHP_EOL;
         return $output;
     };
 
-    $cleanBuildDir = static fn () : array =>
-        array_map(
-            $execute,
-            [
-                $argsToString('rm -rf', $buildDir),
-                $argsToString('mkdir', $buildDir),
-            ]
+    $cleanBuildDir = static function () use ($buildDir, $execute) : void {
+        $execute('rm -rf ' . escapeshellarg($buildDir));
+        $execute('mkdir ' . escapeshellarg($buildDir));
+    };
+
+    $cloneAdvisories = static function () use ($advisoriesRepository, $buildDir, $execute) : void {
+        $execute(
+            'git clone '
+            . escapeshellarg($advisoriesRepository)
+            . ' ' . escapeshellarg($buildDir . '/security-advisories')
+        );
+    };
+
+    $cloneRoaveAdvisories = static function () use ($roaveAdvisoriesRepository, $buildDir, $execute) : void {
+        $execute(
+            'git clone '
+            . escapeshellarg($roaveAdvisoriesRepository)
+            . ' ' . escapeshellarg($buildDir . '/roave-security-advisories')
         );
 
-    $cloneAdvisories = static fn () : array  =>
-        $execute($argsToString('git clone', $advisoriesRepository, $buildDir . '/security-advisories'));
-
-    $cloneRoaveAdvisories = static fn () : array =>
-        array_map(
-            $execute,
-            [
-                $argsToString(
-                    'git clone',
-                    $roaveAdvisoriesRepository,
-                    $buildDir . '/roave-security-advisories'
-                ),
-                $argsToString(
-                    'cp -r',
-                    $buildDir . '/roave-security-advisories',
-                    $buildDir . '/roave-security-advisories-original'
-                ),
-            ]
-        );
+        $execute(sprintf(
+            'cp -r %s %s',
+            escapeshellarg($buildDir . '/roave-security-advisories'),
+            escapeshellarg($buildDir . '/roave-security-advisories-original')
+        ));
+    };
 
     /**
      * @param Generator<Advisory> $getAdvisories
@@ -184,17 +176,19 @@ use const PHP_EOL;
         return array_filter($conflicts);
     };
 
-    $buildConflictsJson = static fn (array $baseConfig, array $conflicts) : string =>
-        json_encode(
+    $buildConflictsJson = static function (array $baseConfig, array $conflicts) : string {
+        return json_encode(
             array_merge(
                 $baseConfig,
                 ['conflict' => $conflicts]
             ),
             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         );
+    };
 
-    $writeJson = static fn (string $jsonString, string $path) : int =>
+    $writeJson = static function (string $jsonString, string $path) : void {
         file_put_contents($path, $jsonString . "\n");
+    };
 
     $runInPath = static function (callable $function, string $path) {
         $originalPath = getcwd();
@@ -234,16 +228,16 @@ use const PHP_EOL;
         );
     };
 
-    $copyGeneratedComposerJson = static fn(
+    $copyGeneratedComposerJson = static function (
         string $sourceComposerJsonPath,
         string $targetComposerJsonPath
-    ) : array => $execute(
-        $argsToString(
-            'cp',
-            $sourceComposerJsonPath,
-            $targetComposerJsonPath
-        )
-    );
+    ) use ($execute) : void {
+        $execute(sprintf(
+            'cp %s %s',
+            escapeshellarg($sourceComposerJsonPath),
+            escapeshellarg($targetComposerJsonPath)
+        ));
+    };
 
     $commitComposerJson = static function (string $composerJsonPath) use ($runInPath, $execute) : void {
         $originalHash = $runInPath(

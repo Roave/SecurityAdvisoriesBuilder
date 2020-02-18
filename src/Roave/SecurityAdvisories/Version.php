@@ -12,9 +12,11 @@ use function array_keys;
 use function array_map;
 use function array_reverse;
 use function array_slice;
+use function assert;
 use function count;
 use function explode;
 use function implode;
+use function is_array;
 use function Safe\preg_match;
 use function Safe\sprintf;
 use function strtolower;
@@ -56,14 +58,14 @@ final class Version
      *
      * @throws PcreException
      * @throws StringsException
-     *
-     * @psalm-suppress PossiblyNullArgument
      */
     public static function fromString(string $version) : self
     {
         if (preg_match('/^' . Matchers::TAGGED_VERSION_MATCHER . '$/', strtolower($version), $matches) !== 1) {
             throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
+
+        assert(is_array($matches));
 
         return new self($matches);
     }

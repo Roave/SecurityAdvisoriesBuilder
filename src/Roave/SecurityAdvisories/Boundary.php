@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories;
 
 use InvalidArgumentException;
+use function assert;
 use function in_array;
+use function is_string;
 use function Safe\preg_match;
 use function Safe\sprintf;
 use function str_replace;
@@ -25,11 +27,10 @@ final class Boundary
         ['=', '>'],
     ];
 
-    /** @var Version */
-    private $version;
+    private Version $version;
 
     /** @var string one of "<", "<=", "=", ">=", ">" */
-    private $limitType;
+    private string $limitType;
 
     private function __construct(Version $version, string $limitType)
     {
@@ -47,6 +48,9 @@ final class Boundary
         if (preg_match(Matchers::BOUNDARY_MATCHER, $boundary, $matches) !== 1) {
             throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
         }
+
+        assert(isset($matches['boundary']));
+        assert(is_string($matches['boundary']));
 
         $boundary = str_replace($matches['boundary'], '', $boundary);
 

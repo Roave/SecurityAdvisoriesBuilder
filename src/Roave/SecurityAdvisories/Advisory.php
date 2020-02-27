@@ -32,11 +32,13 @@ use function str_replace;
 
 final class Advisory
 {
-    /** @var string */
-    private $componentName;
+    private string $componentName;
 
-    /** @var VersionConstraint[] */
-    private $branchConstraints;
+    /**
+     * @var VersionConstraint[]
+     * @psalm-var list<VersionConstraint>
+     */
+    private array $branchConstraints;
 
     /**
      * @param VersionConstraint[] $branchConstraints
@@ -45,7 +47,7 @@ final class Advisory
     {
         static $checkType;
 
-        $checkType = $checkType ?: static function (VersionConstraint ...$versionConstraints) {
+        $checkType = $checkType ?: static function (VersionConstraint ...$versionConstraints) : array {
             return $versionConstraints;
         };
 
@@ -56,11 +58,14 @@ final class Advisory
     /**
      * @param string[]|string[][][]|string[][][][] $config
      *
+     * @return Advisory
+     *
      * @throws InvalidArgumentException
+     *
+     * @psalm-suppress RedundantCondition
      */
     public static function fromArrayData(array $config) : self
     {
-        // @TODO may want to throw exceptions on missing/invalid keys
         $componentName = str_replace('composer://', '', $config['reference']);
         $branches      = $config['branches'];
 

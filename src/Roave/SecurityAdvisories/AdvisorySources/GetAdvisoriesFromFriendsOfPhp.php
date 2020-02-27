@@ -38,8 +38,7 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
 {
     private const ADVISORY_EXTENSION = 'yaml';
 
-    /** @var string */
-    private $advisoriesPath;
+    private string $advisoriesPath;
 
     public function __construct(string $advisoriesPath)
     {

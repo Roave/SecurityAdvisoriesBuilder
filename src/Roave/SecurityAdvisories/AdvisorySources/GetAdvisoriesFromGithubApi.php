@@ -57,11 +57,9 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
             }
         }';
 
-    /** @var ClientInterface */
-    private $client;
+    private ClientInterface $client;
 
-    /** @var string */
-    private $token;
+    private string $token;
 
     public function __construct(
         ClientInterface $client,
@@ -83,7 +81,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
     public function __invoke() : Generator
     {
         return yield from array_map(
-            static function (array $item) {
+            static function (array $item) : Advisory {
                 $versions = explode(',', $item['node']['vulnerableVersionRange']);
                 Assert::lessThanEq(count($versions), 2);
                 Assert::allStringNotEmpty($versions);
@@ -104,11 +102,19 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      * that is used to do a sequence of "paged" requests.
      * Note: 'endCursor' contains the least cursor in the given batch
      *
-     * @return Advisory[]
+     * @return string[]
      *
      * @throws ClientExceptionInterface
      * @throws JsonException
      * @throws StringsException
+     *
+     * @psalm-return array<int, array{
+     *      cursor: string,
+     *      node: array{
+     *          vulnerableVersionRange: string,
+     *          package: array{name: string}
+     *      }
+     * }>
      */
     private function getAdvisories() : array
     {

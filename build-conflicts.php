@@ -64,11 +64,7 @@ use const PHP_EOL;
         E_STRICT | E_NOTICE | E_WARNING
     );
 
-    $token = getenv('GITHUB_TOKEN');
-    if ($token === false) {
-        $token = '';
-    }
-
+    $token                     = getenv('GITHUB_TOKEN') ?: '';
     $authentication            = $token === '' ? '' : $token . ':x-oauth-basic@';
     $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';

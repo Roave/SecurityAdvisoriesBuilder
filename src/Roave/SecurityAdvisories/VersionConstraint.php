@@ -19,14 +19,11 @@ use function Safe\sprintf;
  */
 final class VersionConstraint
 {
-    /** @var string|null */
-    private $constraintString;
+    private ?string $constraintString = null;
 
-    /** @var Boundary|null */
-    private $lowerBoundary;
+    private ?Boundary $lowerBoundary = null;
 
-    /** @var Boundary|null */
-    private $upperBoundary;
+    private ?Boundary $upperBoundary = null;
 
     private function __construct()
     {

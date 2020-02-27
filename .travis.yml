@@ -15,11 +15,10 @@ before_script:
   - git config --global user.name "Marco Pivetta (via Travis-CI)"
 
 script:
-  - vendor/bin/phpstan analyse
+  - vendor/bin/phpcs
   - vendor/bin/psalm
   - vendor/bin/phpunit
-  - php build-conflicts.php
-  - vendor/bin/phpcs
   - vendor/bin/infection --min-msi=99 --min-covered-msi=100
+  - php build-conflicts.php
   - vendor/bin/roave-no-leaks
   - mkdir -p /tmp/dependency-check && composer require --dev -d/tmp/dependency-check maglnet/composer-require-checker:^2.1.0 && /tmp/dependency-check/vendor/bin/composer-require-checker check composer.json

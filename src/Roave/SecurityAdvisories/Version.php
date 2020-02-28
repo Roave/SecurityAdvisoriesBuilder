@@ -46,11 +46,14 @@ final class Version
 
         $this->flag = Flag::build($matches['flag'] ?? '');
 
-        if (isset($matches['stability_numbers'])) {
-            $numbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches['stability_numbers'])));
+        $this->stabilityNumbers = [];
+        if (! isset($matches['stability_numbers'])) {
+            return;
         }
 
-        $this->stabilityNumbers = $numbers ?? [];
+        $this->stabilityNumbers = self::removeTrailingZeroes(
+            ...array_map('intval', explode('.', $matches['stability_numbers']))
+        );
     }
 
     /**
@@ -66,6 +69,8 @@ final class Version
         }
 
         assert(is_array($matches));
+
+        /** @var string[] $matches */
 
         return new self($matches);
     }

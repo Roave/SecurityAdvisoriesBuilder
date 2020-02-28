@@ -122,7 +122,15 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
         $cursor     = '';
 
         do {
-            $response        = $this->client->sendRequest($this->getRequest($cursor));
+            $response = $this->client->sendRequest($this->getRequest($cursor));
+            /** @psalm-var array{
+             * data: array{securityVulnerabilities: array{
+             *   edges: array<int, array{
+             *     cursor: string,
+             *     node: array{vulnerableVersionRange: string, package: array{name: string}}}>,
+             *   pageInfo: array{hasNextPage: bool, endCursor: string}
+             * }}} $data
+             */
             $data            = json_decode($response->getBody()->__toString(), true);
             $vulnerabilities = $data['data']['securityVulnerabilities'];
             $advisories      = array_merge($advisories, $vulnerabilities['edges']);

@@ -45,6 +45,7 @@ final class Advisory
      */
     private function __construct(string $componentName, array $branchConstraints)
     {
+        /** @psalm-var callable(...VersionConstraint): list<VersionConstraint>|null $checkType */
         static $checkType;
 
         $checkType = $checkType ?: static function (VersionConstraint ...$versionConstraints) : array {
@@ -114,6 +115,8 @@ final class Advisory
      * @param VersionConstraint[] $versionConstraints
      *
      * @return VersionConstraint[]
+     *
+     * @psalm-return list<VersionConstraint>
      */
     private function sortVersionConstraints(array $versionConstraints) : array
     {

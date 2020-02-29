@@ -164,8 +164,9 @@ final class VersionConstraint
             return false;
         }
 
-        if ($this->lowerBoundary->limitIncluded()
-            || ($this->lowerBoundary->limitIncluded() === $otherLowerBoundary->limitIncluded())
+        $isLowerLimitIncluded = $this->lowerBoundary->limitIncluded();
+        if ($isLowerLimitIncluded
+            || ($isLowerLimitIncluded === $otherLowerBoundary->limitIncluded())
         ) {
             return $otherLowerBoundary->getVersion()->isGreaterOrEqualThan($this->lowerBoundary->getVersion());
         }

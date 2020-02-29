@@ -41,7 +41,7 @@ final class Version
      */
     private function __construct(array $matches)
     {
-        $this->versionNumbers = self::removeTrailingZeroes(...array_map('\intval', explode('.', $matches['version'])));
+        $this->versionNumbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches['version'])));
 
         $this->flag = Flag::build($matches['flag'] ?? '');
 
@@ -51,7 +51,7 @@ final class Version
         }
 
         $this->stabilityNumbers = self::removeTrailingZeroes(
-            ...array_map('\intval', explode('.', $matches['stability_numbers']))
+            ...array_map('intval', explode('.', $matches['stability_numbers']))
         );
     }
 

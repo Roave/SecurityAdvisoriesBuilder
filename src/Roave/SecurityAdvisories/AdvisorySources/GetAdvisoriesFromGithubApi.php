@@ -133,12 +133,12 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
              */
             $data            = json_decode($response->getBody()->__toString(), true);
             $vulnerabilities = $data['data']['securityVulnerabilities'];
-            $advisories      = array_merge($advisories, $vulnerabilities['edges']);
+            $advisories[]    = $vulnerabilities['edges'];
             $hasNextPage     = $vulnerabilities['pageInfo']['hasNextPage'];
             $cursor          = $vulnerabilities['pageInfo']['endCursor'];
         } while ($hasNextPage);
 
-        return $advisories;
+        return array_merge(...$advisories);
     }
 
     /**

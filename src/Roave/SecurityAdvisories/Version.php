@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use Safe\Exceptions\PcreException;
 use Safe\Exceptions\StringsException;
 use function array_intersect_key;
+use function array_key_exists;
 use function array_keys;
 use function array_map;
 use function array_reverse;
@@ -45,7 +46,7 @@ final class Version
         $this->flag = Flag::build($matches['flag'] ?? '');
 
         $this->stabilityNumbers = [];
-        if (! isset($matches['stability_numbers'])) {
+        if (! array_key_exists('stability_numbers', $matches)) {
             return;
         }
 

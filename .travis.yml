@@ -13,6 +13,11 @@ jobs:
   include:
     - php: 7.4
       script:
+        - echo $TRAVIS_COMMIT
+        - echo $TRAVIS_TAG
+        - echo $TRAVIS_BRANCH
+        - echo $TRAVIS_BUILD_NUMBER
+        - echo $TRAVIS_REPO_SLUG
         - vendor/bin/phpcs
         - vendor/bin/psalm
         - vendor/bin/phpunit

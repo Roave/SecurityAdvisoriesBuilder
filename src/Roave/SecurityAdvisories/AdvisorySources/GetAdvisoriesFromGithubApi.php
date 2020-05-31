@@ -65,7 +65,10 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
         ClientInterface $client,
         string $token
     ) {
-        Assert::stringNotEmpty($token);
+        Assert::stringNotEmpty(
+            $token,
+            'Unable to proceed. Please make sure you have GITHUB_TOKEN environment variable set up.'
+        );
 
         $this->client = $client;
         $this->token  = $token;

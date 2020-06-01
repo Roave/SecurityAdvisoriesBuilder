@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "efe6405cf0e35bbd44cfd4beb9aec981",
+    "content-hash": "a58d52970ed187e5cfca0d4e8eaf4ae4",
     "packages": [
         {
             "name": "clue/stream-filter",
@@ -1360,20 +1360,20 @@
         },
         {
             "name": "doctrine/instantiator",
-            "version": "1.3.0",
+            "version": "1.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/instantiator.git",
-                "reference": "ae466f726242e637cebdd526a7d991b9433bacf1"
+                "reference": "f350df0268e904597e3bd9c4685c53e0e333feea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/instantiator/zipball/ae466f726242e637cebdd526a7d991b9433bacf1",
-                "reference": "ae466f726242e637cebdd526a7d991b9433bacf1",
+                "url": "https://api.github.com/repos/doctrine/instantiator/zipball/f350df0268e904597e3bd9c4685c53e0e333feea",
+                "reference": "f350df0268e904597e3bd9c4685c53e0e333feea",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1"
+                "php": "^7.1 || ^8.0"
             },
             "require-dev": {
                 "doctrine/coding-standard": "^6.0",
@@ -1412,7 +1412,7 @@
                 "constructor",
                 "instantiate"
             ],
-            "time": "2019-10-21T16:45:58+00:00"
+            "time": "2020-05-29T17:27:14+00:00"
         },
         {
             "name": "felixfbecker/advanced-json-rpc",
@@ -2527,16 +2527,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "8.5.4",
+            "version": "8.5.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "8474e22d7d642f665084ba5ec780626cbd1efd23"
+                "reference": "63dda3b212a0025d380a745f91bdb4d8c985adb7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/8474e22d7d642f665084ba5ec780626cbd1efd23",
-                "reference": "8474e22d7d642f665084ba5ec780626cbd1efd23",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/63dda3b212a0025d380a745f91bdb4d8c985adb7",
+                "reference": "63dda3b212a0025d380a745f91bdb4d8c985adb7",
                 "shasum": ""
             },
             "require": {
@@ -2606,7 +2606,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2020-04-23T04:39:42+00:00"
+            "time": "2020-05-22T13:51:52+00:00"
         },
         {
             "name": "pimple/pimple",

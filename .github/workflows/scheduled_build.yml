@@ -1,0 +1,47 @@
+name: Hourly build
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+
+jobs:
+  build:
+    if: github.event_name == 'schedule' && github.repository == 'Roave/SecurityAdvisoriesBuilder'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-node-${{ hashFiles('/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        id: dep-install
+        run: composer install --no-progress --no-suggest
+
+      - name: Set up user name and email for git
+        id: github-setup
+        run: |
+          git config --global user.email "$GIT_USER_EMAIL"
+          git config --global user.name "$GIT_USER_NAME"
+        env:
+          GIT_USER_EMAIL: ocramius@gmail.com
+          GIT_USER_NAME: Ocramius
+
+      - name: Build advisories
+        id: build
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        run: php build-conflicts.php
+
+      - name: Push to "Roave/SecurityAdvisories"
+        run: |
+          cd build/roave-security-advisories
+          git push origin master
+

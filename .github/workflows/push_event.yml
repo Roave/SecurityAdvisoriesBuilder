@@ -1,0 +1,47 @@
+name: Push
+
+on:
+  push:
+    branches: [ * ] # any branch
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-node-${{ hashFiles('/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        id: dep-install
+        run: composer install --no-progress --no-suggest
+
+#      - name: Set up user name and email for git # should I really set up Marco here ?
+#        id: github-setup
+#        run: |
+#          git config --global user.email "$GIT_USER_EMAIL"
+#          git config --global user.name "$GIT_USER_NAME"
+#        env:
+#          GIT_USER_EMAIL: ocramius+travis-ci@gmail.com
+#          GIT_USER_NAME: Marco Pivetta (via GitHub Actions)
+
+    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
+    # Docs: https://getcomposer.org/doc/articles/scripts.md
+
+      - name: Run Quality Control check
+        run: |
+          - vendor/bin/phpcs
+          - vendor/bin/psalm
+          - vendor/bin/phpunit
+          - vendor/bin/infection --min-msi=99 --min-covered-msi=100
+          - vendor/bin/roave-no-leaks
+          - mkdir -p /tmp/dependency-check && composer require --dev -d/tmp/dependency-check maglnet/composer-require-checker:^2.1.0 && /tmp/dependency-check/vendor/bin/composer-require-checker check composer.json

@@ -43,7 +43,7 @@ jobs:
       - name: Push to "Roave/SecurityAdvisories"
         run: |
           cd build/roave-security-advisories
-          git push "https://${GITHUB_TOKEN}:x-oauth-basic@github.com/Roave/SecurityAdvisories.git" master
+          git push "https://${PUSH_GITHUB_TOKEN}:x-oauth-basic@github.com/Roave/SecurityAdvisories.git" master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUSH_GITHUB_TOKEN: ${{ secrets.PUSH_GITHUB_TOKEN }}
 

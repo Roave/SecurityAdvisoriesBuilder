@@ -1,8 +1,6 @@
 name: Push
 
-on:
-  push:
-    branches: [ * ] # any branch
+on: [push]
 
 jobs:
   build:

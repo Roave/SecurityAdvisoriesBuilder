@@ -37,7 +37,7 @@ jobs:
       - name: Build advisories
         id: build
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: php build-conflicts.php
 
       - name: Push to "Roave/SecurityAdvisories"

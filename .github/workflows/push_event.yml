@@ -44,8 +44,10 @@ jobs:
 
       - name: Build advisories
         env:
-          GITHUB_TOKEN: TOKEN
+          GITHUB_TOKEN: ${{ ACTIONS_RUNTIME_TOKEN }}
         run: |
+          env
+          echo $GITHUB_TOKEN
           php build-conflicts.php
 
       - name: Run Quality Control check

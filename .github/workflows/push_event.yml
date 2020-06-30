@@ -8,6 +8,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Debug Action
+        uses: hmarr/debug-action@v1.0.0
+
+
+
+
       - uses: actions/checkout@v2
 
       - name: Cache Composer packages
@@ -44,4 +50,8 @@ jobs:
           vendor/bin/infection --min-msi=99 --min-covered-msi=100
           vendor/bin/roave-no-leaks
           mkdir -p /tmp/dependency-check && composer require --dev -d/tmp/dependency-check maglnet/composer-require-checker:^2.1.0 && /tmp/dependency-check/vendor/bin/composer-require-checker check composer.json
-          php build-conflicts.php
+
+      - name: Build advisories
+        run: php build-confilicts.php
+        env:
+          GITHUB_TOKEN: TOKEN

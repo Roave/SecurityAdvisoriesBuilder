@@ -2,7 +2,7 @@ name: Hourly build
 
 on:
   schedule:
-    - cron: '0 * * * *' # run cron at every 00 minute, a.k.a. hourly
+    - cron: '0 * * * *' # run cron hourly
 
 jobs:
   build:

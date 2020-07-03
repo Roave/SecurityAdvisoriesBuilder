@@ -1,4 +1,4 @@
-name: Push
+name: Quality Control check
 
 on: [push]
 
@@ -8,12 +8,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Debug Action
-        uses: hmarr/debug-action@v1.0.0
-
-
-
-
       - uses: actions/checkout@v2
 
       - name: Cache Composer packages
@@ -29,28 +23,7 @@ jobs:
         id: dep-install
         run: composer install --no-progress --no-suggest
 
-#      - name: Set up user name and email for git # should I really set up Marco here ?
-#        id: github-setup
-#        run: |
-#          git config --global user.email "$GIT_USER_EMAIL"
-#          git config --global user.name "$GIT_USER_NAME"
-#        env:
-#          GIT_USER_EMAIL: ocramius+travis-ci@gmail.com
-#          GIT_USER_NAME: Marco Pivetta (via GitHub Actions)
-
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
-        # todo: a better failed message to the user?
-
-      - name: Build advisories
-        env:
-          GITHUB_TOKEN: ${{ ACTIONS_RUNTIME_TOKEN }}
-        run: |
-          env
-          echo $GITHUB_TOKEN
-          php build-conflicts.php
-
-      - name: Run Quality Control check
+      - name: Run check
         run: |
           vendor/bin/phpcs
           vendor/bin/psalm

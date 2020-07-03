@@ -39,4 +39,4 @@ jobs:
         id: build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: php build-conflicts.php
+        run: php build-conflicts.php; ls -R build

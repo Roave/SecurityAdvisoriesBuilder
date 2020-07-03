@@ -62,7 +62,7 @@ final class Component
                 },
                 $this->deDuplicateConstraints(array_merge(
                     [],
-                    array_values(array_map(
+                    ...array_values(array_map(
                         static function (Advisory $advisory) {
                             return $advisory->getVersionConstraints();
                         },

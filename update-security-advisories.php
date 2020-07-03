@@ -26,14 +26,7 @@ use ErrorException;
 // and to re-run the code generation/checks every time
 (function () {
     set_error_handler(
-        function ($errorCode, $message = '', $file = '', $line = 0)
-
-
-
-
-
-
-        {
+        function ($errorCode, $message = '', $file = '', $line = 0) {
             throw new ErrorException($message, 0, $errorCode, $file, $line);
         },
         E_STRICT | E_NOTICE | E_WARNING

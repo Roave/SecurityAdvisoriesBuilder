@@ -1,4 +1,4 @@
-name: Quality Control check
+name: Quality control
 
 on: [push]
 
@@ -24,6 +24,7 @@ jobs:
         run: composer install --no-progress --no-suggest
 
       - name: Run check
+        id: qc-check
         run: |
           vendor/bin/phpcs
           vendor/bin/psalm

@@ -32,8 +32,8 @@ jobs:
           git config --global user.email "$GIT_USER_EMAIL"
           git config --global user.name "$GIT_USER_NAME"
         env:
-          GIT_USER_EMAIL: ocramius@gmail.com
-          GIT_USER_NAME: Ocramius
+          GIT_USER_EMAIL: test@test.com
+          GIT_USER_NAME: test
 
       - name: Build advisories
         id: build

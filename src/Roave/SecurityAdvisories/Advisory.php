@@ -67,8 +67,8 @@ final class Advisory
      */
     public static function fromArrayData(array $config) : self
     {
-        /** @var string $reference */
         $reference = $config['reference'];
+        assert(is_string($reference));
         $componentName = str_replace('composer://', '', $reference);
         $branches      = $config['branches'];
 

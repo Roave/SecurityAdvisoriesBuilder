@@ -40,10 +40,11 @@ class GetAdvisoriesFromMultipleSourcesTest extends TestCase
         $advisories = new GetAdvisoriesFromMultipleSources($someAdvisories);
 
         self::assertEquals(
-            [Advisory::fromArrayData([
-                'reference' => 'test_package',
-                'branches' => [['versions' => ['<1']]],
-            ]),
+            [
+                Advisory::fromArrayData([
+                    'reference' => 'test_package',
+                    'branches' => [['versions' => ['<1']]],
+                ]),
             ],
             iterator_to_array($advisories())
         );

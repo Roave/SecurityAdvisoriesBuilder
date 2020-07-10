@@ -1,0 +1,40 @@
+name: Quality check
+
+on: [push]
+
+jobs:
+  build:
+    if: github.ref != 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache Composer packages
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-node-${{ hashFiles('/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: composer install --no-progress --no-suggest
+
+      - name: Code sniffer
+        run: vendor/bin/phpcs
+
+      - name: Psalm
+        run: vendor/bin/psalm
+
+      - name: Phpunit
+        run: vendor/bin/phpunit
+
+      - name: Mutation testing
+        run: vendor/bin/infection --min-msi=99 --min-covered-msi=100
+
+      - name: Memory leaks detection
+        run: vendor/bin/roave-no-leaks
+
+      - name: Composer Require Checker
+        run: vendor/bin/composer-require-checker check composer.json

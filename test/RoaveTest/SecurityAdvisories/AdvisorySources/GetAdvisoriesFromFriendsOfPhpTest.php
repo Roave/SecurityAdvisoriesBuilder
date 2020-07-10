@@ -34,15 +34,16 @@ class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
         ))();
 
         self::assertEquals(
-            [Advisory::fromArrayData([
-                'branches'  => [
-                    '1.x' => [
-                        'time'     => '2017-05-15 09:09:00',
-                        'versions' => ['<1.2'],
+            [
+                Advisory::fromArrayData([
+                    'branches'  => [
+                        '1.x' => [
+                            'time'     => '2017-05-15 09:09:00',
+                            'versions' => ['<1.2'],
+                        ],
                     ],
-                ],
-                'reference' => 'composer://3f/pygmentize',
-            ]),
+                    'reference' => 'composer://3f/pygmentize',
+                ]),
             ],
             iterator_to_array($advisories, false)
         );

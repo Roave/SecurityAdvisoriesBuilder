@@ -1,6 +1,6 @@
 # Roave Security Advisories Builder
 
-[![Build Status](https://travis-ci.org/Roave/SecurityAdvisoriesBuilder.svg?branch=master)](https://travis-ci.org/Roave/SecurityAdvisories)
+![Hourly build status](https://github.com/Roave/SecurityAdvisoriesBuilder/workflows/Hourly%20build/badge.svg?branch=master)
 [![Downloads](https://img.shields.io/packagist/dt/roave/security-advisories.svg)](https://packagist.org/packages/roave/security-advisories)
 
 This project is responsible for generating the

@@ -27,7 +27,7 @@
         "webmozart/assert": "^1.9.1"
     },
     "require-dev": {
-        "doctrine/coding-standard": "^7.0.2",
+        "doctrine/coding-standard": "^8.1.0",
         "infection/infection": "^0.15.1",
         "maglnet/composer-require-checker": "^2.1",
         "phpunit/phpunit": "^8.5.8",

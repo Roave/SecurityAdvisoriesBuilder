@@ -23,7 +23,7 @@ namespace Roave\SecurityAdvisories;
 final class Flag
 {
     /**
-     * within extent of same version patch flag is of the highest priority
+     * within extent of the same version "patch" flag is of the highest priority
      * e.g. 1.1-alpha < 1.1-beta < 1.1-rc < 1.1-stable < 1.1 < 1.1-p
      */
     private const PRIORITY = [

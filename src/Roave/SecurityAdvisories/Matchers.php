@@ -20,44 +20,25 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
-/**
- * @see https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
- *
- * @fixme: throw this garbage away and use existing regexp from semver.org
- */
 final class Matchers
 {
-    // pattern that matches full version only, without boundary sign
-    public const TAGGED_VERSION_MATCHER = '\s*(?<version>(?:\d+\.)*\d+)' .
-                                                '(?:-' . // dash is required for correct version
-                                                    '(?<flag>stable|beta|b|rc|alpha|a|patch|p)' .
-                                                    '[._-]?' .
-                                                    '(?<stability_numbers>(?:\d+\.)*\d+)?' .
-                                                ')?\s*';
+    /*
+     * Pattern that matches full version only, without boundary sign.
+     * Was "inspired" by semver regexp -- https://github.com/composer/semver/blob/master/src/VersionParser.php
+     * Regular expression was tailored to the needs of the package and catches:
+     * - main version, e.g. 2.1.0
+     * - stability flag, e.g. alpha, beta and etc.
+     * - stability numbers
+     */
+    public const TAGGED_VERSION_MATCHER = '\s*(?<version>(?:\d+\.)*\d+)(?:-(?<flag>stable|beta|b|rc|alpha|a|patch|p)[._-]?(?<stability_numbers>(?:\d+\.)*\d+)?)?\s*';
 
-    private const UNTAGGED_VERSION_MATCHER = '((?:\d+\.)*\d+)' .
-                                                '(?:-' .
-                                                    '(stable|beta|b|rc|alpha|a|patch|p)' .
-                                                    '[._-]?' .
-                                                    '((?:\d+\.)*\d+)?' .
-                                                ')?';
+    private const UNTAGGED_VERSION_MATCHER = '((?:\d+\.)*\d+)(?:-(stable|beta|b|rc|alpha|a|patch|p)[._-]?((?:\d+\.)*\d+)?)?';
 
-    // pattern that ensures we have a correct boundary in the right place
-    public const BOUNDARY_MATCHER = '/^\s*(?<boundary><|<=|=|>=|>)\s*' .
-                                    self::TAGGED_VERSION_MATCHER .
-                                    '\s*$/';
+    public const BOUNDARY_MATCHER = '/^\s*(?<boundary><|<=|=|>=|>)\s*' . self::TAGGED_VERSION_MATCHER . '\s*$/';
 
-    public const CLOSED_RANGE_MATCHER = '/^>(=?)\s*' .
-                                        self::UNTAGGED_VERSION_MATCHER .
-                                        '\s*,\s*<(=?)\s*' .
-                                        self::UNTAGGED_VERSION_MATCHER .
-                                        '$/';
+    public const CLOSED_RANGE_MATCHER = '/^>(=?)\s*' . self::UNTAGGED_VERSION_MATCHER . '\s*,\s*<(=?)\s*' . self::UNTAGGED_VERSION_MATCHER . '$/';
 
-    public const LEFT_OPEN_RANGE_MATCHER = '/^<(=?)\s*' .
-                                            self::UNTAGGED_VERSION_MATCHER .
-                                            '$/';
+    public const LEFT_OPEN_RANGE_MATCHER = '/^<(=?)\s*' . self::UNTAGGED_VERSION_MATCHER . '$/';
 
-    public const RIGHT_OPEN_RANGE_MATCHER = '/^>(=?)\s*' .
-                                            self::UNTAGGED_VERSION_MATCHER .
-                                            '$/';
+    public const RIGHT_OPEN_RANGE_MATCHER = '/^>(=?)\s*' . self::UNTAGGED_VERSION_MATCHER . '$/';
 }

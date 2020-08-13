@@ -18,6 +18,10 @@
         <exclude name="SlevomatCodingStandard.TypeHints.TypeHintDeclaration.IncorrectReturnTypeHint"/>
     </rule>
 
+    <rule ref="Generic.Files.LineLength">
+        <exclude-pattern>src/Roave/SecurityAdvisories/Matchers.php</exclude-pattern>
+    </rule>
+
     <file>build-conflicts.php</file>
     <file>public</file>
     <file>src</file>

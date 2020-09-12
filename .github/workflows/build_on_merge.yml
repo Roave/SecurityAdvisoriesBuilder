@@ -1,9 +1,10 @@
-name: Push to master build
+name: Build on merge to latest
 
 on:
   push:
     branches:
-      - master
+      - latest
+      - master # for bc only
 
 jobs:
   build:

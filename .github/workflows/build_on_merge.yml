@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - latest
-      - master # for bc only
 
 jobs:
   build:

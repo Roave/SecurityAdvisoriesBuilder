@@ -38,7 +38,7 @@ final class FlagTest extends TestCase
         string $otherFlag,
         bool $firstExpected,
         bool $secondExpected
-    ) : void {
+    ): void {
         $first  = Flag::build($firstFlag);
         $second = Flag::build($otherFlag);
 
@@ -54,7 +54,7 @@ final class FlagTest extends TestCase
         string $otherFlag,
         bool $firstExpected,
         bool $secondExpected
-    ) : void {
+    ): void {
         $first  = Flag::build($firstFlag);
         $second = Flag::build($otherFlag);
 
@@ -68,7 +68,7 @@ final class FlagTest extends TestCase
     public function testThatGetterWorks(
         string $literal,
         string $expected
-    ) : void {
+    ): void {
         $flag = Flag::build($literal);
 
         self::assertSame($expected, $flag->getLiteral());
@@ -77,7 +77,7 @@ final class FlagTest extends TestCase
     /**
      * @return mixed[]
      */
-    public function isGreaterFlagDataProvider() : array
+    public function isGreaterFlagDataProvider(): array
     {
         return [
             ['patch', 'p', false, false],
@@ -130,7 +130,7 @@ final class FlagTest extends TestCase
     /**
      * @return mixed[]
      */
-    public function isEqualDataProvider() : array
+    public function isEqualDataProvider(): array
     {
         return [
             ['patch', 'p', true, true],
@@ -143,7 +143,7 @@ final class FlagTest extends TestCase
     /**
      * @return mixed[]
      */
-    public function getterTestDataProvider() : array
+    public function getterTestDataProvider(): array
     {
         return [
             ['patch', 'patch'],

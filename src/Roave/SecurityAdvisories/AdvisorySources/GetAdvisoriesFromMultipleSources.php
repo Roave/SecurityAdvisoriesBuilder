@@ -36,7 +36,7 @@ final class GetAdvisoriesFromMultipleSources implements GetAdvisories
     }
 
     /** {@inheritDoc} */
-    public function __invoke() : Generator
+    public function __invoke(): Generator
     {
         foreach ($this->sources as $source) {
             yield from $source();

@@ -25,6 +25,7 @@ use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Boundary;
 use Roave\SecurityAdvisories\Matchers;
 use Roave\SecurityAdvisories\Version;
+
 use function Safe\preg_match;
 use function str_replace;
 use function strpos;
@@ -39,7 +40,7 @@ final class BoundaryTest extends TestCase
     /**
      * @dataProvider invalidBoundaryStrings
      */
-    public function testRejectsInvalidBoundaryStrings(string $boundaryString) : void
+    public function testRejectsInvalidBoundaryStrings(string $boundaryString): void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -49,7 +50,7 @@ final class BoundaryTest extends TestCase
     /**
      * @dataProvider validBoundaryStrings
      */
-    public function testValidBoundaryString(string $boundaryString, string $expectedNormalizedString) : void
+    public function testValidBoundaryString(string $boundaryString, string $expectedNormalizedString): void
     {
         $boundary = Boundary::fromString($boundaryString);
 
@@ -60,7 +61,7 @@ final class BoundaryTest extends TestCase
     /**
      * @dataProvider validBoundaryStrings
      */
-    public function testLimitIncluded(string $boundaryString) : void
+    public function testLimitIncluded(string $boundaryString): void
     {
         self::assertSame(
             strpos($boundaryString, '=') !== false,
@@ -71,7 +72,7 @@ final class BoundaryTest extends TestCase
     /**
      * @dataProvider validBoundaryStrings
      */
-    public function testGetVersion(string $boundaryString) : void
+    public function testGetVersion(string $boundaryString): void
     {
         preg_match(Matchers::BOUNDARY_MATCHER, $boundaryString, $matches);
         $boundary = str_replace($matches['boundary'], '', $matches[0]);
@@ -84,7 +85,7 @@ final class BoundaryTest extends TestCase
     /**
      * @dataProvider validBoundaryStrings
      */
-    public function testBoundaryNotAdjacentToItself(string $boundaryString) : void
+    public function testBoundaryNotAdjacentToItself(string $boundaryString): void
     {
         self::assertFalse(Boundary::fromString($boundaryString)->adjacentTo(Boundary::fromString($boundaryString)));
     }
@@ -92,7 +93,7 @@ final class BoundaryTest extends TestCase
     /**
      * @dataProvider adjacentBoundaries
      */
-    public function testAdjacentBoundaries(string $boundary1String, string $boundary2String) : void
+    public function testAdjacentBoundaries(string $boundary1String, string $boundary2String): void
     {
         $boundary1 = Boundary::fromString($boundary1String);
         $boundary2 = Boundary::fromString($boundary2String);
@@ -104,7 +105,7 @@ final class BoundaryTest extends TestCase
     /**
      * @dataProvider nonAdjacentBoundaries
      */
-    public function testNonAdjacentBoundaries(string $boundary1String, string $boundary2String) : void
+    public function testNonAdjacentBoundaries(string $boundary1String, string $boundary2String): void
     {
         $boundary1 = Boundary::fromString($boundary1String);
         $boundary2 = Boundary::fromString($boundary2String);
@@ -116,7 +117,7 @@ final class BoundaryTest extends TestCase
     /**
      * @return string[][]
      */
-    public function invalidBoundaryStrings() : array
+    public function invalidBoundaryStrings(): array
     {
         return [
             [''],
@@ -158,7 +159,7 @@ final class BoundaryTest extends TestCase
     /**
      * @return string[][]
      */
-    public function validBoundaryStrings() : array
+    public function validBoundaryStrings(): array
     {
         return [
             ['>1.2.3', '>1.2.3'],
@@ -213,7 +214,7 @@ final class BoundaryTest extends TestCase
     /**
      * @return string[][]
      */
-    public function adjacentBoundaries() : array
+    public function adjacentBoundaries(): array
     {
         return [
             ['<1', '=1'],
@@ -232,7 +233,7 @@ final class BoundaryTest extends TestCase
     /**
      * @return string[][]
      */
-    public function nonAdjacentBoundaries() : array
+    public function nonAdjacentBoundaries(): array
     {
         return [
             ['<1', '<1'],

@@ -29,6 +29,7 @@ use Roave\SecurityAdvisories\Advisory;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
 use Webmozart\Assert\Assert;
+
 use function array_map;
 use function array_merge;
 use function count;
@@ -81,10 +82,10 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      * @throws JsonException
      * @throws StringsException
      */
-    public function __invoke() : Generator
+    public function __invoke(): Generator
     {
         return yield from array_map(
-            static function (array $item) : Advisory {
+            static function (array $item): Advisory {
                 $versions = explode(',', $item['node']['vulnerableVersionRange']);
                 Assert::lessThanEq(count($versions), 2);
                 Assert::allStringNotEmpty($versions);
@@ -119,7 +120,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      *      }
      * }>
      */
-    private function getAdvisories() : array
+    private function getAdvisories(): array
     {
         $advisories = [];
         $cursor     = '';
@@ -148,7 +149,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      * @throws JsonException
      * @throws StringsException
      */
-    private function getRequest(string $cursor) : RequestInterface
+    private function getRequest(string $cursor): RequestInterface
     {
         return new Request(
             'POST',
@@ -166,7 +167,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      * @throws JsonException
      * @throws StringsException
      */
-    private function queryWithCursor(string $cursor) : string
+    private function queryWithCursor(string $cursor): string
     {
         $after = $cursor === '' ? '' : sprintf(', after: "%s"', $cursor);
 

@@ -7,6 +7,7 @@ namespace Roave\SecurityAdvisories;
 use InvalidArgumentException;
 use Safe\Exceptions\PcreException;
 use Safe\Exceptions\StringsException;
+
 use function array_intersect_key;
 use function array_key_exists;
 use function array_keys;
@@ -61,7 +62,7 @@ final class Version
      * @throws PcreException
      * @throws StringsException
      */
-    public static function fromString(string $version) : self
+    public static function fromString(string $version): self
     {
         if (preg_match('/^' . Matchers::TAGGED_VERSION_MATCHER . '$/', strtolower($version), $matches) !== 1) {
             throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
@@ -70,14 +71,14 @@ final class Version
         return new self($matches);
     }
 
-    public function equalTo(self $other) : bool
+    public function equalTo(self $other): bool
     {
         return $other->versionNumbers === $this->versionNumbers
             && $this->flag->isEqual($other->flag)
             && $this->stabilityNumbers === $other->stabilityNumbers;
     }
 
-    public function isGreaterThan(self $other) : bool
+    public function isGreaterThan(self $other): bool
     {
         foreach (array_keys(array_intersect_key($this->versionNumbers, $other->versionNumbers)) as $index) {
             if ($this->versionNumbers[$index] > $other->versionNumbers[$index]) {
@@ -103,7 +104,7 @@ final class Version
         return $this->isStabilityGreaterThan($other);
     }
 
-    private function isStabilityGreaterThan(self $other) : bool
+    private function isStabilityGreaterThan(self $other): bool
     {
         if (! $this->flag->isEqual($other->flag)) {
             return $this->flag->isGreaterThan($other->flag);
@@ -127,13 +128,13 @@ final class Version
      *
      * @todo may become a simple array comparison (if PHP supports it)
      */
-    public function isGreaterOrEqualThan(self $other) : bool
+    public function isGreaterOrEqualThan(self $other): bool
     {
         return $this->equalTo($other)
             || $this->isGreaterThan($other);
     }
 
-    public function getVersion() : string
+    public function getVersion(): string
     {
         $version = implode('.', $this->versionNumbers);
 
@@ -150,7 +151,7 @@ final class Version
     }
 
     /** @return int[] */
-    private static function removeTrailingZeroes(int ...$versionNumbers) : array
+    private static function removeTrailingZeroes(int ...$versionNumbers): array
     {
         foreach (array_reverse(array_keys($versionNumbers)) as $key) {
             if ($versionNumbers[$key] !== 0) {

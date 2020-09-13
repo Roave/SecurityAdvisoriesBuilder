@@ -25,11 +25,12 @@ use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisories;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
+
 use function iterator_to_array;
 
 class GetAdvisoriesFromMultipleSourcesTest extends TestCase
 {
-    public function testMultipleAdvisoriesSources() : void
+    public function testMultipleAdvisoriesSources(): void
     {
         $someAdvisories = $this->createMock(GetAdvisories::class);
 
@@ -50,7 +51,7 @@ class GetAdvisoriesFromMultipleSourcesTest extends TestCase
         );
     }
 
-    private function getGenerator() : Generator
+    private function getGenerator(): Generator
     {
         return yield Advisory::fromArrayData([
             'reference' => 'test_package',

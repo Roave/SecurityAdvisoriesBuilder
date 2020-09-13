@@ -198,29 +198,29 @@
         },
         {
             "name": "php-http/discovery",
-            "version": "1.9.0",
+            "version": "1.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-http/discovery.git",
-                "reference": "9ab7668fee74a5ad61996095e50917bd50ee8bfe"
+                "reference": "88ff14cad4a0db68b343260fa7ac3f1599703660"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-http/discovery/zipball/9ab7668fee74a5ad61996095e50917bd50ee8bfe",
-                "reference": "9ab7668fee74a5ad61996095e50917bd50ee8bfe",
+                "url": "https://api.github.com/repos/php-http/discovery/zipball/88ff14cad4a0db68b343260fa7ac3f1599703660",
+                "reference": "88ff14cad4a0db68b343260fa7ac3f1599703660",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1"
+                "php": "^7.1 || ^8.0"
             },
             "conflict": {
                 "nyholm/psr7": "<1.0"
             },
             "require-dev": {
-                "akeneo/phpspec-skip-example-extension": "^4.0",
+                "graham-campbell/phpspec-skip-example-extension": "^5.0",
                 "php-http/httplug": "^1.0 || ^2.0",
                 "php-http/message-factory": "^1.0",
-                "phpspec/phpspec": "^5.1",
+                "phpspec/phpspec": "^5.1 || ^6.1",
                 "puli/composer-plugin": "1.0.0-beta10"
             },
             "suggest": {
@@ -259,7 +259,7 @@
                 "message",
                 "psr7"
             ],
-            "time": "2020-07-02T11:43:45+00:00"
+            "time": "2020-09-04T08:41:23+00:00"
         },
         {
             "name": "php-http/httplug",

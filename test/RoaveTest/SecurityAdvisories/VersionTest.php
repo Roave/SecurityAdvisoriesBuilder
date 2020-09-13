@@ -24,6 +24,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use Roave\SecurityAdvisories\Version;
+
 use function array_map;
 use function Safe\array_combine;
 
@@ -37,7 +38,7 @@ final class VersionTest extends TestCase
     /**
      * @dataProvider invalidVersionStringsProvider
      */
-    public function testVersionWillNotAllowInvalidFormats(string $versionString) : void
+    public function testVersionWillNotAllowInvalidFormats(string $versionString): void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -47,7 +48,7 @@ final class VersionTest extends TestCase
     /**
      * @dataProvider validVersionStringProvider
      */
-    public function testGetVersionWithValidVersion(string $versionString, string $normalisedExpectation) : void
+    public function testGetVersionWithValidVersion(string $versionString, string $normalisedExpectation): void
     {
         self::assertSame($normalisedExpectation, Version::fromString($versionString)->getVersion());
     }
@@ -60,7 +61,7 @@ final class VersionTest extends TestCase
         string $version2String,
         bool $v1GreaterThanV2,
         bool $v2GreaterThanV1
-    ) : void {
+    ): void {
         $version1 = Version::fromString($version1String);
         $version2 = Version::fromString($version2String);
 
@@ -76,7 +77,7 @@ final class VersionTest extends TestCase
         string $version2String,
         bool $v1GreaterOrEqualThanV2,
         bool $v2GreaterOrEqualThanV1
-    ) : void {
+    ): void {
         $version1 = Version::fromString($version1String);
         $version2 = Version::fromString($version2String);
 
@@ -87,7 +88,7 @@ final class VersionTest extends TestCase
     /**
      * @dataProvider equivalentVersionProvider
      */
-    public function testVersionEquivalence(string $version1String, string $version2String) : void
+    public function testVersionEquivalence(string $version1String, string $version2String): void
     {
         $version1 = Version::fromString($version1String);
         $version2 = Version::fromString($version2String);
@@ -100,7 +101,7 @@ final class VersionTest extends TestCase
     /**
      * @dataProvider nonEquivalentVersionProvider
      */
-    public function testVersionNonEquivalence(string $version1String, string $version2String) : void
+    public function testVersionNonEquivalence(string $version1String, string $version2String): void
     {
         $version1 = Version::fromString($version1String);
         $version2 = Version::fromString($version2String);
@@ -118,7 +119,7 @@ final class VersionTest extends TestCase
         string $version2String,
         bool $version1vs2Expected,
         bool $version2vs1Expected
-    ) : void {
+    ): void {
         $version1 = Version::fromString($version1String);
         $version2 = Version::fromString($version2String);
 
@@ -129,7 +130,7 @@ final class VersionTest extends TestCase
     private function callIsStabilityGreaterThan(
         Version $version1,
         Version $version2
-    ) : bool {
+    ): bool {
         $method = new ReflectionMethod($version1, 'isStabilityGreaterThan');
 
         $method->setAccessible(true);
@@ -140,7 +141,7 @@ final class VersionTest extends TestCase
     /**
      * @return string[][]
      */
-    public function validVersionStringProvider() : array
+    public function validVersionStringProvider(): array
     {
         return [
             ['0', '0'],
@@ -169,7 +170,7 @@ final class VersionTest extends TestCase
     /**
      * @return string[][]|bool[][]
      */
-    public function greaterThanComparisonVersionsProvider() : array
+    public function greaterThanComparisonVersionsProvider(): array
     {
         $versions = [
             ['0', '0', false, false],
@@ -252,7 +253,7 @@ final class VersionTest extends TestCase
     /**
      * @return string[][]|bool[][]
      */
-    public function greaterOrEqualThanComparisonVersionsProvider() : array
+    public function greaterOrEqualThanComparisonVersionsProvider(): array
     {
         $versions = [
             ['0', '0', true, true],
@@ -325,7 +326,7 @@ final class VersionTest extends TestCase
     /**
      * @return string[][]
      */
-    public function invalidVersionStringsProvider() : array
+    public function invalidVersionStringsProvider(): array
     {
         return [
             [''],
@@ -345,7 +346,7 @@ final class VersionTest extends TestCase
     /**
      * @return string[][]
      */
-    public function equivalentVersionProvider() : array
+    public function equivalentVersionProvider(): array
     {
         return [
             ['0', '0.0'],
@@ -362,7 +363,7 @@ final class VersionTest extends TestCase
     /**
      * @return string[][]
      */
-    public function nonEquivalentVersionProvider() : array
+    public function nonEquivalentVersionProvider(): array
     {
         return [
             ['0.1', '0.0'],
@@ -393,7 +394,7 @@ final class VersionTest extends TestCase
     /**
      * @return mixed[]
      */
-    public function stabilitiesToCompare() : array
+    public function stabilitiesToCompare(): array
     {
         return [
             ['1', '1', false, false],

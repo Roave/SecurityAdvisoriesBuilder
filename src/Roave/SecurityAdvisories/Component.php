@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories;
 
 use LogicException;
+
 use function array_filter;
 use function array_map;
 use function array_merge;
@@ -44,7 +45,7 @@ final class Component
         $this->advisories = $advisories;
     }
 
-    public function getName() : string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -52,7 +53,7 @@ final class Component
     /**
      * @throws LogicException
      */
-    public function getConflictConstraint() : string
+    public function getConflictConstraint(): string
     {
         return implode(
             '|',
@@ -80,7 +81,7 @@ final class Component
      *
      * @throws LogicException
      */
-    private function deDuplicateConstraints(array $constraints) : array
+    private function deDuplicateConstraints(array $constraints): array
     {
         restart:
 

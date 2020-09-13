@@ -28,6 +28,7 @@ use RecursiveIteratorIterator;
 use Roave\SecurityAdvisories\Advisory;
 use SplFileInfo;
 use Symfony\Component\Yaml\Yaml;
+
 use function array_map;
 use function assert;
 use function is_string;
@@ -48,7 +49,7 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
     /**
      * @return Generator<Advisory>
      */
-    public function __invoke() : Generator
+    public function __invoke(): Generator
     {
         return yield from array_map(
             static function (SplFileInfo $advisoryFile) {
@@ -67,7 +68,7 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
     /**
      * @return SplFileInfo[]
      */
-    private function getAdvisoryFiles() : array
+    private function getAdvisoryFiles(): array
     {
         return iterator_to_array(new CallbackFilterIterator(
             new RecursiveIteratorIterator(

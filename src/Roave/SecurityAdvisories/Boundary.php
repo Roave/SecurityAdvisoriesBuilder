@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories;
 
 use InvalidArgumentException;
+
 use function assert;
 use function in_array;
 use function is_string;
@@ -43,7 +44,7 @@ final class Boundary
      *
      * @throws InvalidArgumentException
      */
-    public static function fromString(string $boundary) : self
+    public static function fromString(string $boundary): self
     {
         if (preg_match(Matchers::BOUNDARY_MATCHER, $boundary, $matches) !== 1) {
             throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
@@ -60,12 +61,12 @@ final class Boundary
         );
     }
 
-    public function limitIncluded() : bool
+    public function limitIncluded(): bool
     {
         return strpos($this->limitType, '=') !== false;
     }
 
-    public function adjacentTo(self $other) : bool
+    public function adjacentTo(self $other): bool
     {
         if (! $other->version->equalTo($this->version)) {
             return false;
@@ -75,12 +76,12 @@ final class Boundary
             || in_array([$other->limitType, $this->limitType], self::VALID_ADJACENCY_MAP, self::IN_ARRAY_STRICT);
     }
 
-    public function getVersion() : Version
+    public function getVersion(): Version
     {
         return $this->version;
     }
 
-    public function getBoundaryString() : string
+    public function getBoundaryString(): string
     {
         return $this->limitType . $this->version->getVersion();
     }

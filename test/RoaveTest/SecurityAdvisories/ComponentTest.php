@@ -31,7 +31,7 @@ use Roave\SecurityAdvisories\Component;
  */
 final class ComponentTest extends TestCase
 {
-    public function testFromMultipleAdvisories() : void
+    public function testFromMultipleAdvisories(): void
     {
         $advisory1 = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
@@ -64,7 +64,7 @@ final class ComponentTest extends TestCase
         self::assertSame('foo/bar', $component->getName());
     }
 
-    public function testDeDuplicatesOverlappingAdvisories() : void
+    public function testDeDuplicatesOverlappingAdvisories(): void
     {
         $advisory1 = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
@@ -110,7 +110,7 @@ final class ComponentTest extends TestCase
         self::assertSame('foo/bar', $component->getName());
     }
 
-    public function testDeDuplicatesOverlappingComplexAdvisories() : void
+    public function testDeDuplicatesOverlappingComplexAdvisories(): void
     {
         $advisory1 = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
@@ -157,7 +157,7 @@ final class ComponentTest extends TestCase
         self::assertSame('foo/bar', $component->getName());
     }
 
-    public function testSortAdvisoriesWithRealCase() : void
+    public function testSortAdvisoriesWithRealCase(): void
     {
         $advisory1 = Advisory::fromArrayData([
             'reference' => 'composer://silverstripe/cms',
@@ -196,7 +196,7 @@ final class ComponentTest extends TestCase
         array $advisory1Branches,
         array $advisory2Branches,
         string $expected
-    ) : void {
+    ): void {
         $advisory1 = Advisory::fromArrayData([
             'reference' => $reference,
             'branches' => $advisory1Branches,

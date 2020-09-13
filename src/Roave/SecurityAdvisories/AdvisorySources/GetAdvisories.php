@@ -28,5 +28,5 @@ interface GetAdvisories
     /**
      * @return Generator<Advisory>
      */
-    public function __invoke() : Generator;
+    public function __invoke(): Generator;
 }

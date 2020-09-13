@@ -23,11 +23,12 @@ namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
+
 use function iterator_to_array;
 
 class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
 {
-    public function testThatAdvisoriesAreBuiltFromYamlFiles() : void
+    public function testThatAdvisoriesAreBuiltFromYamlFiles(): void
     {
         $advisories = (new GetAdvisoriesFromFriendsOfPhp(
             __DIR__ . '/security-advisories'

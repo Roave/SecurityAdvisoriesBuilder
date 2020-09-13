@@ -23,6 +23,7 @@ namespace RoaveTest\SecurityAdvisories;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\VersionConstraint;
 use Roave\SecurityAdvisories\VersionConstraintSort;
+
 use function array_map;
 use function Safe\array_combine;
 
@@ -34,14 +35,14 @@ use function Safe\array_combine;
 final class VersionConstraintSortTest extends TestCase
 {
     /** @dataProvider comparedConstraints */
-    public function testSorting(VersionConstraint $a, VersionConstraint $b, int $result) : void
+    public function testSorting(VersionConstraint $a, VersionConstraint $b, int $result): void
     {
         self::assertSame($result, (new VersionConstraintSort())->__invoke($a, $b));
         self::assertSame($result * -1, (new VersionConstraintSort())->__invoke($b, $a));
     }
 
     /** @return int[][]|VersionConstraint[][] */
-    public function comparedConstraints() : array
+    public function comparedConstraints(): array
     {
         $constraints = [
             ['>=1', '>=1', 0],
@@ -69,10 +70,10 @@ final class VersionConstraintSortTest extends TestCase
         ];
 
         return array_combine(
-            array_map(static function (array $entry) : string {
+            array_map(static function (array $entry): string {
                 return '"' . $entry[0] . '" <=> "' . $entry[1] . '"';
             }, $constraints),
-            array_map(static function (array $entry) : array {
+            array_map(static function (array $entry): array {
                 return [
                     VersionConstraint::fromString($entry[0]),
                     VersionConstraint::fromString($entry[1]),

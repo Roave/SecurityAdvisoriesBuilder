@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories;
 
 use InvalidArgumentException;
+
 use function array_map;
 use function array_values;
 use function assert;
@@ -48,7 +49,7 @@ final class Advisory
         /** @psalm-var callable(...VersionConstraint): list<VersionConstraint>|null $checkType */
         static $checkType;
 
-        $checkType = $checkType ?: static function (VersionConstraint ...$versionConstraints) : array {
+        $checkType = $checkType ?: static function (VersionConstraint ...$versionConstraints): array {
             return $versionConstraints;
         };
 
@@ -65,7 +66,7 @@ final class Advisory
      *
      * @psalm-suppress RedundantCondition
      */
-    public static function fromArrayData(array $config) : self
+    public static function fromArrayData(array $config): self
     {
         $reference = $config['reference'];
         assert(is_string($reference));
@@ -86,7 +87,7 @@ final class Advisory
         );
     }
 
-    public function getComponentName() : string
+    public function getComponentName(): string
     {
         return $this->componentName;
     }
@@ -94,12 +95,12 @@ final class Advisory
     /**
      * @return VersionConstraint[]
      */
-    public function getVersionConstraints() : array
+    public function getVersionConstraints(): array
     {
         return $this->branchConstraints;
     }
 
-    public function getConstraint() : ?string
+    public function getConstraint(): ?string
     {
         // @TODO may want to escape this
         return implode(
@@ -120,7 +121,7 @@ final class Advisory
      *
      * @psalm-return list<VersionConstraint>
      */
-    private function sortVersionConstraints(array $versionConstraints) : array
+    private function sortVersionConstraints(array $versionConstraints): array
     {
         usort($versionConstraints, new VersionConstraintSort());
 

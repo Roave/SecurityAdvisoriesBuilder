@@ -6,6 +6,7 @@ namespace Roave\SecurityAdvisories;
 
 use InvalidArgumentException;
 use LogicException;
+
 use function array_filter;
 use function array_map;
 use function assert;
@@ -32,7 +33,7 @@ final class VersionConstraint
     /**
      * @throws InvalidArgumentException
      */
-    public static function fromString(string $versionConstraint) : self
+    public static function fromString(string $versionConstraint): self
     {
         $constraintString = $versionConstraint;
         $instance         = new self();
@@ -63,12 +64,12 @@ final class VersionConstraint
         return $instance;
     }
 
-    public function isSimpleRangeString() : bool
+    public function isSimpleRangeString(): bool
     {
         return $this->constraintString === null;
     }
 
-    public function getConstraintString() : string
+    public function getConstraintString(): string
     {
         if ($this->constraintString !== null) {
             return $this->constraintString;
@@ -85,27 +86,27 @@ final class VersionConstraint
         );
     }
 
-    public function isLowerBoundIncluded() : bool
+    public function isLowerBoundIncluded(): bool
     {
         return $this->lowerBoundary !== null ? $this->lowerBoundary->limitIncluded() : false;
     }
 
-    public function getLowerBound() : ?Version
+    public function getLowerBound(): ?Version
     {
         return $this->lowerBoundary !== null ? $this->lowerBoundary->getVersion() : null;
     }
 
-    public function getUpperBound() : ?Version
+    public function getUpperBound(): ?Version
     {
         return $this->upperBoundary !== null ? $this->upperBoundary->getVersion() : null;
     }
 
-    public function isUpperBoundIncluded() : bool
+    public function isUpperBoundIncluded(): bool
     {
         return $this->upperBoundary !== null ? $this->upperBoundary->limitIncluded() : false;
     }
 
-    public function canMergeWith(self $other) : bool
+    public function canMergeWith(self $other): bool
     {
         return $this->contains($other)
             || $other->contains($this)
@@ -115,7 +116,7 @@ final class VersionConstraint
     }
 
     /** @throws LogicException */
-    public function mergeWith(self $other) : self
+    public function mergeWith(self $other): self
     {
         if ($this->contains($other)) {
             return $this;
@@ -146,7 +147,7 @@ final class VersionConstraint
         ));
     }
 
-    private function contains(self $other) : bool
+    private function contains(self $other): bool
     {
         return $this->isSimpleRangeString()  // cannot compare - too complex :-(
             && $other->isSimpleRangeString() // cannot compare - too complex :-(
@@ -154,7 +155,7 @@ final class VersionConstraint
             && $this->containsUpperBound($other->upperBoundary);
     }
 
-    private function containsLowerBound(?Boundary $otherLowerBoundary) : bool
+    private function containsLowerBound(?Boundary $otherLowerBoundary): bool
     {
         if ($this->lowerBoundary === null) {
             return true;
@@ -165,7 +166,8 @@ final class VersionConstraint
         }
 
         $isLowerLimitIncluded = $this->lowerBoundary->limitIncluded();
-        if ($isLowerLimitIncluded
+        if (
+            $isLowerLimitIncluded
             || ($isLowerLimitIncluded === $otherLowerBoundary->limitIncluded())
         ) {
             return $otherLowerBoundary->getVersion()->isGreaterOrEqualThan($this->lowerBoundary->getVersion());
@@ -174,7 +176,7 @@ final class VersionConstraint
         return $otherLowerBoundary->getVersion()->isGreaterThan($this->lowerBoundary->getVersion());
     }
 
-    private function containsUpperBound(?Boundary $otherUpperBoundary) : bool
+    private function containsUpperBound(?Boundary $otherUpperBoundary): bool
     {
         if ($this->upperBoundary === null) {
             return true;
@@ -193,7 +195,7 @@ final class VersionConstraint
         return $this->upperBoundary->getVersion()->isGreaterThan($otherUpperBoundary->getVersion());
     }
 
-    private function overlapsWith(VersionConstraint $other) : bool
+    private function overlapsWith(VersionConstraint $other): bool
     {
         if (! $this->isSimpleRangeString() && $other->isSimpleRangeString()) {
             return false;
@@ -203,9 +205,10 @@ final class VersionConstraint
             xor $this->strictlyContainsOtherBound($other->upperBoundary);
     }
 
-    private function adjacentTo(VersionConstraint $other) : bool
+    private function adjacentTo(VersionConstraint $other): bool
     {
-        if ($this->lowerBoundary !== null
+        if (
+            $this->lowerBoundary !== null
             && $other->upperBoundary !== null
             && $this->lowerBoundary->adjacentTo($other->upperBoundary)
         ) {
@@ -220,7 +223,7 @@ final class VersionConstraint
     /**
      * @throws LogicException
      */
-    private function mergeWithOverlapping(VersionConstraint $other) : self
+    private function mergeWithOverlapping(VersionConstraint $other): self
     {
         if (! $this->overlapsWith($other)) {
             throw new LogicException(sprintf(
@@ -252,9 +255,10 @@ final class VersionConstraint
     /**
      * @throws LogicException
      */
-    private function mergeAdjacent(VersionConstraint $other) : self
+    private function mergeAdjacent(VersionConstraint $other): self
     {
-        if ($this->upperBoundary !== null
+        if (
+            $this->upperBoundary !== null
             && $other->lowerBoundary !== null
             && $this->upperBoundary->adjacentTo($other->lowerBoundary)
         ) {
@@ -275,7 +279,7 @@ final class VersionConstraint
     }
 
     /** Note: most of the limitations/complication probably go away if we define a `Bound` VO */
-    private function strictlyContainsOtherBound(?Boundary $boundary) : bool
+    private function strictlyContainsOtherBound(?Boundary $boundary): bool
     {
         if ($boundary === null) {
             return false;

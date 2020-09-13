@@ -30,7 +30,7 @@ use Roave\SecurityAdvisories\Advisory;
  */
 final class AdvisoryTest extends TestCase
 {
-    public function testFromArrayWithValidConfig() : void
+    public function testFromArrayWithValidConfig(): void
     {
         $advisory = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
@@ -54,7 +54,7 @@ final class AdvisoryTest extends TestCase
         self::assertSame('>=2,<2.1', $constraints[1]->getConstraintString());
     }
 
-    public function testFromArrayWithComplexValidConfig() : void
+    public function testFromArrayWithComplexValidConfig(): void
     {
         $advisory = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
@@ -78,7 +78,7 @@ final class AdvisoryTest extends TestCase
         self::assertSame('>=2-rc.5,<2.1-rc.6', $constraints[1]->getConstraintString());
     }
 
-    public function testFromArrayWithStringVersion() : void
+    public function testFromArrayWithStringVersion(): void
     {
         $advisory = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
@@ -98,7 +98,7 @@ final class AdvisoryTest extends TestCase
         self::assertSame('<2.1', $constraints[1]->getConstraintString());
     }
 
-    public function testFromArrayWithComplexStringVersion() : void
+    public function testFromArrayWithComplexStringVersion(): void
     {
         $advisory = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
@@ -128,7 +128,7 @@ final class AdvisoryTest extends TestCase
         array $versionConstraint1,
         array $versionConstraint2,
         string $expected
-    ) : void {
+    ): void {
         $advisory = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
             'branches'  => [
@@ -141,7 +141,7 @@ final class AdvisoryTest extends TestCase
     }
 
     /** @return string[][]|string[][][] */
-    public function unsortedBranchesProvider() : array
+    public function unsortedBranchesProvider(): array
     {
         return [
             [

@@ -33,13 +33,14 @@ use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
+
 use function iterator_to_array;
 use function Safe\json_decode;
 use function Safe\sprintf;
 
 class GetAdvisoriesFromGithubApiTest extends TestCase
 {
-    public function testGithubAdvisoriesHasToken() : void
+    public function testGithubAdvisoriesHasToken(): void
     {
         $client = $this->createMock(Client::class);
 
@@ -53,7 +54,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
      *
      * @dataProvider cursorProvider
      */
-    public function testGithubAdvisoriesQueryMethod(string $cursor, bool $shouldContainCursor) : void
+    public function testGithubAdvisoriesQueryMethod(string $cursor, bool $shouldContainCursor): void
     {
         $client = $this->createMock(Client::class);
 
@@ -85,7 +86,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
      *
      * @dataProvider correctResponsesSequenceDataProvider
      */
-    public function testGithubAdvisoriesIsAbleToProduceAdvisories(array $apiResponses) : void
+    public function testGithubAdvisoriesIsAbleToProduceAdvisories(array $apiResponses): void
     {
         $client = $this->createMock(Client::class);
 
@@ -117,7 +118,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
      *
      * @dataProvider responsesWithIncorrectRangesProvider
      */
-    public function testGithubAdvisoriesFailToCompileGettingIncorrectRanges(ResponseInterface $response) : void
+    public function testGithubAdvisoriesFailToCompileGettingIncorrectRanges(ResponseInterface $response): void
     {
         $client = $this->createMock(Client::class);
 
@@ -142,7 +143,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     /**
      * @return mixed[]
      */
-    public function correctResponsesSequenceDataProvider() : array
+    public function correctResponsesSequenceDataProvider(): array
     {
         $responseBodies = [
             <<<'F'
@@ -210,7 +211,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
      *
      * @throws StringsException
      */
-    public function responsesWithIncorrectRangesProvider() : array
+    public function responsesWithIncorrectRangesProvider(): array
     {
         $query = <<<'QUERY'
                 {
@@ -255,7 +256,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     /**
      * @return mixed[]
      */
-    public function cursorProvider() : array
+    public function cursorProvider(): array
     {
         return [
             [

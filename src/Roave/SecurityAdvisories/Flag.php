@@ -45,22 +45,22 @@ final class Flag
         $this->literal = $literal;
     }
 
-    public static function build(string $literal) : self
+    public static function build(string $literal): self
     {
         return new self($literal);
     }
 
-    public function isEqual(Flag $flag) : bool
+    public function isEqual(Flag $flag): bool
     {
         return self::PRIORITY[$this->literal] === self::PRIORITY[$flag->literal];
     }
 
-    public function isGreaterThan(Flag $flag) : bool
+    public function isGreaterThan(Flag $flag): bool
     {
         return self::PRIORITY[$this->literal] > self::PRIORITY[$flag->literal];
     }
 
-    public function getLiteral() : string
+    public function getLiteral(): string
     {
         return $this->literal;
     }

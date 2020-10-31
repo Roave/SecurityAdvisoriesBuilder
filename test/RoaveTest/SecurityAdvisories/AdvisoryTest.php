@@ -118,6 +118,16 @@ final class AdvisoryTest extends TestCase
         self::assertSame('<2.1-beta.0.1', $constraints[1]->getConstraintString());
     }
 
+    public function testFromArrayWithWrongPackageName(): void
+    {
+        $advisory = Advisory::fromArrayData([
+            'reference' => 'composer://foo\bar',
+            'branches'  => [],
+        ]);
+
+        self::assertSame('foo/bar', $advisory->getComponentName());
+    }
+
     /**
      * @param string[] $versionConstraint1
      * @param string[] $versionConstraint2

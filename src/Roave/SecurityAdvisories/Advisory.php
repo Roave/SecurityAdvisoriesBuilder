@@ -30,6 +30,7 @@ use function is_array;
 use function is_string;
 use function Safe\usort;
 use function str_replace;
+use function strrpos;
 
 final class Advisory
 {
@@ -68,13 +69,19 @@ final class Advisory
      */
     public static function fromArrayData(array $config): self
     {
+        $branches = $config['branches'];
+        assert(is_array($branches));
+
         $reference = $config['reference'];
         assert(is_string($reference));
+
         $componentName = str_replace('composer://', '', $reference);
-        $branches      = $config['branches'];
+
+        if (!is_bool(strrpos($componentName, '\\'))) {
+            $componentName = str_replace('\\', '/', $componentName);
+        }
 
         assert(is_string($componentName));
-        assert(is_array($branches));
 
         return new self(
             $componentName,

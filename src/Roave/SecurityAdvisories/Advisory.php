@@ -27,6 +27,7 @@ use function array_values;
 use function assert;
 use function implode;
 use function is_array;
+use function is_bool;
 use function is_string;
 use function Safe\usort;
 use function str_replace;
@@ -77,7 +78,7 @@ final class Advisory
 
         $componentName = str_replace('composer://', '', $reference);
 
-        if (!is_bool(strrpos($componentName, '\\'))) {
+        if (! is_bool(strrpos($componentName, '\\'))) {
             $componentName = str_replace('\\', '/', $componentName);
         }
 

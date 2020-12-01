@@ -22,7 +22,7 @@
         "php-http/curl-client": "^2.1",
         "psr/http-client": "^1.0",
         "psr/http-message": "^1.0",
-        "symfony/yaml": "^5.1",
+        "symfony/yaml": "^5.2",
         "thecodingmachine/safe": "^0.1.16",
         "webmozart/assert": "^1.9.1"
     },

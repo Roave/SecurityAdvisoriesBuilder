@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5cc1c742b721ae05da10410661510679",
+    "content-hash": "9c8cb42daf5687563325572d83da7787",
     "packages": [
         {
             "name": "clue/stream-filter",
@@ -1017,7 +1017,7 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v5.1.9",
+            "version": "v5.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",

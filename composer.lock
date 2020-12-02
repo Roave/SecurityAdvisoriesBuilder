@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9c8cb42daf5687563325572d83da7787",
+    "content-hash": "63a61766d4a73949a420896739d410f5",
     "packages": [
         {
             "name": "clue/stream-filter",
@@ -4846,16 +4846,16 @@
         },
         {
             "name": "vimeo/psalm",
-            "version": "4.2.1",
+            "version": "4.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vimeo/psalm.git",
-                "reference": "ea9cb72143b77e7520c52fa37290bd8d8bc88fd9"
+                "reference": "6f916553a8de3c5c2483162b6cc01b21b24e4d1d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vimeo/psalm/zipball/ea9cb72143b77e7520c52fa37290bd8d8bc88fd9",
-                "reference": "ea9cb72143b77e7520c52fa37290bd8d8bc88fd9",
+                "url": "https://api.github.com/repos/vimeo/psalm/zipball/6f916553a8de3c5c2483162b6cc01b21b24e4d1d",
+                "reference": "6f916553a8de3c5c2483162b6cc01b21b24e4d1d",
                 "shasum": ""
             },
             "require": {
@@ -4943,7 +4943,7 @@
                 "inspection",
                 "php"
             ],
-            "time": "2020-11-20T14:56:53+00:00"
+            "time": "2020-12-02T22:13:45+00:00"
         },
         {
             "name": "webmozart/glob",

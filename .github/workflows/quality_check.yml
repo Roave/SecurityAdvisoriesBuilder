@@ -9,13 +9,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Cache Composer packages
-        uses: actions/cache@v2
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
         with:
-          path: vendor
-          key: ${{ runner.os }}-node-${{ hashFiles('/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          coverage: "pcov"
+          php-version: "7.4"
+          ini-values: memory_limit=-1
+          tools: composer:v2, cs2pr
+
+      - name: "Cache dependencies"
+        uses: "actions/cache@v2"
+        with:
+          path: |
+            ~/.composer/cache
+            vendor
 
       - name: Install dependencies
         run: composer install --no-progress --no-suggest

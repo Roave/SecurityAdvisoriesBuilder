@@ -172,9 +172,7 @@ final class VersionTest extends TestCase
         ];
     }
 
-    /**
-     * @return string[][]|bool[][]
-     */
+    /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string, bool, bool}> */
     public function greaterThanComparisonVersionsProvider(): array
     {
         $versions = [
@@ -255,9 +253,7 @@ final class VersionTest extends TestCase
         );
     }
 
-    /**
-     * @return string[][]|bool[][]
-     */
+    /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string, bool, bool}> */
     public function greaterOrEqualThanComparisonVersionsProvider(): array
     {
         $versions = [
@@ -396,9 +392,7 @@ final class VersionTest extends TestCase
         ];
     }
 
-    /**
-     * @return mixed[]
-     */
+    /** @psalm-return non-empty-list<array{non-empty-string, non-empty-string, bool, bool}> */
     public function stabilitiesToCompare(): array
     {
         return [

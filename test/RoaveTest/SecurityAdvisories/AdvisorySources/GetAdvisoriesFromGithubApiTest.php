@@ -145,9 +145,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         (new GetAdvisoriesFromGithubApi($client, 'some_token'))()->next();
     }
 
-    /**
-     * @return mixed[]
-     */
+    /** @psalm-return non-empty-list<array{list<ResponseInterface>}> */
     public function correctResponsesSequenceDataProvider(): array
     {
         $responseBodies = [
@@ -211,11 +209,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         ];
     }
 
-    /**
-     * @return mixed[]
-     *
-     * @throws StringsException
-     */
+    /** @psalm-return non-empty-list<list<ResponseInterface>> */
     public function responsesWithIncorrectRangesProvider(): array
     {
         $query = <<<'QUERY'
@@ -258,9 +252,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         return $responses;
     }
 
-    /**
-     * @return mixed[]
-     */
+    /** @psalm-return non-empty-list<array{string, bool}> */
     public function cursorProvider(): array
     {
         return [

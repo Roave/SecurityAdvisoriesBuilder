@@ -12,8 +12,7 @@ jobs:
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
         with:
-          coverage: "pcov"
-          php-version: "7.4"
+          php-version: "8.0"
           ini-values: memory_limit=-1
           tools: composer:v2, cs2pr
 

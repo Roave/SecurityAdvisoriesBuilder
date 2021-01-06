@@ -25,7 +25,7 @@ jobs:
             vendor
 
       - name: Install dependencies
-        run: composer install --no-progress --no-suggest
+        run: composer install --no-progress --no-suggest --ignore-platform-req=php
 
       - name: Code sniffer
         run: vendor/bin/phpcs

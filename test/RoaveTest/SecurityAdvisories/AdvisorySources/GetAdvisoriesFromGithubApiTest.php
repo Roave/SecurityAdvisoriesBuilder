@@ -33,6 +33,7 @@ use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
+use Webmozart\Assert\Assert;
 
 use function iterator_to_array;
 use function Safe\json_decode;
@@ -66,9 +67,13 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
 
         $jsonEncodedQuery = $overlapsWithReflection->invoke($githubAdvisories, $cursor);
 
+        Assert::string($jsonEncodedQuery);
+
         $decodedQuery = json_decode($jsonEncodedQuery, true);
 
+        self::assertIsArray($decodedQuery);
         self::assertArrayHasKey('query', $decodedQuery);
+        self::assertIsString($decodedQuery['query']);
 
         if ($shouldContainCursor) {
             self::assertStringContainsString(sprintf('after: "%s"', $cursor), $decodedQuery['query']);
@@ -140,9 +145,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         (new GetAdvisoriesFromGithubApi($client, 'some_token'))()->next();
     }
 
-    /**
-     * @return mixed[]
-     */
+    /** @psalm-return non-empty-list<array{list<ResponseInterface>}> */
     public function correctResponsesSequenceDataProvider(): array
     {
         $responseBodies = [
@@ -206,11 +209,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         ];
     }
 
-    /**
-     * @return mixed[]
-     *
-     * @throws StringsException
-     */
+    /** @psalm-return non-empty-list<list<ResponseInterface>> */
     public function responsesWithIncorrectRangesProvider(): array
     {
         $query = <<<'QUERY'
@@ -253,9 +252,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         return $responses;
     }
 
-    /**
-     * @return mixed[]
-     */
+    /** @psalm-return non-empty-list<array{string, bool}> */
     public function cursorProvider(): array
     {
         return [

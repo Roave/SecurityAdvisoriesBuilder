@@ -24,9 +24,10 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use Roave\SecurityAdvisories\Version;
+use Webmozart\Assert\Assert;
 
+use function array_combine;
 use function array_map;
-use function Safe\array_combine;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\Version}
@@ -135,7 +136,11 @@ final class VersionTest extends TestCase
 
         $method->setAccessible(true);
 
-        return $method->invoke($version1, $version2);
+        $value = $method->invoke($version1, $version2);
+
+        Assert::boolean($value);
+
+        return $value;
     }
 
     /**
@@ -167,9 +172,7 @@ final class VersionTest extends TestCase
         ];
     }
 
-    /**
-     * @return string[][]|bool[][]
-     */
+    /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string, bool, bool}> */
     public function greaterThanComparisonVersionsProvider(): array
     {
         $versions = [
@@ -250,9 +253,7 @@ final class VersionTest extends TestCase
         );
     }
 
-    /**
-     * @return string[][]|bool[][]
-     */
+    /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string, bool, bool}> */
     public function greaterOrEqualThanComparisonVersionsProvider(): array
     {
         $versions = [
@@ -391,9 +392,7 @@ final class VersionTest extends TestCase
         ];
     }
 
-    /**
-     * @return mixed[]
-     */
+    /** @psalm-return non-empty-list<array{non-empty-string, non-empty-string, bool, bool}> */
     public function stabilitiesToCompare(): array
     {
         return [

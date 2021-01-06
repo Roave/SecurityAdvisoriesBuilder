@@ -186,9 +186,10 @@ final class ComponentTest extends TestCase
     }
 
     /**
-     * @param string[][] $advisory1Branches
-     * @param string[][] $advisory2Branches
-     *
+     * @psalm-param non-empty-string $reference
+     * @psalm-param array<non-empty-string, array{versions: non-empty-list<non-empty-string>}> $advisory1Branches
+     * @psalm-param array<non-empty-string, array{versions: non-empty-list<non-empty-string>}> $advisory2Branches
+     * @psalm-param non-empty-string $expected
      * @dataProvider complexRealAdvisoriesProvider
      */
     public function testSortComplexAdvisoriesWithRealCase(
@@ -213,7 +214,15 @@ final class ComponentTest extends TestCase
     }
 
     /**
-     * @return mixed
+     * @psalm-return non-empty-array<
+     *     non-empty-string,
+     *     array{
+     *          non-empty-string,
+     *          array<non-empty-string, array{versions: non-empty-list<non-empty-string>}>,
+     *          array<non-empty-string, array{versions: non-empty-list<non-empty-string>}>,
+     *          non-empty-string
+     *     }
+     * >
      */
     public function complexRealAdvisoriesProvider()
     {

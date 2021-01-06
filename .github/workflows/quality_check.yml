@@ -12,8 +12,7 @@ jobs:
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
         with:
-          coverage: "pcov"
-          php-version: "7.4"
+          php-version: "8.0"
           ini-values: memory_limit=-1
           tools: composer:v2, cs2pr
 
@@ -26,7 +25,7 @@ jobs:
             vendor
 
       - name: Install dependencies
-        run: composer install --no-progress --no-suggest
+        run: composer install --no-progress --no-suggest --ignore-platform-req=php
 
       - name: Code sniffer
         run: vendor/bin/phpcs
@@ -38,7 +37,7 @@ jobs:
         run: vendor/bin/phpunit
 
       - name: Mutation testing
-        run: vendor/bin/infection --min-msi=99 --min-covered-msi=100
+        run: phpdbg -qrr vendor/bin/infection
 
       - name: Memory leaks detection
         run: vendor/bin/roave-no-leaks

@@ -74,9 +74,7 @@ final class FlagTest extends TestCase
         self::assertSame($expected, $flag->getLiteral());
     }
 
-    /**
-     * @return mixed[]
-     */
+    /** @psalm-return non-empty-list<array{string, string, bool, bool}> */
     public function isGreaterFlagDataProvider(): array
     {
         return [
@@ -127,9 +125,7 @@ final class FlagTest extends TestCase
         ];
     }
 
-    /**
-     * @return mixed[]
-     */
+    /** @psalm-return non-empty-list<array{string, string, bool, bool}> */
     public function isEqualDataProvider(): array
     {
         return [
@@ -140,9 +136,7 @@ final class FlagTest extends TestCase
         ];
     }
 
-    /**
-     * @return mixed[]
-     */
+    /** @psalm-return non-empty-list<array{string, string}> */
     public function getterTestDataProvider(): array
     {
         return [

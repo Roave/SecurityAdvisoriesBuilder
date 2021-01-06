@@ -37,7 +37,7 @@ jobs:
         run: vendor/bin/phpunit
 
       - name: Mutation testing
-        run: phpdbg -qrr vendor/bin/infection
+        run: phpdbg -qrr vendor/bin/roave-infection-static-analysis-plugin
 
       - name: Memory leaks detection
         run: vendor/bin/roave-no-leaks

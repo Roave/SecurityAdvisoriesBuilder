@@ -28,7 +28,7 @@
     },
     "require-dev": {
         "doctrine/coding-standard": "^8.2.0",
-        "infection/infection": "^0.20.2",
+        "roave/infection-static-analysis-plugin": "^1.7.0",
         "maglnet/composer-require-checker": "^2.1.0",
         "phpunit/phpunit": "^9.5.0",
         "psalm/plugin-phpunit": "^0.15.0",

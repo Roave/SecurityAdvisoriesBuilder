@@ -38,7 +38,7 @@ jobs:
         run: vendor/bin/phpunit
 
       - name: Mutation testing
-        run: vendor/bin/infection --min-msi=99 --min-covered-msi=100
+        run: phpdbg -qrr vendor/bin/infection
 
       - name: Memory leaks detection
         run: vendor/bin/roave-no-leaks

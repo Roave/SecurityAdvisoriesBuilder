@@ -150,7 +150,13 @@ final class AdvisoryTest extends TestCase
         self::assertSame($expected, $advisory->getConstraint());
     }
 
-    /** @return string[][]|string[][][] */
+    /**
+     * @psalm-return non-empty-list<array{
+     *      non-empty-list<non-empty-string>,
+     *      non-empty-list<non-empty-string>,
+     *      non-empty-string
+     * }>
+     */
     public function unsortedBranchesProvider(): array
     {
         return [

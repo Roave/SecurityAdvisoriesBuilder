@@ -25,10 +25,11 @@ use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use Roave\SecurityAdvisories\Version;
 use Roave\SecurityAdvisories\VersionConstraint;
+use Webmozart\Assert\Assert;
 
 use function array_column;
+use function array_combine;
 use function array_map;
-use function Safe\array_combine;
 use function Safe\preg_match;
 use function var_export;
 
@@ -45,16 +46,18 @@ final class VersionConstraintTest extends TestCase
     public function testFromRange(string $stringConstraint): void
     {
         $constraint = VersionConstraint::fromString($stringConstraint);
+        $lowerBound = $constraint->getLowerBound();
+        $upperBound = $constraint->getUpperBound();
 
-        self::assertInstanceOf(Version::class, $constraint->getLowerBound());
-        self::assertInstanceOf(Version::class, $constraint->getUpperBound());
+        self::assertNotNull($lowerBound);
+        self::assertNotNull($upperBound);
 
         $constraintAsString = $constraint->getConstraintString();
 
         self::assertSame((bool) preg_match('/>=/', $stringConstraint), $constraint->isLowerBoundIncluded());
         self::assertSame((bool) preg_match('/<=/', $stringConstraint), $constraint->isUpperBoundIncluded());
-        self::assertStringMatchesFormat('%A' . $constraint->getLowerBound()->getVersion() . '%A', $constraintAsString);
-        self::assertStringMatchesFormat('%A' . $constraint->getUpperBound()->getVersion() . '%A', $constraintAsString);
+        self::assertStringMatchesFormat('%A' . $lowerBound->getVersion() . '%A', $constraintAsString);
+        self::assertStringMatchesFormat('%A' . $upperBound->getVersion() . '%A', $constraintAsString);
     }
 
     /**
@@ -234,12 +237,10 @@ final class VersionConstraintTest extends TestCase
         $this->callMergeWithOverlapping($constraint1, $constraint2);
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @psalm-return array<non-empty-string, array{non-empty-string}> */
     public function closedRangesProvider(): array
     {
-        $matchedRanges = [
+        $samples = [
             ['>1.2.3,<4.5.6'],
             ['>=1.2.3,<4.5.6'],
             ['>1.2.3,<=4.5.6'],
@@ -254,18 +255,20 @@ final class VersionConstraintTest extends TestCase
             ['>1-stable.1.2,<1-rc.1.2'],
         ];
 
-        return array_combine(
-            array_column($matchedRanges, 0),
-            $matchedRanges
+        $entries = array_combine(
+            array_column($samples, 0),
+            $samples
         );
+
+        Assert::isArray($entries);
+
+        return $entries;
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @psalm-return array<non-empty-string, array{non-empty-string}> */
     public function complexRangesProvider(): array
     {
-        return $this->dataProviderFirstValueAsProviderKey([
+        $samples = [
             ['>1.2.3,<4.5.6,<7.8.9'],
             ['1.2.3|4.5.6'],
             ['1'],
@@ -278,7 +281,16 @@ final class VersionConstraintTest extends TestCase
             ['<1-a.2'],
             ['<1-a.2, >1-p.1.2'],
             ['1-beta.2.0|1-rc.1.2.3'],
-        ]);
+        ];
+
+        $entries = array_combine(
+            array_column($samples, 0),
+            $samples
+        );
+
+        Assert::isArray($entries);
+
+        return $entries;
     }
 
     /**
@@ -288,6 +300,8 @@ final class VersionConstraintTest extends TestCase
      *  - range2
      *  - range1 contains range2
      *  - range2 contains range1
+     *
+     * @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string, bool, bool}>
      */
     public function rangesForComparisonProvider(): array
     {
@@ -386,9 +400,7 @@ final class VersionConstraintTest extends TestCase
         );
     }
 
-    /**
-     * @return string[][]|bool[][]
-     */
+    /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string, bool, bool}> */
     public function mergeableRangesProvider(): array
     {
         $entries = [
@@ -477,7 +489,7 @@ final class VersionConstraintTest extends TestCase
             ['>1,<1-p', '>1-a,<1-b', false, false],
         ];
 
-        return array_combine(
+        $samples = array_combine(
             array_map(
                 static function (array $entry) {
                     return '((' . $entry[0] . ') ∩ (' . $entry[1] . ')) ≠ ∅';
@@ -486,14 +498,16 @@ final class VersionConstraintTest extends TestCase
             ),
             $entries
         );
+
+        Assert::isArray($samples);
+
+        return $samples;
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string}> */
     public function normalizableRangesProvider(): array
     {
-        return $this->dataProviderFirstValueAsProviderKey([
+        $samples = [
             ['>1.0,<2.0', '>1,<2'],
             ['>=1.0,<2.0', '>=1,<2'],
             ['>1.0,<=2.0', '>1,<=2'],
@@ -511,12 +525,19 @@ final class VersionConstraintTest extends TestCase
             ['<1.0', '<1'],
             ['<=1.0', '<=1'],
             ['<=1.0.3.0.5.0-beta.0.5.0.0', '<=1.0.3.0.5-beta.0.5'],
-        ]);
+        ];
+
+        $entries = array_combine(
+            array_column($samples, 0),
+            $samples
+        );
+
+        Assert::isArray($entries);
+
+        return $entries;
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string, non-empty-string}> */
     public function strictlyOverlappingRangesProvider(): array
     {
         $entries = [
@@ -555,7 +576,7 @@ final class VersionConstraintTest extends TestCase
             ['>1-a.1.0.1.0,<1-a.4.1', '>1-a.1.0.2,<1-a.5.8', '>1-a.1.0.1,<1-a.5.8'],
         ];
 
-        return array_combine(
+        $samples = array_combine(
             array_map(
                 static function (array $entry) {
                     return '((' . $entry[0] . ') ∪ (' . $entry[1] . ')) = (' . $entry[2] . ')';
@@ -564,11 +585,13 @@ final class VersionConstraintTest extends TestCase
             ),
             $entries
         );
+
+        Assert::isArray($samples);
+
+        return $samples;
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string}> */
     public function nonStrictlyOverlappingRangesProvider(): array
     {
         $entries = [
@@ -599,7 +622,7 @@ final class VersionConstraintTest extends TestCase
             ['>1-alpha.1,<4-alpha.1', '>2-beta.1,<3-beta.1'], // note: containing, not overlapping.
         ];
 
-        return array_combine(
+        $samples = array_combine(
             array_map(
                 static function (array $entry) {
                     return '((' . $entry[0] . ') ∩ (' . $entry[1] . ')) = ∅';
@@ -608,19 +631,10 @@ final class VersionConstraintTest extends TestCase
             ),
             $entries
         );
-    }
 
-    /**
-     * @param mixed[][] $entries
-     *
-     * @return mixed[][]
-     */
-    private function dataProviderFirstValueAsProviderKey(array $entries): array
-    {
-        return array_combine(
-            array_column($entries, 0),
-            $entries
-        );
+        Assert::isArray($samples);
+
+        return $samples;
     }
 
     private function callContains(VersionConstraint $versionConstraint, VersionConstraint $other): bool
@@ -629,7 +643,11 @@ final class VersionConstraintTest extends TestCase
 
         $containsReflection->setAccessible(true);
 
-        return $containsReflection->invoke($versionConstraint, $other);
+        $contains = $containsReflection->invoke($versionConstraint, $other);
+
+        Assert::boolean($contains);
+
+        return $contains;
     }
 
     private function callOverlapsWith(VersionConstraint $versionConstraint, VersionConstraint $other): bool
@@ -638,7 +656,11 @@ final class VersionConstraintTest extends TestCase
 
         $overlapsWithReflection->setAccessible(true);
 
-        return $overlapsWithReflection->invoke($versionConstraint, $other);
+        $overlaps = $overlapsWithReflection->invoke($versionConstraint, $other);
+
+        Assert::boolean($overlaps);
+
+        return $overlaps;
     }
 
     private function callMergeWithOverlapping(
@@ -649,12 +671,14 @@ final class VersionConstraintTest extends TestCase
 
         $mergeWithOverlappingReflection->setAccessible(true);
 
-        return $mergeWithOverlappingReflection->invoke($versionConstraint, $other);
+        $merged = $mergeWithOverlappingReflection->invoke($versionConstraint, $other);
+
+        Assert::isInstanceOf($merged, VersionConstraint::class);
+
+        return $versionConstraint;
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @psalm-return non-empty-list<array{non-empty-string}> */
     public function leftOpenEndedRangeProvider(): array
     {
         return [

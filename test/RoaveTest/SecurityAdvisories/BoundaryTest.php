@@ -25,6 +25,7 @@ use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Boundary;
 use Roave\SecurityAdvisories\Matchers;
 use Roave\SecurityAdvisories\Version;
+use Webmozart\Assert\Assert;
 
 use function Safe\preg_match;
 use function str_replace;
@@ -75,6 +76,11 @@ final class BoundaryTest extends TestCase
     public function testGetVersion(string $boundaryString): void
     {
         preg_match(Matchers::BOUNDARY_MATCHER, $boundaryString, $matches);
+
+        Assert::isArray($matches);
+        Assert::notEmpty($matches);
+        Assert::allString($matches);
+
         $boundary = str_replace($matches['boundary'], '', $matches[0]);
 
         self::assertTrue(
@@ -114,9 +120,7 @@ final class BoundaryTest extends TestCase
         self::assertFalse($boundary2->adjacentTo($boundary1));
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @psalm-return non-empty-list<array{string}> */
     public function invalidBoundaryStrings(): array
     {
         return [
@@ -156,9 +160,7 @@ final class BoundaryTest extends TestCase
         ];
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @psalm-return non-empty-list<array{non-empty-string, non-empty-string}> */
     public function validBoundaryStrings(): array
     {
         return [
@@ -211,9 +213,7 @@ final class BoundaryTest extends TestCase
         ];
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @psalm-return non-empty-list<array{non-empty-string, non-empty-string}> */
     public function adjacentBoundaries(): array
     {
         return [
@@ -230,9 +230,7 @@ final class BoundaryTest extends TestCase
         ];
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @psalm-return non-empty-list<array{non-empty-string, non-empty-string}> */
     public function nonAdjacentBoundaries(): array
     {
         return [

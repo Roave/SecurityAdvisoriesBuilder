@@ -33,6 +33,7 @@ use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
+use Webmozart\Assert\Assert;
 
 use function iterator_to_array;
 use function Safe\json_decode;
@@ -66,9 +67,13 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
 
         $jsonEncodedQuery = $overlapsWithReflection->invoke($githubAdvisories, $cursor);
 
+        Assert::string($jsonEncodedQuery);
+
         $decodedQuery = json_decode($jsonEncodedQuery, true);
 
+        self::assertIsArray($decodedQuery);
         self::assertArrayHasKey('query', $decodedQuery);
+        self::assertIsString($decodedQuery['query']);
 
         if ($shouldContainCursor) {
             self::assertStringContainsString(sprintf('after: "%s"', $cursor), $decodedQuery['query']);

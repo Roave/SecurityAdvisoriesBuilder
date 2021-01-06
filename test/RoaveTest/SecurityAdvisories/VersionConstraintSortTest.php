@@ -23,9 +23,10 @@ namespace RoaveTest\SecurityAdvisories;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\VersionConstraint;
 use Roave\SecurityAdvisories\VersionConstraintSort;
+use Webmozart\Assert\Assert;
 
+use function array_combine;
 use function array_map;
-use function Safe\array_combine;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\VersionConstraintSort}
@@ -41,7 +42,7 @@ final class VersionConstraintSortTest extends TestCase
         self::assertSame($result * -1, (new VersionConstraintSort())->__invoke($b, $a));
     }
 
-    /** @return int[][]|VersionConstraint[][] */
+    /** @psalm-return array<non-empty-string, array{VersionConstraint, VersionConstraint, int}> */
     public function comparedConstraints(): array
     {
         $constraints = [
@@ -69,7 +70,7 @@ final class VersionConstraintSortTest extends TestCase
             ['>=1-alpha.9,<=2-alpha.9,>3-alpha.9', '>=1-alpha.9,<=2-alpha.9', 0],
         ];
 
-        return array_combine(
+        $entries = array_combine(
             array_map(static function (array $entry): string {
                 return '"' . $entry[0] . '" <=> "' . $entry[1] . '"';
             }, $constraints),
@@ -81,5 +82,9 @@ final class VersionConstraintSortTest extends TestCase
                 ];
             }, $constraints)
         );
+
+        Assert::isArray($entries);
+
+        return $entries;
     }
 }

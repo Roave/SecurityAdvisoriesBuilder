@@ -213,7 +213,15 @@ final class ComponentTest extends TestCase
     }
 
     /**
-     * @return mixed
+     * @psalm-return non-empty-array<
+     *     non-empty-string,
+     *     array{
+     *          non-empty-string,
+     *          array<non-empty-string, array{versions: non-empty-list<non-empty-string>}>,
+     *          array<non-empty-string, array{versions: non-empty-list<non-empty-string>}>,
+     *          non-empty-string
+     *     }
+     * >
      */
     public function complexRealAdvisoriesProvider()
     {

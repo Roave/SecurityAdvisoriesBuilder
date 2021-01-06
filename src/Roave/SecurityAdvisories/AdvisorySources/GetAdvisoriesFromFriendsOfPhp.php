@@ -24,16 +24,20 @@ use CallbackFilterIterator;
 use FilesystemIterator;
 use Generator;
 use RecursiveDirectoryIterator;
+use RecursiveFilterIterator;
+use RecursiveIterator;
 use RecursiveIteratorIterator;
 use Roave\SecurityAdvisories\Advisory;
 use SplFileInfo;
 use Symfony\Component\Yaml\Yaml;
+use Webmozart\Assert\Assert;
 
 use function array_map;
 use function assert;
 use function is_string;
 use function iterator_to_array;
 use function Safe\file_get_contents;
+use function strpos;
 
 final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
 {
@@ -72,11 +76,28 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
     {
         return iterator_to_array(new CallbackFilterIterator(
             new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($this->advisoriesPath, FilesystemIterator::SKIP_DOTS)
+                $this->skipHiddenFilesAndDirectories(
+                    new RecursiveDirectoryIterator($this->advisoriesPath, FilesystemIterator::SKIP_DOTS)
+                ),
             ),
-            static function (SplFileInfo $advisoryFile) {
-                return $advisoryFile->isFile() && $advisoryFile->getExtension() === self::ADVISORY_EXTENSION;
+            static function (SplFileInfo $advisoryFile): bool {
+                return $advisoryFile->isFile()
+                    && $advisoryFile->getExtension() === self::ADVISORY_EXTENSION;
             }
         ));
+    }
+
+    private function skipHiddenFilesAndDirectories(RecursiveIterator $files): RecursiveIterator
+    {
+        return new class ($files) extends RecursiveFilterIterator {
+            public function accept(): bool
+            {
+                $current = $this->current();
+
+                Assert::isInstanceOf($current, SplFileInfo::class);
+
+                return strpos($current->getFilename(), '.') !== 0;
+            }
+        };
     }
 }

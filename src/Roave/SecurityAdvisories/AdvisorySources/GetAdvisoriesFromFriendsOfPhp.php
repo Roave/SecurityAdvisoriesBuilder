@@ -37,7 +37,7 @@ use function assert;
 use function is_string;
 use function iterator_to_array;
 use function Safe\file_get_contents;
-use function strpos;
+use function str_starts_with;
 
 final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
 {
@@ -96,7 +96,7 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
 
                 Assert::isInstanceOf($current, SplFileInfo::class);
 
-                return strpos($current->getFilename(), '.') !== 0;
+                return ! str_starts_with($current->getFilename(), '.');
             }
         };
     }

@@ -18,5 +18,6 @@
 
     <plugins>
         <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
+        <pluginClass class="Psl\Integration\Psalm\Plugin" />
     </plugins>
 </psalm>

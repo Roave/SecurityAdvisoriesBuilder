@@ -25,8 +25,9 @@ use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Boundary;
 use Roave\SecurityAdvisories\Matchers;
 use Roave\SecurityAdvisories\Version;
-use Webmozart\Assert\Assert;
 
+use function Psl\Type\non_empty_string;
+use function Psl\Type\shape;
 use function Safe\preg_match;
 use function str_replace;
 use function strpos;
@@ -77,11 +78,13 @@ final class BoundaryTest extends TestCase
     {
         preg_match(Matchers::BOUNDARY_MATCHER, $boundaryString, $matches);
 
-        Assert::isArray($matches);
-        Assert::notEmpty($matches);
-        Assert::allString($matches);
+            $result = shape([
+                0 => non_empty_string(),
+                'boundary' => non_empty_string(),
+            ])
+                ->coerce($matches);
 
-        $boundary = str_replace($matches['boundary'], '', $matches[0]);
+        $boundary = str_replace($result['boundary'], '', $result[0]);
 
         self::assertTrue(
             Version::fromString($boundary)->equalTo(Boundary::fromString($boundaryString)->getVersion())

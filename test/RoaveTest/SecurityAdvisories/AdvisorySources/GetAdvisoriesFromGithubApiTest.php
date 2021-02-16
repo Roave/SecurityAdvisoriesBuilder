@@ -33,23 +33,16 @@ use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
-use Webmozart\Assert\Assert;
 
 use function iterator_to_array;
+use function Psl\Type\non_empty_string;
+use function Psl\Type\shape;
+use function Psl\Type\string;
 use function Safe\json_decode;
 use function Safe\sprintf;
 
 class GetAdvisoriesFromGithubApiTest extends TestCase
 {
-    public function testGithubAdvisoriesHasToken(): void
-    {
-        $client = $this->createMock(Client::class);
-
-        $this->expectException(InvalidArgumentException::class);
-
-        new GetAdvisoriesFromGithubApi($client, '');
-    }
-
     /**
      * @throws ReflectionException
      *
@@ -65,20 +58,18 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
 
         $overlapsWithReflection->setAccessible(true);
 
-        $jsonEncodedQuery = $overlapsWithReflection->invoke($githubAdvisories, $cursor);
-
-        Assert::string($jsonEncodedQuery);
-
-        $decodedQuery = json_decode($jsonEncodedQuery, true);
-
-        self::assertIsArray($decodedQuery);
-        self::assertArrayHasKey('query', $decodedQuery);
-        self::assertIsString($decodedQuery['query']);
+        $query = shape([
+            'query' => non_empty_string(),
+        ])->coerce(json_decode(
+            string()
+                ->coerce($overlapsWithReflection->invoke($githubAdvisories, $cursor)),
+            true
+        ))['query'];
 
         if ($shouldContainCursor) {
-            self::assertStringContainsString(sprintf('after: "%s"', $cursor), $decodedQuery['query']);
+            self::assertStringContainsString(sprintf('after: "%s"', $cursor), $query);
         } else {
-            self::assertStringNotContainsString('after: ""', $decodedQuery['query']);
+            self::assertStringNotContainsString('after: ""', $query);
         }
     }
 
@@ -140,7 +131,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
             }))
             ->willReturn($response);
 
-        self::expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         (new GetAdvisoriesFromGithubApi($client, 'some_token'))()->next();
     }

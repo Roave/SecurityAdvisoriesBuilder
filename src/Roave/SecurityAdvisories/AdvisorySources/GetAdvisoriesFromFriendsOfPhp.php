@@ -30,12 +30,12 @@ use RecursiveIteratorIterator;
 use Roave\SecurityAdvisories\Advisory;
 use SplFileInfo;
 use Symfony\Component\Yaml\Yaml;
-use Webmozart\Assert\Assert;
 
 use function array_map;
 use function assert;
 use function is_string;
 use function iterator_to_array;
+use function Psl\Type\object as objectType;
 use function Safe\file_get_contents;
 use function str_starts_with;
 
@@ -92,11 +92,12 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
         return new class ($files) extends RecursiveFilterIterator {
             public function accept(): bool
             {
-                $current = $this->current();
-
-                Assert::isInstanceOf($current, SplFileInfo::class);
-
-                return ! str_starts_with($current->getFilename(), '.');
+                return ! str_starts_with(
+                    objectType(SplFileInfo::class)
+                        ->coerce($this->current())
+                        ->getFilename(),
+                    '.'
+                );
             }
         };
     }

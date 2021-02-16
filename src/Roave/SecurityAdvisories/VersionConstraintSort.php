@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+/** @psalm-immutable */
 final class VersionConstraintSort
 {
     public function __invoke(VersionConstraint $a, VersionConstraint $b): int

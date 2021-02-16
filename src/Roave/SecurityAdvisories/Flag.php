@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+/** @psalm-immutable */
 final class Flag
 {
     /**

@@ -22,6 +22,7 @@ namespace RoaveTest\SecurityAdvisories;
 
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Advisory;
+use Roave\SecurityAdvisories\PackageName;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\Advisory}
@@ -44,7 +45,7 @@ final class AdvisoryTest extends TestCase
             ],
         ]);
 
-        self::assertSame('foo/bar', $advisory->getComponentName());
+        self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
         self::assertSame('>=1,<1.1|>=2,<2.1', $advisory->getConstraint());
 
         $constraints = $advisory->getVersionConstraints();
@@ -68,7 +69,7 @@ final class AdvisoryTest extends TestCase
             ],
         ]);
 
-        self::assertSame('foo/bar', $advisory->getComponentName());
+        self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
         self::assertSame('>=1-beta.3.4,<1.1-alpha.4.5|>=2-rc.5,<2.1-rc.6', $advisory->getConstraint());
 
         $constraints = $advisory->getVersionConstraints();
@@ -88,7 +89,7 @@ final class AdvisoryTest extends TestCase
             ],
         ]);
 
-        self::assertSame('foo/bar', $advisory->getComponentName());
+        self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
         self::assertSame('<1.1|<2.1', $advisory->getConstraint());
 
         $constraints = $advisory->getVersionConstraints();
@@ -108,7 +109,7 @@ final class AdvisoryTest extends TestCase
             ],
         ]);
 
-        self::assertSame('foo/bar', $advisory->getComponentName());
+        self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
         self::assertSame('<1.1-beta.0.1|<2.1-beta.0.1', $advisory->getConstraint());
 
         $constraints = $advisory->getVersionConstraints();
@@ -125,7 +126,7 @@ final class AdvisoryTest extends TestCase
             'branches'  => [],
         ]);
 
-        self::assertSame('foo/bar', $advisory->getComponentName());
+        self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
     }
 
     /**

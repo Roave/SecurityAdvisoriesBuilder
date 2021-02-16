@@ -23,6 +23,7 @@ namespace RoaveTest\SecurityAdvisories;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\Component;
+use Roave\SecurityAdvisories\PackageName;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\Component}
@@ -56,12 +57,12 @@ final class ComponentTest extends TestCase
             ],
         ]);
 
-        $component = new Component('foo/bar', $advisory1, $advisory2);
+        $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2);
 
         $expected = '>=1-beta.1.1,<1.1-beta.1.1|>=2-beta.1.1,<2.1-beta.1.1|' .
             '>=3-beta.1.1,<3.1-beta.1.1|>=4-beta.1.1,<4.1-beta.1.1';
         self::assertSame($expected, $component->getConflictConstraint());
-        self::assertSame('foo/bar', $component->getName());
+        self::assertEquals(PackageName::fromName('foo/bar'), $component->name);
     }
 
     public function testDeDuplicatesOverlappingAdvisories(): void
@@ -104,10 +105,10 @@ final class ComponentTest extends TestCase
             ],
         ]);
 
-        $component = new Component('foo/bar', $advisory1, $advisory2, $advisory3);
+        $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2, $advisory3);
 
         self::assertSame('>=1,<1.1|>=2,<2.1|>=3,<3.1', $component->getConflictConstraint());
-        self::assertSame('foo/bar', $component->getName());
+        self::assertEquals(PackageName::fromName('foo/bar'), $component->name);
     }
 
     public function testDeDuplicatesOverlappingComplexAdvisories(): void
@@ -150,11 +151,11 @@ final class ComponentTest extends TestCase
             ],
         ]);
 
-        $component = new Component('foo/bar', $advisory1, $advisory2, $advisory3);
+        $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2, $advisory3);
 
         $expected = '>=1-p.1.1.2,<1.1-b.1.1.3|>=2-rc,<2.1-p|>=3-stable.5,<3.1';
         self::assertSame($expected, $component->getConflictConstraint());
-        self::assertSame('foo/bar', $component->getName());
+        self::assertEquals(PackageName::fromName('foo/bar'), $component->name);
     }
 
     public function testSortAdvisoriesWithRealCase(): void
@@ -180,7 +181,7 @@ final class ComponentTest extends TestCase
             ],
         ]);
 
-        $component = new Component('foo/bar', $advisory1, $advisory2, $advisory3);
+        $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2, $advisory3);
 
         self::assertSame('>=3,<=3.0.11|>=3.1,<3.1.11', $component->getConflictConstraint());
     }
@@ -208,7 +209,7 @@ final class ComponentTest extends TestCase
             'branches' => $advisory2Branches,
         ]);
 
-        $component = new Component('foo/bar', $advisory1, $advisory2, $advisory3);
+        $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2, $advisory3);
 
         self::assertSame($expected, $component->getConflictConstraint());
     }

@@ -37,26 +37,14 @@ final class Advisory
 {
     private string $componentName;
 
-    /**
-     * @var VersionConstraint[]
-     * @psalm-var list<VersionConstraint>
-     */
+    /** @var list<VersionConstraint> */
     private array $branchConstraints;
 
-    /**
-     * @param VersionConstraint[] $branchConstraints
-     */
+    /** @param list<VersionConstraint> $branchConstraints */
     private function __construct(string $componentName, array $branchConstraints)
     {
-        /** @psalm-var callable(...VersionConstraint): list<VersionConstraint>|null $checkType */
-        static $checkType;
-
-        $checkType = $checkType ?: static function (VersionConstraint ...$versionConstraints): array {
-            return $versionConstraints;
-        };
-
         $this->componentName     = $componentName;
-        $this->branchConstraints = $this->sortVersionConstraints($checkType(...$branchConstraints));
+        $this->branchConstraints = $this->sortVersionConstraints($branchConstraints);
     }
 
     /**

@@ -26,12 +26,11 @@ use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Roave\SecurityAdvisories\Advisory;
+use Roave\SecurityAdvisories\Exception\InvalidPackageName;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
 use Webmozart\Assert\Assert;
 
-use function array_map;
-use function array_merge;
 use function count;
 use function explode;
 use function Safe\json_decode;
@@ -84,21 +83,25 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      */
     public function __invoke(): Generator
     {
-        return yield from array_map(
-            static function (array $item): Advisory {
-                $versions = explode(',', $item['node']['vulnerableVersionRange']);
-                Assert::lessThanEq(count($versions), 2);
-                Assert::allStringNotEmpty($versions);
+        foreach ($this->getAdvisories() as $item) {
+            $versions = explode(',', $item['node']['vulnerableVersionRange']);
+            Assert::lessThanEq(count($versions), 2);
+            Assert::allStringNotEmpty($versions);
 
-                return Advisory::fromArrayData(
+            try {
+                yield Advisory::fromArrayData(
                     [
                         'reference' => $item['node']['package']['name'],
-                        'branches' => [['versions' => $versions]],
+                        'branches'  => [['versions' => $versions]],
                     ]
                 );
-            },
-            $this->getAdvisories()
-        );
+            } catch (InvalidPackageName) {
+                // Sometimes, github advisories publish CVEs with malformed package names, and that
+                // should not crash our entire pipeline.
+                // @TODO add logging here?
+                continue;
+            }
+        }
     }
 
     /**
@@ -112,7 +115,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      * @throws JsonException
      * @throws StringsException
      *
-     * @psalm-return array<int, array{
+     * @psalm-return iterable<int, array{
      *      cursor: string,
      *      node: array{
      *          vulnerableVersionRange: string,
@@ -120,10 +123,9 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      *      }
      * }>
      */
-    private function getAdvisories(): array
+    private function getAdvisories(): iterable
     {
-        $advisories = [];
-        $cursor     = '';
+        $cursor = '';
 
         do {
             $response = $this->client->sendRequest($this->getRequest($cursor));
@@ -137,12 +139,12 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
              */
             $data            = json_decode($response->getBody()->__toString(), true);
             $vulnerabilities = $data['data']['securityVulnerabilities'];
-            $advisories[]    = $vulnerabilities['edges'];
-            $hasNextPage     = $vulnerabilities['pageInfo']['hasNextPage'];
-            $cursor          = $vulnerabilities['pageInfo']['endCursor'];
-        } while ($hasNextPage);
 
-        return array_merge(...$advisories);
+            yield from $vulnerabilities['edges'];
+
+            $hasNextPage = $vulnerabilities['pageInfo']['hasNextPage'];
+            $cursor      = $vulnerabilities['pageInfo']['endCursor'];
+        } while ($hasNextPage);
     }
 
     /**

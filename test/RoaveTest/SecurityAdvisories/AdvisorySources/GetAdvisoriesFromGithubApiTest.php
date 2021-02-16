@@ -209,6 +209,104 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider correctResponsesWithInvalidAdvisoryNames
+     */
+    public function testWillSkipAdvisoriesWithMalformedNames(ResponseInterface ...$responses): void
+    {
+        $client = $this->createMock(Client::class);
+
+        $client->method('sendRequest')
+            ->willReturnOnConsecutiveCalls(...$responses);
+
+        $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token');
+
+        self::assertEquals(
+            [
+                Advisory::fromArrayData([
+                    'reference' => 'aa/bb',
+                    'branches'  => [['versions' => ['> 0.12.0, < 0.12.1 ']]],
+                ]),
+                Advisory::fromArrayData([
+                    'reference' => 'dd/ee',
+                    'branches'  => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
+                ]),
+            ],
+            iterator_to_array($advisories(), false)
+        );
+    }
+
+    /** @psalm-return non-empty-list<list<ResponseInterface>> */
+    public function correctResponsesWithInvalidAdvisoryNames(): array
+    {
+        $responseBodies = [
+            <<<'F'
+                {
+                  "data": {
+                    "securityVulnerabilities": {
+                      "edges": [
+                        {
+                          "cursor": "Y3Vyc29yOnYyOpK5MjAyMC0wMS0wOFQxOToxNTowNiswMjowMM0LdA==",
+                          "node": {
+                            "vulnerableVersionRange": "> 0.12.0, < 0.12.1 ",
+                            "package": {
+                              "name": "aa/bb"
+                            }
+                          }
+                        },
+                        {
+                          "cursor": "Y3Vyc29yOnYyOpK5MjAyMC0wMS0wOFQxOToxNTowNiswMjowMM0LdB==",
+                          "node": {
+                            "vulnerableVersionRange": "> 0.12.0, < 0.12.1 ",
+                            "package": {
+                              "name": "cc"
+                            }
+                          }
+                        },
+                        {
+                          "cursor": "Y3Vyc29yOnYyOpK5MjAyMC0wMS0wOFQxOToxNTowNiswMjowMM0LdB==",
+                          "node": {
+                            "vulnerableVersionRange": "> 1.2.3, < 4.5.6 ",
+                            "package": {
+                              "name": "dd/ee"
+                            }
+                          }
+                        }
+                      ],
+                      "pageInfo": {
+                        "hasNextPage": true,
+                        "endCursor": "Y3Vyc29yOnYyOpK5MjAyMC0wMS0wOFQxOToxNTowNiswMjowMM0LdA=="
+                      }
+                    }
+                  }
+                }
+            F,
+            <<<'S'
+                {
+                  "data": {
+                    "securityVulnerabilities": {
+                      "edges": [],
+                      "pageInfo": {
+                        "hasNextPage": false,
+                        "endCursor": null
+                      }
+                    }
+                  }
+                }
+            S,
+        ];
+
+        $first  = new Response(200, [], $responseBodies[0]);
+        $second = new Response(200, [], $responseBodies[1]);
+
+        return [
+            [
+                $first,
+                $second,
+            ],
+        ];
+    }
+
     /** @psalm-return non-empty-list<list<ResponseInterface>> */
     public function responsesWithIncorrectRangesProvider(): array
     {

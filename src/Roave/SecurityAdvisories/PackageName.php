@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories;
 
 use Roave\SecurityAdvisories\Exception\InvalidPackageName;
-use Webmozart\Assert\Assert;
 
 use function preg_match;
+use function Psl\Type\non_empty_string;
 use function str_replace;
 
 /**
@@ -32,6 +32,9 @@ final class PackageName
      * @throws InvalidPackageName
      *
      * @psalm-pure
+     *
+     * @psalm-suppress ImpureFunctionCall see https://github.com/azjezz/psl/issues/130
+     * @psalm-suppress ImpureMethodCall see https://github.com/azjezz/psl/issues/130
      */
     public static function fromName(string $name): self
     {
@@ -39,9 +42,10 @@ final class PackageName
             throw InvalidPackageName::fromInvalidName($name);
         }
 
-        Assert::stringNotEmpty($name);
-
-        return new self($name);
+        return new self(
+            non_empty_string()
+                ->coerce($name)
+        );
     }
 
     /**

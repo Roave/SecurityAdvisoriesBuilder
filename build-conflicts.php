@@ -34,9 +34,10 @@ use function array_merge;
 use function dirname;
 use function escapeshellarg;
 use function exec;
-use function getenv;
 use function implode;
 use function ksort;
+use function Psl\Env\get_var;
+use function Psl\Type\non_empty_string;
 use function Safe\chdir;
 use function Safe\file_put_contents;
 use function Safe\getcwd;
@@ -83,8 +84,8 @@ use const PHP_EOL;
         E_STRICT | E_NOTICE | E_WARNING
     );
 
-    $token                     = getenv('GITHUB_TOKEN') ?: '';
-    $authentication            = $token === '' ? '' : $token . ':x-oauth-basic@';
+    $token                     = non_empty_string()->coerce(get_var('GITHUB_TOKEN'));
+    $authentication            = $token . ':x-oauth-basic@';
     $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';
     $buildDir                  = __DIR__ . '/build';

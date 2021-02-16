@@ -21,7 +21,9 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories\AdvisorySources;
 
 use Generator;
+use InvalidArgumentException;
 use Nyholm\Psr7\Request;
+use Psl\Type\Exception\AssertException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
@@ -29,10 +31,12 @@ use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\Exception\InvalidPackageName;
 use Safe\Exceptions\JsonException;
 use Safe\Exceptions\StringsException;
-use Webmozart\Assert\Assert;
 
 use function count;
 use function explode;
+use function Psl\Type\int;
+use function Psl\Type\iterable;
+use function Psl\Type\non_empty_string;
 use function Safe\json_decode;
 use function Safe\json_encode;
 use function Safe\sprintf;
@@ -61,15 +65,11 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
 
     private string $token;
 
+    /** @psalm-param non-empty-string $token */
     public function __construct(
         ClientInterface $client,
         string $token
     ) {
-        Assert::stringNotEmpty(
-            $token,
-            'Unable to proceed. Please make sure you have GITHUB_TOKEN environment variable set up.'
-        );
-
         $this->client = $client;
         $this->token  = $token;
     }
@@ -85,8 +85,19 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
     {
         foreach ($this->getAdvisories() as $item) {
             $versions = explode(',', $item['node']['vulnerableVersionRange']);
-            Assert::lessThanEq(count($versions), 2);
-            Assert::allStringNotEmpty($versions);
+
+            try {
+                iterable(
+                    int(),
+                    non_empty_string()
+                )->assert($versions);
+            } catch (AssertException $failure) {
+                throw new InvalidArgumentException($failure->getMessage(), (int) $failure->getCode(), $failure);
+            }
+
+            if (count($versions) > 2) {
+                throw new InvalidArgumentException('More than 2 version range delimiters found');
+            }
 
             try {
                 yield Advisory::fromArrayData(

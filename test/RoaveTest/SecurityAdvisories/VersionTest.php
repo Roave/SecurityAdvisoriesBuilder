@@ -24,10 +24,10 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use Roave\SecurityAdvisories\Version;
-use Webmozart\Assert\Assert;
 
 use function array_combine;
 use function array_map;
+use function Psl\Type\bool;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\Version}
@@ -136,11 +136,8 @@ final class VersionTest extends TestCase
 
         $method->setAccessible(true);
 
-        $value = $method->invoke($version1, $version2);
-
-        Assert::boolean($value);
-
-        return $value;
+        return bool()
+            ->coerce($method->invoke($version1, $version2));
     }
 
     /**

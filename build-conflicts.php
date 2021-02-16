@@ -23,7 +23,6 @@ namespace Roave\SecurityAdvisories;
 use DateTime;
 use DateTimeZone;
 use ErrorException;
-use Generator;
 use Http\Client\Curl\Client;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
@@ -32,21 +31,19 @@ use UnexpectedValueException;
 
 use function array_filter;
 use function array_merge;
-use function assert;
 use function dirname;
 use function escapeshellarg;
 use function exec;
 use function getenv;
 use function implode;
-use function is_string;
+use function ksort;
 use function Safe\chdir;
 use function Safe\file_put_contents;
 use function Safe\getcwd;
 use function Safe\json_encode;
-use function Safe\ksort;
 use function Safe\realpath;
-use function Safe\sprintf;
 use function set_error_handler;
+use function sprintf;
 
 use const E_NOTICE;
 use const E_STRICT;
@@ -59,8 +56,28 @@ use const PHP_EOL;
 (static function (): void {
     require_once __DIR__ . '/vendor/autoload.php';
 
+    /**
+     * @psalm-template ReturnType of mixed|void
+     * @psalm-param callable(): ReturnType $function
+     * @psalm-return ReturnType
+     */
+    function runInPath(callable $function, string $path): mixed
+    {
+        $originalPath = getcwd();
+
+        chdir($path);
+
+        try {
+            $returnValue = $function();
+        } finally {
+            chdir($originalPath);
+        }
+
+        return $returnValue;
+    }
+
     set_error_handler(
-        static function ($errorCode, $message = '', $file = '', $line = 0): bool {
+        static function (int $errorCode, string $message = '', string $file = '', int $line = 0): bool {
             throw new ErrorException($message, 0, $errorCode, $file, $line);
         },
         E_STRICT | E_NOTICE | E_WARNING
@@ -91,21 +108,24 @@ use const PHP_EOL;
         ],
     ];
 
-    $execute = static function (string $commandString): array {
-        // may the gods forgive me for this in-lined command addendum, but I CBA to fix proc_open's handling
-        // of exit codes.
-        exec($commandString . ' 2>&1', $output, $result);
+    $execute =
+        /** @return non-empty-list<string> */
+        static function (string $commandString): array {
+            // may the gods forgive me for this in-lined command addendum, but I CBA to fix proc_open's handling
+            // of exit codes.
+            exec($commandString . ' 2>&1', $output, $result);
 
-        if ($result !== 0) {
-            throw new UnexpectedValueException(sprintf(
-                'Command failed: "%s" "%s"',
-                $commandString,
-                implode(PHP_EOL, $output)
-            ));
-        }
+            if ($result !== 0) {
+                throw new UnexpectedValueException(sprintf(
+                    'Command failed: "%s" "%s"',
+                    $commandString,
+                    implode(PHP_EOL, $output)
+                ));
+            }
 
-        return $output;
-    };
+            /** @psalm-var non-empty-list<string> $output */
+            return $output;
+        };
 
     $cleanBuildDir = static function () use ($buildDir, $execute): void {
         $execute('rm -rf ' . escapeshellarg($buildDir));
@@ -134,49 +154,44 @@ use const PHP_EOL;
         ));
     };
 
-    /**
-     * @param Generator<Advisory> $getAdvisories
-     *
-     * @return Component[]
-     */
-    $buildComponents = static function (Generator $advisories): array {
-        // @todo need a functional way to do this, somehow
-        $indexedAdvisories = [];
-        $components        = [];
+    $buildComponents =
+        /**
+         * @param iterable<int, Advisory> $advisories
+         *
+         * @return Component[]
+         */
+        static function (iterable $advisories): array {
+            $indexedAdvisories = [];
+            $components        = [];
 
-        foreach ($advisories as $advisory) {
-            if (! isset($indexedAdvisories[$advisory->getComponentName()])) {
-                $indexedAdvisories[$advisory->getComponentName()] = [];
+            foreach ($advisories as $advisory) {
+                $indexedAdvisories[$advisory->package->packageName][] = $advisory;
             }
 
-            $indexedAdvisories[$advisory->getComponentName()][] = $advisory;
-        }
+            foreach ($indexedAdvisories as $componentName => $componentAdvisories) {
+                $components[$componentName] = new Component($componentAdvisories[0]->package, ...$componentAdvisories);
+            }
 
-        foreach ($indexedAdvisories as $componentName => $componentAdvisories) {
-            assert(is_string($componentName));
+            return $components;
+        };
 
-            $components[$componentName] = new Component($componentName, ...$componentAdvisories);
-        }
+    $buildConflicts =
+        /**
+         * @param Component[] $components
+         *
+         * @return array<non-empty-string, non-empty-string>
+         */
+        static function (array $components): array {
+            $conflicts = [];
 
-        return $components;
-    };
+            foreach ($components as $component) {
+                $conflicts[$component->name->packageName] = $component->getConflictConstraint();
+            }
 
-    /**
-     * @param Component[] $components
-     *
-     * @return string[]
-     */
-    $buildConflicts = static function (array $components): array {
-        $conflicts = [];
+            ksort($conflicts);
 
-        foreach ($components as $component) {
-            $conflicts[$component->getName()] = $component->getConflictConstraint();
-        }
-
-        ksort($conflicts);
-
-        return array_filter($conflicts);
-    };
+            return array_filter($conflicts);
+        };
 
     $buildConflictsJson = static function (array $baseConfig, array $conflicts): string {
         return json_encode(
@@ -192,22 +207,8 @@ use const PHP_EOL;
         file_put_contents($path, $jsonString . "\n");
     };
 
-    $runInPath = static function (callable $function, string $path) {
-        $originalPath = getcwd();
-
-        chdir($path);
-
-        try {
-            $returnValue = $function();
-        } finally {
-            chdir($originalPath);
-        }
-
-        return $returnValue;
-    };
-
-    $getComposerPhar = static function (string $targetDir) use ($runInPath, $execute): void {
-        $runInPath(
+    $getComposerPhar = static function (string $targetDir) use ($execute): void {
+        runInPath(
             static function () use ($targetDir, $execute): void {
                 $installerPath = escapeshellarg($targetDir . '/composer-installer.php');
 
@@ -221,8 +222,8 @@ use const PHP_EOL;
         );
     };
 
-    $validateComposerJson = static function (string $composerJsonPath) use ($runInPath, $execute): void {
-        $runInPath(
+    $validateComposerJson = static function (string $composerJsonPath) use ($execute): void {
+        runInPath(
             static function () use ($execute): void {
                 $execute('php composer.phar validate');
             },
@@ -241,15 +242,18 @@ use const PHP_EOL;
         ));
     };
 
-    $commitComposerJson = static function (string $composerJsonPath) use ($runInPath, $execute): void {
-        $originalHash = $runInPath(
-            static function () use ($execute) {
+    $commitComposerJson = static function (string $composerJsonPath) use ($execute): void {
+        $parseHead =
+            /** @psalm-return non-empty-list<string> */
+            static function () use ($execute): array {
                 return $execute('git rev-parse HEAD');
-            },
+            };
+        $originalHash = runInPath(
+            $parseHead,
             dirname($composerJsonPath) . '/../security-advisories'
         );
 
-        $runInPath(
+        runInPath(
             static function () use ($composerJsonPath, $originalHash, $execute): void {
                 $execute('git add ' . escapeshellarg(realpath($composerJsonPath)));
 

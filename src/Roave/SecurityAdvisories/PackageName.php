@@ -8,6 +8,7 @@ use Roave\SecurityAdvisories\Exception\InvalidPackageName;
 use Webmozart\Assert\Assert;
 
 use function preg_match;
+use function str_replace;
 
 /**
  * Small value type around the definition of a package name.
@@ -41,5 +42,19 @@ final class PackageName
         Assert::stringNotEmpty($name);
 
         return new self($name);
+    }
+
+    /**
+     * @throws InvalidPackageName
+     *
+     * @psalm-pure
+     */
+    public static function fromReferenceName(string $reference): self
+    {
+        return self::fromName(str_replace(
+            ['composer://', '\\'],
+            ['', '/'],
+            $reference
+        ));
     }
 }

@@ -16,6 +16,8 @@
     <rule ref="Doctrine">
         <!-- return type mismatch is detected by static analysis tools, not by phpcs tools -->
         <exclude name="SlevomatCodingStandard.TypeHints.TypeHintDeclaration.IncorrectReturnTypeHint"/>
+        <!-- /build-conflict.php declares namespaced functions -->
+        <exclude name="PSR1.Files.SideEffects.FoundWithSymbols"/>
     </rule>
 
     <file>build-conflicts.php</file>

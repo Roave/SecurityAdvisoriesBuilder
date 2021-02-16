@@ -43,7 +43,7 @@ class GetAdvisoriesFromMultipleSourcesTest extends TestCase
         self::assertEquals(
             [
                 Advisory::fromArrayData([
-                    'reference' => 'test_package',
+                    'reference' => 'test/package',
                     'branches' => [['versions' => ['<1']]],
                 ]),
             ],
@@ -54,7 +54,7 @@ class GetAdvisoriesFromMultipleSourcesTest extends TestCase
     private function getGenerator(): Generator
     {
         return yield Advisory::fromArrayData([
-            'reference' => 'test_package',
+            'reference' => 'test/package',
             'branches' => [['versions' => ['<1']]],
         ]);
     }

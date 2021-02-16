@@ -25,6 +25,7 @@ use LogicException;
 use function array_filter;
 use function array_map;
 use function array_merge;
+use function array_reduce;
 use function array_values;
 use function count;
 use function implode;
@@ -33,7 +34,7 @@ use function usort;
 /** @psalm-immutable */
 final class Component
 {
-    private string $name;
+    public PackageName $name;
 
     /**
      * @var Advisory[]
@@ -41,15 +42,10 @@ final class Component
      */
     private array $advisories;
 
-    public function __construct(string $name, Advisory ...$advisories)
+    public function __construct(PackageName $name, Advisory ...$advisories)
     {
         $this->name       = $name;
         $this->advisories = $advisories;
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
     }
 
     /**
@@ -92,7 +88,7 @@ final class Component
         }
 
         $merged = array_map(
-            static fn (VersionConstraint $item) => \array_reduce(
+            static fn (VersionConstraint $item) => array_reduce(
                 $constraints,
                 static fn (VersionConstraint $carry, VersionConstraint $current) => $carry->canMergeWith($current)
                     ? $carry->mergeWith($current)

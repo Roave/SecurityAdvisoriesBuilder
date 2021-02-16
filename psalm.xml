@@ -8,6 +8,7 @@
     errorBaseline="psalm-baseline.xml"
 >
     <projectFiles>
+        <file name="build-conflicts.php" />
         <directory name="src" />
         <directory name="test" />
         <ignoreFiles>

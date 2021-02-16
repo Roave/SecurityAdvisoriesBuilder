@@ -27,24 +27,21 @@ use function array_values;
 use function assert;
 use function implode;
 use function is_array;
-use function is_bool;
 use function is_string;
 use function usort;
-use function str_replace;
-use function strrpos;
 
 /** @psalm-immutable */
 final class Advisory
 {
-    private string $componentName;
+    public PackageName $package;
 
     /** @var list<VersionConstraint> */
     private array $branchConstraints;
 
     /** @param list<VersionConstraint> $branchConstraints */
-    private function __construct(string $componentName, array $branchConstraints)
+    private function __construct(PackageName $package, array $branchConstraints)
     {
-        $this->componentName     = $componentName;
+        $this->package           = $package;
         $this->branchConstraints = $this->sortVersionConstraints($branchConstraints);
     }
 
@@ -65,16 +62,8 @@ final class Advisory
         $reference = $config['reference'];
         assert(is_string($reference));
 
-        $componentName = str_replace('composer://', '', $reference);
-
-        if (! is_bool(strrpos($componentName, '\\'))) {
-            $componentName = str_replace('\\', '/', $componentName);
-        }
-
-        assert(is_string($componentName));
-
         return new self(
-            $componentName,
+            PackageName::fromReferenceName($reference),
             array_values(array_map(
                 static function (array $branchConfig) {
                     return VersionConstraint::fromString(implode(',', (array) $branchConfig['versions']));
@@ -82,11 +71,6 @@ final class Advisory
                 $branches
             ))
         );
-    }
-
-    public function getComponentName(): string
-    {
-        return $this->componentName;
     }
 
     /**

@@ -24,6 +24,10 @@ use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Exception\InvalidPackageName;
 use Roave\SecurityAdvisories\PackageName;
 
+use function array_map;
+use function array_merge;
+use function str_replace;
+
 /** @covers \Roave\SecurityAdvisories\PackageName */
 final class PackageNameTest extends TestCase
 {
@@ -45,12 +49,44 @@ final class PackageNameTest extends TestCase
         ];
     }
 
+    /** @dataProvider validReferenceNames */
+    public function testStoresValidPackageFromReferenceName(string $reference, string $name): void
+    {
+        self::assertSame($name, PackageName::fromReferenceName($reference)->packageName);
+    }
+
+    /** @return non-empty-list<array{string, string}> */
+    public function validReferenceNames(): array
+    {
+        $references = $this->validPackageNames();
+
+        return array_merge(
+            array_map(static fn (array $names): array => [$names[0], $names[0]], $references),
+            array_map(
+                static fn (array $names): array => [str_replace('/', '\\', $names[0]), $names[0]],
+                $references
+            ),
+            array_map(
+                static fn (array $names): array => ['composer://' . $names[0], $names[0]],
+                $references
+            ),
+        );
+    }
+
     /** @dataProvider invalidPackageNames */
     public function testWillRejectInvalidPackageName(string $invalidName): void
     {
         $this->expectException(InvalidPackageName::class);
 
         PackageName::fromName($invalidName);
+    }
+
+    /** @dataProvider invalidPackageNames */
+    public function testWillRejectInvalidReference(string $invalidName): void
+    {
+        $this->expectException(InvalidPackageName::class);
+
+        PackageName::fromReferenceName($invalidName);
     }
 
     /** @return non-empty-list<array{string}> */
@@ -67,6 +103,7 @@ final class PackageNameTest extends TestCase
             ['foo bar'],
             ['foo /bar'],
             ['foo/ bar'],
+            ['foo//bar'],
         ];
     }
 }

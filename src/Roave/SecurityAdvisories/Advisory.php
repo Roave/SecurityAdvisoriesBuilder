@@ -29,10 +29,11 @@ use function implode;
 use function is_array;
 use function is_bool;
 use function is_string;
-use function Safe\usort;
+use function usort;
 use function str_replace;
 use function strrpos;
 
+/** @psalm-immutable */
 final class Advisory
 {
     private string $componentName;
@@ -119,6 +120,7 @@ final class Advisory
      */
     private function sortVersionConstraints(array $versionConstraints): array
     {
+        /** @psalm-suppress ImpureFunctionCall this sorting function is operating in a pure manner */
         usort($versionConstraints, new VersionConstraintSort());
 
         return $versionConstraints;

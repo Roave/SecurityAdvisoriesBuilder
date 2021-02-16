@@ -21,6 +21,7 @@ use function preg_match;
 use function Safe\sprintf;
 use function strtolower;
 
+/** @psalm-immutable */
 final class Version
 {
     private Flag $flag;

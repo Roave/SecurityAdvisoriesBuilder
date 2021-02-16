@@ -16,6 +16,8 @@ use function strpos;
 
 /**
  * A simple version, such as 1.0 or 1.0.0.0 or 2.0.1.3.2
+ *
+ * @psalm-immutable
  */
 final class Boundary
 {

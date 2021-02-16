@@ -26,9 +26,11 @@ use function array_filter;
 use function array_map;
 use function array_merge;
 use function array_values;
+use function count;
 use function implode;
-use function Safe\usort;
+use function usort;
 
+/** @psalm-immutable */
 final class Component
 {
     private string $name;
@@ -77,31 +79,44 @@ final class Component
     /**
      * @param VersionConstraint[] $constraints
      *
-     * @return VersionConstraint[]
+     * @return list<VersionConstraint>
      *
      * @throws LogicException
      */
     private function deDuplicateConstraints(array $constraints): array
     {
-        restart:
+        $inputConstraintsByName = [];
 
-        foreach ($constraints as & $constraint) {
-            foreach ($constraints as $key => $comparedConstraint) {
-                if ($constraint === $comparedConstraint || ! $constraint->canMergeWith($comparedConstraint)) {
-                    continue;
-                }
-
-                unset($constraints[$key]);
-                $constraint = $constraint->mergeWith($comparedConstraint);
-
-                // note: this is just simulating tail recursion. Normal recursion not viable here, and `foreach`
-                //       becomes unstable when elements are removed from the loop
-                goto restart;
-            }
+        foreach ($constraints as $constraint) {
+            $inputConstraintsByName[$constraint->getConstraintString()] = $constraint;
         }
 
-        usort($constraints, new VersionConstraintSort());
+        $merged = array_map(
+            static fn (VersionConstraint $item) => \array_reduce(
+                $constraints,
+                static fn (VersionConstraint $carry, VersionConstraint $current) => $carry->canMergeWith($current)
+                    ? $carry->mergeWith($current)
+                    : $carry,
+                $item
+            ),
+            $inputConstraintsByName
+        );
 
-        return $constraints;
+        $mergedConstraintsByName = [];
+
+        foreach ($merged as $constraint) {
+            $mergedConstraintsByName[$constraint->getConstraintString()] = $constraint;
+        }
+
+        // All constraints were merged together
+        if (count($inputConstraintsByName) === count($mergedConstraintsByName)) {
+            /** @psalm-suppress ImpureFunctionCall this sorting function is operating in a pure manner */
+            usort($merged, new VersionConstraintSort());
+
+            return array_values($merged);
+        }
+
+        // Recursion: one de-duplication did not suffice
+        return $this->deDuplicateConstraints($merged);
     }
 }

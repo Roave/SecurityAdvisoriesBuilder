@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c1d65c429ebc80c4237ff9236813d3f4",
+    "content-hash": "2f75d8a241e6363ecc4dbf73ad4d5cdb",
     "packages": [
         {
             "name": "clue/stream-filter",
@@ -894,16 +894,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v5.2.3",
+            "version": "v5.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "338cddc6d74929f6adf19ca5682ac4b8e109cdb0"
+                "reference": "7d6ae0cce3c33965af681a4355f1c4de326ed277"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/338cddc6d74929f6adf19ca5682ac4b8e109cdb0",
-                "reference": "338cddc6d74929f6adf19ca5682ac4b8e109cdb0",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/7d6ae0cce3c33965af681a4355f1c4de326ed277",
+                "reference": "7d6ae0cce3c33965af681a4355f1c4de326ed277",
                 "shasum": ""
             },
             "require": {
@@ -949,7 +949,7 @@
             "description": "Loads and dumps YAML files",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/yaml/tree/v5.2.3"
+                "source": "https://github.com/symfony/yaml/tree/v5.2.4"
             },
             "funding": [
                 {
@@ -965,7 +965,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-02-03T04:42:09+00:00"
+            "time": "2021-02-22T15:48:39+00:00"
         },
         {
             "name": "thecodingmachine/safe",

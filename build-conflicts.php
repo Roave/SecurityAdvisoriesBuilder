@@ -158,7 +158,7 @@ use const PHP_EOL;
 
     $buildComponents =
         /**
-         * @param iterable<int, Advisory> $advisories
+         * @param iterable<Advisory> $advisories
          *
          * @return Component[]
          */

@@ -56,14 +56,15 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
     public function __invoke(): Generator
     {
         return yield from array_map(
-            static function (SplFileInfo $advisoryFile) {
+            static function (SplFileInfo $advisoryFile): Advisory {
                 $filePath = $advisoryFile->getRealPath();
 
                 assert(is_string($filePath));
 
-                return Advisory::fromArrayData(
-                    Yaml::parse(file_get_contents($filePath), Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE)
-                );
+                /** @psalm-var array<array-key, array<array-key, array<array-key, array<array-key, string>|string>>|string> $definition */
+                $definition = Yaml::parse(file_get_contents($filePath), Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE);
+
+                return Advisory::fromArrayData($definition);
             },
             $this->getAdvisoryFiles()
         );

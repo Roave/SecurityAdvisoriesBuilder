@@ -27,14 +27,16 @@ final class Version
     private Flag $flag;
 
     /**
-     * @var int[]
      * @psalm-param list<int>
+     *
+     * @var int[]
      */
     private array $versionNumbers;
 
     /**
-     * @var int[]
      * @psalm-param list<int>
+     *
+     * @var int[]
      */
     private array $stabilityNumbers;
 

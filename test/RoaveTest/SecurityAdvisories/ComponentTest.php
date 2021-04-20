@@ -191,6 +191,7 @@ final class ComponentTest extends TestCase
      * @psalm-param array<non-empty-string, array{versions: non-empty-list<non-empty-string>}> $advisory1Branches
      * @psalm-param array<non-empty-string, array{versions: non-empty-list<non-empty-string>}> $advisory2Branches
      * @psalm-param non-empty-string $expected
+     *
      * @dataProvider complexRealAdvisoriesProvider
      */
     public function testSortComplexAdvisoriesWithRealCase(

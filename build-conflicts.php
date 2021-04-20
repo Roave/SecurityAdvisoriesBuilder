@@ -57,9 +57,11 @@ use const PHP_EOL;
     require_once __DIR__ . '/vendor/autoload.php';
 
     /**
-     * @psalm-template ReturnType of mixed|void
      * @psalm-param callable(): ReturnType $function
+     *
      * @psalm-return ReturnType
+     *
+     * @psalm-template ReturnType of mixed|void
      */
     function runInPath(callable $function, string $path): mixed
     {

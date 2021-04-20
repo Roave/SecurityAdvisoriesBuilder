@@ -27,36 +27,42 @@ final class Version
     private Flag $flag;
 
     /**
-     * @psalm-param list<int>
-     *
+     * @psalm-var list<int>
      * @var int[]
      */
     private array $versionNumbers;
 
     /**
-     * @psalm-param list<int>
-     *
+     * @psalm-var list<int>
      * @var int[]
      */
-    private array $stabilityNumbers;
+    private array $stabilityNumbers = [];
 
     /**
      * @param string[] $matches
+     * @psalm-param array{
+     *   version: string,
+     *   flag?: string,
+     *   stability_numbers?: string
+     * } $matches
      */
     private function __construct(array $matches)
     {
-        $this->versionNumbers = self::removeTrailingZeroes(...array_map('intval', explode('.', $matches['version'])));
+        $this->versionNumbers = self::removeTrailingZeroes(array_map(
+            static fn (string $versionComponent): int => (int) $versionComponent,
+            explode('.', $matches['version'])
+        ));
 
         $this->flag = Flag::build($matches['flag'] ?? '');
 
-        $this->stabilityNumbers = [];
         if (! array_key_exists('stability_numbers', $matches)) {
             return;
         }
 
-        $this->stabilityNumbers = self::removeTrailingZeroes(
-            ...array_map('intval', explode('.', $matches['stability_numbers']))
-        );
+        $this->stabilityNumbers = self::removeTrailingZeroes(array_map(
+            static fn (string $versionComponent): int => (int) $versionComponent,
+            explode('.', $matches['stability_numbers'])
+        ));
     }
 
     /**
@@ -71,6 +77,7 @@ final class Version
             throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
         }
 
+        /** @psalm-var array{flag?: string, stability_numbers?: string, version: string} $matches */
         return new self($matches);
     }
 
@@ -153,8 +160,13 @@ final class Version
         return $version;
     }
 
-    /** @return int[] */
-    private static function removeTrailingZeroes(int ...$versionNumbers): array
+    /**
+     * @psalm-param list<int> $versionNumbers
+     *
+     * @return int[]
+     * @psalm-return list<int>
+     */
+    private static function removeTrailingZeroes(array $versionNumbers): array
     {
         foreach (array_reverse(array_keys($versionNumbers)) as $key) {
             if ($versionNumbers[$key] !== 0) {

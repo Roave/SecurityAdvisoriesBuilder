@@ -255,14 +255,10 @@ final class VersionConstraintTest extends TestCase
             ['>1-stable.1.2,<1-rc.1.2'],
         ];
 
-        $entries = array_combine(
+        return array_combine(
             array_column($samples, 0),
             $samples
         );
-
-        Assert::isArray($entries);
-
-        return $entries;
     }
 
     /** @psalm-return array<non-empty-string, array{non-empty-string}> */
@@ -283,14 +279,10 @@ final class VersionConstraintTest extends TestCase
             ['1-beta.2.0|1-rc.1.2.3'],
         ];
 
-        $entries = array_combine(
+        return array_combine(
             array_column($samples, 0),
             $samples
         );
-
-        Assert::isArray($entries);
-
-        return $entries;
     }
 
     /**
@@ -488,7 +480,7 @@ final class VersionConstraintTest extends TestCase
             ['>1,<1-p', '>1-a,<1-b', false, false],
         ];
 
-        $samples = array_combine(
+        return array_combine(
             array_map(
                 static function (array $entry) {
                     return '((' . $entry[0] . ') ∩ (' . $entry[1] . ')) ≠ ∅';
@@ -497,10 +489,6 @@ final class VersionConstraintTest extends TestCase
             ),
             $entries
         );
-
-        Assert::isArray($samples);
-
-        return $samples;
     }
 
     /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string}> */
@@ -526,14 +514,10 @@ final class VersionConstraintTest extends TestCase
             ['<=1.0.3.0.5.0-beta.0.5.0.0', '<=1.0.3.0.5-beta.0.5'],
         ];
 
-        $entries = array_combine(
+        return array_combine(
             array_column($samples, 0),
             $samples
         );
-
-        Assert::isArray($entries);
-
-        return $entries;
     }
 
     /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string, non-empty-string}> */
@@ -575,7 +559,7 @@ final class VersionConstraintTest extends TestCase
             ['>1-a.1.0.1.0,<1-a.4.1', '>1-a.1.0.2,<1-a.5.8', '>1-a.1.0.1,<1-a.5.8'],
         ];
 
-        $samples = array_combine(
+        return array_combine(
             array_map(
                 static function (array $entry) {
                     return '((' . $entry[0] . ') ∪ (' . $entry[1] . ')) = (' . $entry[2] . ')';
@@ -584,10 +568,6 @@ final class VersionConstraintTest extends TestCase
             ),
             $entries
         );
-
-        Assert::isArray($samples);
-
-        return $samples;
     }
 
     /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string}> */
@@ -621,7 +601,7 @@ final class VersionConstraintTest extends TestCase
             ['>1-alpha.1,<4-alpha.1', '>2-beta.1,<3-beta.1'], // note: containing, not overlapping.
         ];
 
-        $samples = array_combine(
+        return array_combine(
             array_map(
                 static function (array $entry) {
                     return '((' . $entry[0] . ') ∩ (' . $entry[1] . ')) = ∅';
@@ -630,10 +610,6 @@ final class VersionConstraintTest extends TestCase
             ),
             $entries
         );
-
-        Assert::isArray($samples);
-
-        return $samples;
     }
 
     private function callContains(VersionConstraint $versionConstraint, VersionConstraint $other): bool

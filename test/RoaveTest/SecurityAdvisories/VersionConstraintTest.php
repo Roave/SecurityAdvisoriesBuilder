@@ -300,7 +300,6 @@ final class VersionConstraintTest extends TestCase
      *  - range2
      *  - range1 contains range2
      *  - range2 contains range1
-     *
      * @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string, bool, bool}>
      */
     public function rangesForComparisonProvider(): array

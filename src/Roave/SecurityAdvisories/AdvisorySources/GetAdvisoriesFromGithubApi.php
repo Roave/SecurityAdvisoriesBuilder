@@ -110,11 +110,6 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      * Note: 'endCursor' contains the least cursor in the given batch
      *
      * @return string[]
-     *
-     * @throws ClientExceptionInterface
-     * @throws JsonException
-     * @throws StringsException
-     *
      * @psalm-return iterable<int, array{
      *      cursor: string,
      *      node: array{
@@ -122,6 +117,10 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      *          package: array{name: string}
      *      }
      * }>
+     *
+     * @throws ClientExceptionInterface
+     * @throws JsonException
+     * @throws StringsException
      */
     private function getAdvisories(): iterable
     {

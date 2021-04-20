@@ -99,7 +99,6 @@ final class Advisory
      * @param VersionConstraint[] $versionConstraints
      *
      * @return VersionConstraint[]
-     *
      * @psalm-return list<VersionConstraint>
      */
     private function sortVersionConstraints(array $versionConstraints): array

@@ -41,7 +41,7 @@ final class Advisory
     }
 
     /**
-     * @param array<array-key, array<array-key, array<array-key, array<array-key, string>|string>>|string> $config
+     * @param array{branches: array<array-key, array{versions: string|array<array-key, string>}>, reference: string} $config
      *
      * @return Advisory
      *
@@ -49,23 +49,15 @@ final class Advisory
      * @throws Type\Exception\CoercionException
      *
      * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
-     * @psalm-suppress ImpureMethodCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
      */
     public static function fromArrayData(array $config): self
     {
-        $config = Type\shape([
-            'branches' => Type\dict(Type\string(), Type\shape([
-                'versions' => Type\union(Type\string(), Type\vec(Type\string())),
-            ])),
-            'reference' => Type\string(),
-        ])->coerce($config);
-
         return new self(
             PackageName::fromReferenceName($config['reference']),
             Vec\map(
                 $config['branches'],
                 /**
-                 * @param array{versions: string|list<string>} $branchConfig
+                 * @param array{versions: string|array<array-key, string>} $branchConfig
                  */
                 static function (array $branchConfig): VersionConstraint {
                     $versions = $branchConfig['versions'];
@@ -73,7 +65,7 @@ final class Advisory
                         $versions = [$versions];
                     }
 
-                    return VersionConstraint::fromString(Str\join($versions, ','));
+                    return VersionConstraint::fromString(Str\join(Vec\values($versions), ','));
                 }
             )
         );

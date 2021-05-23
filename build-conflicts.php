@@ -56,20 +56,20 @@ use const E_WARNING;
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';
     $buildDir                  = __DIR__ . '/build';
     $baseComposerJson          = [
-        'name' => 'roave/security-advisories',
-        'type' => 'metapackage',
-        'description' => 'Prevents installation of composer packages with known security vulnerabilities: '
+        'name'          => 'roave/security-advisories',
+        'type'          => 'metapackage',
+        'description'   => 'Prevents installation of composer packages with known security vulnerabilities: '
             . 'no API, simply require it',
-        'license' => 'MIT',
-        'authors' => [
+        'license'       => 'MIT',
+        'authors'       => [
             [
-                'name' => 'Marco Pivetta',
-                'role' => 'maintainer',
+                'name'  => 'Marco Pivetta',
+                'role'  => 'maintainer',
                 'email' => 'ocramius@gmail.com',
             ],
             [
-                'name' => 'Ilya Tribusean',
-                'role' => 'maintainer',
+                'name'  => 'Ilya Tribusean',
+                'role'  => 'maintainer',
                 'email' => 'slash3b@gmail.com',
             ],
         ],

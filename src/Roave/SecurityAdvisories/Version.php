@@ -5,79 +5,61 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories;
 
 use InvalidArgumentException;
-use Safe\Exceptions\PcreException;
-use Safe\Exceptions\StringsException;
-
-use function array_intersect_key;
-use function array_key_exists;
-use function array_keys;
-use function array_map;
-use function array_reverse;
-use function array_slice;
-use function count;
-use function explode;
-use function implode;
-use function preg_match;
-use function Safe\sprintf;
-use function strtolower;
+use Psl\Dict;
+use Psl\Iter;
+use Psl\Regex;
+use Psl\Str;
+use Psl\Type;
+use Psl\Vec;
 
 /** @psalm-immutable */
 final class Version
 {
     private Flag $flag;
 
-    /**
-     * @psalm-var list<int>
-     * @var int[]
-     */
+    /** @var list<int> */
     private array $versionNumbers;
 
-    /**
-     * @psalm-var list<int>
-     * @var int[]
-     */
+    /** @var list<int> */
     private array $stabilityNumbers = [];
 
     /**
-     * @param string[] $matches
-     * @psalm-param array{
-     *   version: string,
-     *   flag?: string,
-     *   stability_numbers?: string
-     * } $matches
+     * @param array{version: string, flag?: string, stability_numbers?: string} $matches
+     *
+     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
      */
     private function __construct(array $matches)
     {
-        $this->versionNumbers = self::removeTrailingZeroes(array_map(
+        $this->versionNumbers = self::removeTrailingZeroes(Vec\map(
+            Str\split($matches['version'], '.'),
             static fn (string $versionComponent): int => (int) $versionComponent,
-            explode('.', $matches['version'])
         ));
 
         $this->flag = Flag::build($matches['flag'] ?? '');
 
-        if (! array_key_exists('stability_numbers', $matches)) {
+        $stability_numbers = $matches['stability_numbers'] ?? null;
+        if ($stability_numbers === null) {
             return;
         }
 
-        $this->stabilityNumbers = self::removeTrailingZeroes(array_map(
+        $this->stabilityNumbers = self::removeTrailingZeroes(Vec\map(
+            Str\split($stability_numbers, '.'),
             static fn (string $versionComponent): int => (int) $versionComponent,
-            explode('.', $matches['stability_numbers'])
         ));
     }
 
-    /**
-     * @return Version
-     *
-     * @throws PcreException
-     * @throws StringsException
-     */
     public static function fromString(string $version): self
     {
-        if (preg_match('/^' . Matchers::TAGGED_VERSION_MATCHER . '$/', strtolower($version), $matches) !== 1) {
-            throw new InvalidArgumentException(sprintf('Given version "%s" is not a valid version string', $version));
+        $matches = Regex\first_match(Str\Byte\lowercase($version), '/^' . Matchers::TAGGED_VERSION_MATCHER . '$/', Type\shape([
+            'version' => Type\string(),
+            'stability_numbers' => Type\optional(Type\string()),
+            'flag' => Type\optional(Type\string()),
+        ]));
+
+        if ($matches === null) {
+            throw new InvalidArgumentException(Str\format('Given version "%s" is not a valid version string', $version));
         }
 
-        /** @psalm-var array{flag?: string, stability_numbers?: string, version: string} $matches */
         return new self($matches);
     }
 
@@ -88,9 +70,12 @@ final class Version
             && $this->stabilityNumbers === $other->stabilityNumbers;
     }
 
+    /**
+     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
+     */
     public function isGreaterThan(self $other): bool
     {
-        foreach (array_keys(array_intersect_key($this->versionNumbers, $other->versionNumbers)) as $index) {
+        foreach (Vec\keys(Dict\intersect_by_key($this->versionNumbers, $other->versionNumbers)) as $index) {
             if ($this->versionNumbers[$index] > $other->versionNumbers[$index]) {
                 return true;
             }
@@ -105,7 +90,7 @@ final class Version
          * Here the latter is greater than the former so <=> will return -1.
          * Continue only when versions are equal, as in <=> returns 0
          */
-        $result = count($this->versionNumbers) <=> count($other->versionNumbers);
+        $result = Iter\count($this->versionNumbers) <=> Iter\count($other->versionNumbers);
         if ($result !== 0) {
             return $result === 1;
         }
@@ -114,13 +99,16 @@ final class Version
         return $this->isStabilityGreaterThan($other);
     }
 
+    /**
+     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
+     */
     private function isStabilityGreaterThan(self $other): bool
     {
         if (! $this->flag->isEqual($other->flag)) {
             return $this->flag->isGreaterThan($other->flag);
         }
 
-        foreach (array_keys(array_intersect_key($this->stabilityNumbers, $other->stabilityNumbers)) as $index) {
+        foreach (Vec\keys(Dict\intersect_by_key($this->stabilityNumbers, $other->stabilityNumbers)) as $index) {
             if ($this->stabilityNumbers[$index] > $other->stabilityNumbers[$index]) {
                 return true;
             }
@@ -130,7 +118,7 @@ final class Version
             }
         }
 
-        return count($this->stabilityNumbers) > count($other->stabilityNumbers);
+        return Iter\count($this->stabilityNumbers) > Iter\count($other->stabilityNumbers);
     }
 
     /**
@@ -140,20 +128,28 @@ final class Version
      */
     public function isGreaterOrEqualThan(self $other): bool
     {
-        return $this->equalTo($other)
-            || $this->isGreaterThan($other);
+        return $this->equalTo($other) || $this->isGreaterThan($other);
     }
 
+    /**
+     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
+     */
     public function getVersion(): string
     {
-        $version = implode('.', $this->versionNumbers);
+        $version = Str\join(Vec\map(
+            $this->versionNumbers,
+            static fn (int $number): string => (string) $number
+        ), '.');
 
         $flagLiteral = $this->flag->getLiteral();
         if ($flagLiteral !== '') {
             $version .= '-' . $flagLiteral;
 
             if ($this->stabilityNumbers !== []) {
-                $version .= '.' . implode('.', $this->stabilityNumbers);
+                $version .= '.' . Str\join(Vec\map(
+                    $this->stabilityNumbers,
+                    static fn (int $number): string => (string) $number
+                ), '.');
             }
         }
 
@@ -168,9 +164,9 @@ final class Version
      */
     private static function removeTrailingZeroes(array $versionNumbers): array
     {
-        foreach (array_reverse(array_keys($versionNumbers)) as $key) {
+        foreach (Vec\reverse(Vec\keys($versionNumbers)) as $key) {
             if ($versionNumbers[$key] !== 0) {
-                return array_slice($versionNumbers, 0, $key + 1);
+                return Vec\values(Dict\slice($versionNumbers, 0, $key + 1));
             }
         }
 

@@ -20,16 +20,9 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
-use LogicException;
-
-use function array_filter;
-use function array_map;
-use function array_merge;
-use function array_reduce;
-use function array_values;
-use function count;
-use function implode;
-use function usort;
+use Psl\Iter;
+use Psl\Str;
+use Psl\Vec;
 
 /** @psalm-immutable */
 final class Component
@@ -46,35 +39,25 @@ final class Component
     }
 
     /**
-     * @throws LogicException
+     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
      */
     public function getConflictConstraint(): string
     {
-        return implode(
-            '|',
-            array_filter(array_map(
-                static function (VersionConstraint $versionConstraint) {
-                    return $versionConstraint->getConstraintString();
-                },
-                $this->deDuplicateConstraints(array_merge(
-                    [],
-                    ...array_values(array_map(
-                        static function (Advisory $advisory) {
-                            return $advisory->getVersionConstraints();
-                        },
-                        $this->advisories
-                    ))
-                ))
-            ))
-        );
+        return Str\join(Vec\filter(Vec\map(
+            $this->deDuplicateConstraints(Vec\concat([], ...Vec\map(
+                $this->advisories,
+                static fn (Advisory $advisory) => $advisory->getVersionConstraints(),
+            ))),
+            static fn (VersionConstraint $versionConstraint) => $versionConstraint->getConstraintString(),
+        )), '|');
     }
 
     /**
-     * @param VersionConstraint[] $constraints
+     * @param list<VersionConstraint> $constraints
      *
      * @return list<VersionConstraint>
      *
-     * @throws LogicException
+     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
      */
     private function deDuplicateConstraints(array $constraints): array
     {
@@ -84,15 +67,15 @@ final class Component
             $inputConstraintsByName[$constraint->getConstraintString()] = $constraint;
         }
 
-        $merged = array_map(
-            static fn (VersionConstraint $item) => array_reduce(
+        $merged = Vec\map(
+            $inputConstraintsByName,
+            static fn (VersionConstraint $item) => Iter\reduce(
                 $constraints,
                 static fn (VersionConstraint $carry, VersionConstraint $current) => $carry->canMergeWith($current)
                     ? $carry->mergeWith($current)
                     : $carry,
                 $item
             ),
-            $inputConstraintsByName
         );
 
         $mergedConstraintsByName = [];
@@ -102,11 +85,9 @@ final class Component
         }
 
         // All constraints were merged together
-        if (count($inputConstraintsByName) === count($mergedConstraintsByName)) {
+        if (Iter\count($inputConstraintsByName) === Iter\count($mergedConstraintsByName)) {
             /** @psalm-suppress ImpureFunctionCall this sorting function is operating in a pure manner */
-            usort($merged, new VersionConstraintSort());
-
-            return array_values($merged);
+            return Vec\sort($merged, new VersionConstraintSort());
         }
 
         // Recursion: one de-duplication did not suffice

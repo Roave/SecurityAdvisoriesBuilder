@@ -23,6 +23,10 @@ namespace Roave\SecurityAdvisories\AdvisorySources;
 use CallbackFilterIterator;
 use FilesystemIterator;
 use Generator;
+use Psl\Filesystem;
+use Psl\Str;
+use Psl\Type;
+use Psl\Vec;
 use RecursiveDirectoryIterator;
 use RecursiveFilterIterator;
 use RecursiveIterator;
@@ -30,14 +34,6 @@ use RecursiveIteratorIterator;
 use Roave\SecurityAdvisories\Advisory;
 use SplFileInfo;
 use Symfony\Component\Yaml\Yaml;
-use Webmozart\Assert\Assert;
-
-use function array_map;
-use function assert;
-use function is_string;
-use function iterator_to_array;
-use function Safe\file_get_contents;
-use function str_starts_with;
 
 final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
 {
@@ -55,37 +51,40 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
      */
     public function __invoke(): Generator
     {
-        return yield from array_map(
+        return yield from Vec\map(
+            $this->getAdvisoryFiles(),
             static function (SplFileInfo $advisoryFile): Advisory {
-                $filePath = $advisoryFile->getRealPath();
+                $filePath = Type\non_empty_string()->assert($advisoryFile->getRealPath());
 
-                assert(is_string($filePath));
-
-                /** @psalm-var array<array-key, array<array-key, array<array-key, array<array-key, string>|string>>|string> $definition */
-                $definition = Yaml::parse(file_get_contents($filePath), Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE);
+                /** @var array<array-key, mixed> $definition */
+                $definition = Yaml::parse(Filesystem\read_file($filePath), Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE);
+                $definition = Type\shape([
+                    'branches' => Type\dict(Type\string(), Type\shape([
+                        'versions' => Type\union(Type\string(), Type\vec(Type\string())),
+                    ])),
+                    'reference' => Type\string(),
+                ])->coerce($definition);
 
                 return Advisory::fromArrayData($definition);
             },
-            $this->getAdvisoryFiles()
         );
     }
 
     /**
-     * @return SplFileInfo[]
+     * @return iterable<SplFileInfo>
      */
-    private function getAdvisoryFiles(): array
+    private function getAdvisoryFiles(): iterable
     {
-        return iterator_to_array(new CallbackFilterIterator(
+        return new CallbackFilterIterator(
             new RecursiveIteratorIterator(
                 $this->skipHiddenFilesAndDirectories(
                     new RecursiveDirectoryIterator($this->advisoriesPath, FilesystemIterator::SKIP_DOTS)
                 ),
             ),
             static function (SplFileInfo $advisoryFile): bool {
-                return $advisoryFile->isFile()
-                    && $advisoryFile->getExtension() === self::ADVISORY_EXTENSION;
+                return $advisoryFile->isFile() && $advisoryFile->getExtension() === self::ADVISORY_EXTENSION;
             }
-        ));
+        );
     }
 
     private function skipHiddenFilesAndDirectories(RecursiveIterator $files): RecursiveIterator
@@ -93,11 +92,9 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
         return new class ($files) extends RecursiveFilterIterator {
             public function accept(): bool
             {
-                $current = $this->current();
+                $current = Type\object(SplFileInfo::class)->assert($this->current());
 
-                Assert::isInstanceOf($current, SplFileInfo::class);
-
-                return ! str_starts_with($current->getFilename(), '.');
+                return ! Str\starts_with($current->getFilename(), '.');
             }
         };
     }

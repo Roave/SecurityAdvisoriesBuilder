@@ -21,12 +21,10 @@ declare(strict_types=1);
 namespace RoaveTest\SecurityAdvisories;
 
 use PHPUnit\Framework\TestCase;
+use Psl\Str;
+use Psl\Vec;
 use Roave\SecurityAdvisories\Exception\InvalidPackageName;
 use Roave\SecurityAdvisories\PackageName;
-
-use function array_map;
-use function array_merge;
-use function str_replace;
 
 /** @covers \Roave\SecurityAdvisories\PackageName */
 final class PackageNameTest extends TestCase
@@ -55,20 +53,40 @@ final class PackageNameTest extends TestCase
         self::assertSame($name, PackageName::fromReferenceName($reference)->packageName);
     }
 
-    /** @return non-empty-list<array{string, string}> */
+    /**
+     * @return list<array{0: string, 1: string}>
+     */
     public function validReferenceNames(): array
     {
         $references = $this->validPackageNames();
 
-        return array_merge(
-            array_map(static fn (array $names): array => [$names[0], $names[0]], $references),
-            array_map(
-                static fn (array $names): array => [str_replace('/', '\\', $names[0]), $names[0]],
-                $references
+        return Vec\concat(
+            Vec\map(
+                $references,
+                /**
+                 * @param array{0: string} $names
+                 *
+                 * @return array{0: string, 1: string}
+                 */
+                static fn (array $names): array => [$names[0], $names[0]]
             ),
-            array_map(
+            Vec\map(
+                $references,
+                /**
+                 * @param array{0: string} $names
+                 *
+                 * @return array{0: string, 1: string}
+                 */
+                static fn (array $names): array => [Str\replace($names[0], '/', '\\'), $names[0]],
+            ),
+            Vec\map(
+                $references,
+                /**
+                 * @param array{0: string} $names
+                 *
+                 * @return array{0: string, 1: string}
+                 */
                 static fn (array $names): array => ['composer://' . $names[0], $names[0]],
-                $references
             ),
         );
     }

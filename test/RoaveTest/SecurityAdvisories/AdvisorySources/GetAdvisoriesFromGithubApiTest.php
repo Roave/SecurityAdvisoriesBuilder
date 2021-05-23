@@ -21,9 +21,14 @@ declare(strict_types=1);
 namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 
 use Http\Client\Curl\Client;
-use InvalidArgumentException;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use Psl\Exception\InvariantViolationException;
+use Psl\Json;
+use Psl\Str;
+use Psl\Type;
+use Psl\Type\Exception\AssertException;
+use Psl\Vec;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -31,13 +36,6 @@ use ReflectionException;
 use ReflectionMethod;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
-use Safe\Exceptions\JsonException;
-use Safe\Exceptions\StringsException;
-use Webmozart\Assert\Assert;
-
-use function iterator_to_array;
-use function Safe\json_decode;
-use function Safe\sprintf;
 
 class GetAdvisoriesFromGithubApiTest extends TestCase
 {
@@ -45,7 +43,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     {
         $client = $this->createMock(Client::class);
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvariantViolationException::class);
 
         new GetAdvisoriesFromGithubApi($client, '');
     }
@@ -65,18 +63,14 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
 
         $overlapsWithReflection->setAccessible(true);
 
-        $jsonEncodedQuery = $overlapsWithReflection->invoke($githubAdvisories, $cursor);
+        $jsonEncodedQuery = Type\string()->assert($overlapsWithReflection->invoke($githubAdvisories, $cursor));
 
-        Assert::string($jsonEncodedQuery);
-
-        $decodedQuery = json_decode($jsonEncodedQuery, true);
-
-        self::assertIsArray($decodedQuery);
-        self::assertArrayHasKey('query', $decodedQuery);
-        self::assertIsString($decodedQuery['query']);
+        $decodedQuery = Json\typed($jsonEncodedQuery, Type\shape([
+            'query' => Type\string(),
+        ]));
 
         if ($shouldContainCursor) {
-            self::assertStringContainsString(sprintf('after: "%s"', $cursor), $decodedQuery['query']);
+            self::assertStringContainsString(Str\format('after: "%s"', $cursor), $decodedQuery['query']);
         } else {
             self::assertStringNotContainsString('after: ""', $decodedQuery['query']);
         }
@@ -86,8 +80,6 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
      * @param ResponseInterface[] $apiResponses
      *
      * @throws ClientExceptionInterface
-     * @throws JsonException
-     * @throws StringsException
      *
      * @dataProvider correctResponsesSequenceDataProvider
      */
@@ -112,14 +104,12 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                     'branches'  => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
                 ]),
             ],
-            iterator_to_array($advisories(), false)
+            Vec\values($advisories())
         );
     }
 
     /**
      * @throws ClientExceptionInterface
-     * @throws JsonException
-     * @throws StringsException
      *
      * @dataProvider responsesWithIncorrectRangesProvider
      */
@@ -140,7 +130,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
             }))
             ->willReturn($response);
 
-        self::expectException(InvalidArgumentException::class);
+        $this->expectException(AssertException::class);
 
         (new GetAdvisoriesFromGithubApi($client, 'some_token'))()->next();
     }
@@ -232,7 +222,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                     'branches'  => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
                 ]),
             ],
-            iterator_to_array($advisories(), false)
+            Vec\values($advisories())
         );
     }
 
@@ -344,7 +334,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         $responses = [];
 
         foreach ($incorrectRanges as $range) {
-            $responses[] = [new Response(200, [], sprintf($query, $range))];
+            $responses[] = [new Response(200, [], Str\format($query, $range))];
         }
 
         return $responses;

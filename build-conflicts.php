@@ -24,59 +24,24 @@ use DateTime;
 use DateTimeZone;
 use ErrorException;
 use Http\Client\Curl\Client;
+use Psl\Dict;
+use Psl\Env;
+use Psl\Filesystem;
+use Psl\Json;
+use Psl\Shell;
+use Psl\Str;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
-use UnexpectedValueException;
 
-use function array_filter;
-use function array_merge;
-use function dirname;
-use function escapeshellarg;
-use function exec;
-use function getenv;
-use function implode;
-use function ksort;
-use function Safe\chdir;
-use function Safe\file_put_contents;
-use function Safe\getcwd;
-use function Safe\json_encode;
-use function Safe\realpath;
 use function set_error_handler;
-use function sprintf;
 
 use const E_NOTICE;
 use const E_STRICT;
 use const E_WARNING;
-use const JSON_PRETTY_PRINT;
-use const JSON_UNESCAPED_SLASHES;
-use const JSON_UNESCAPED_UNICODE;
-use const PHP_EOL;
 
 (static function (): void {
     require_once __DIR__ . '/vendor/autoload.php';
-
-    /**
-     * @psalm-param callable(): ReturnType $function
-     *
-     * @psalm-return ReturnType
-     *
-     * @psalm-template ReturnType of mixed|void
-     */
-    function runInPath(callable $function, string $path): mixed
-    {
-        $originalPath = getcwd();
-
-        chdir($path);
-
-        try {
-            $returnValue = $function();
-        } finally {
-            chdir($originalPath);
-        }
-
-        return $returnValue;
-    }
 
     set_error_handler(
         static function (int $errorCode, string $message = '', string $file = '', int $line = 0): bool {
@@ -85,75 +50,43 @@ use const PHP_EOL;
         E_STRICT | E_NOTICE | E_WARNING
     );
 
-    $token                     = getenv('GITHUB_TOKEN') ?: '';
+    $token                     = Env\get_var('GITHUB_TOKEN') ?? '';
     $authentication            = $token === '' ? '' : $token . ':x-oauth-basic@';
     $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';
     $buildDir                  = __DIR__ . '/build';
     $baseComposerJson          = [
-        'name'        => 'roave/security-advisories',
-        'type'        => 'metapackage',
+        'name' => 'roave/security-advisories',
+        'type' => 'metapackage',
         'description' => 'Prevents installation of composer packages with known security vulnerabilities: '
             . 'no API, simply require it',
-        'license'     => 'MIT',
-        'authors'     => [
+        'license' => 'MIT',
+        'authors' => [
             [
-                'name'  => 'Marco Pivetta',
-                'role'  => 'maintainer',
+                'name' => 'Marco Pivetta',
+                'role' => 'maintainer',
                 'email' => 'ocramius@gmail.com',
             ],
             [
-                'name'  => 'Ilya Tribusean',
-                'role'  => 'maintainer',
+                'name' => 'Ilya Tribusean',
+                'role' => 'maintainer',
                 'email' => 'slash3b@gmail.com',
             ],
         ],
     ];
 
-    $execute =
-        /** @return non-empty-list<string> */
-        static function (string $commandString): array {
-            // may the gods forgive me for this in-lined command addendum, but I CBA to fix proc_open's handling
-            // of exit codes.
-            exec($commandString . ' 2>&1', $output, $result);
-
-            if ($result !== 0) {
-                throw new UnexpectedValueException(sprintf(
-                    'Command failed: "%s" "%s"',
-                    $commandString,
-                    implode(PHP_EOL, $output)
-                ));
-            }
-
-            /** @psalm-var non-empty-list<string> $output */
-            return $output;
-        };
-
-    $cleanBuildDir = static function () use ($buildDir, $execute): void {
-        $execute('rm -rf ' . escapeshellarg($buildDir));
-        $execute('mkdir ' . escapeshellarg($buildDir));
+    $cleanBuildDir = static function () use ($buildDir): void {
+        Shell\execute('rm', ['-rf', $buildDir]);
+        Shell\execute('mkdir', [$buildDir]);
     };
 
-    $cloneAdvisories = static function () use ($advisoriesRepository, $buildDir, $execute): void {
-        $execute(
-            'git clone '
-            . escapeshellarg($advisoriesRepository)
-            . ' ' . escapeshellarg($buildDir . '/security-advisories')
-        );
+    $cloneAdvisories = static function () use ($advisoriesRepository, $buildDir): void {
+        Shell\execute('git', ['clone', $advisoriesRepository, $buildDir . '/security-advisories']);
     };
 
-    $cloneRoaveAdvisories = static function () use ($roaveAdvisoriesRepository, $buildDir, $execute): void {
-        $execute(
-            'git clone '
-            . escapeshellarg($roaveAdvisoriesRepository)
-            . ' ' . escapeshellarg($buildDir . '/roave-security-advisories')
-        );
-
-        $execute(sprintf(
-            'cp -r %s %s',
-            escapeshellarg($buildDir . '/roave-security-advisories'),
-            escapeshellarg($buildDir . '/roave-security-advisories-original')
-        ));
+    $cloneRoaveAdvisories = static function () use ($roaveAdvisoriesRepository, $buildDir): void {
+        Shell\execute('git', ['clone', $roaveAdvisoriesRepository, $buildDir . '/roave-security-advisories']);
+        Shell\execute('cp', ['-r', $buildDir . '/roave-security-advisories', $buildDir . '/roave-security-advisories-original']);
     };
 
     $buildComponents =
@@ -181,7 +114,7 @@ use const PHP_EOL;
         /**
          * @param Component[] $components
          *
-         * @return array<non-empty-string, non-empty-string>
+         * @return array<non-empty-string, string>
          */
         static function (array $components): array {
             $conflicts = [];
@@ -190,76 +123,52 @@ use const PHP_EOL;
                 $conflicts[$component->name->packageName] = $component->getConflictConstraint();
             }
 
-            ksort($conflicts);
-
-            return array_filter($conflicts);
+            return Dict\filter(Dict\sort_by_key($conflicts));
         };
 
     $buildConflictsJson = static function (array $baseConfig, array $conflicts): string {
-        return json_encode(
-            array_merge(
-                $baseConfig,
-                ['conflict' => $conflicts]
-            ),
-            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-        );
+        return Json\encode(Dict\merge($baseConfig, ['conflict' => $conflicts]), true);
     };
 
     $writeJson = static function (string $jsonString, string $path): void {
-        file_put_contents($path, $jsonString . "\n");
+        Filesystem\write_file($path, $jsonString . "\n");
     };
 
-    $validateComposerJson = static function (string $composerJsonPath) use ($execute): void {
-        runInPath(
-            static function () use ($execute): void {
-                $execute('composer validate');
-            },
-            dirname($composerJsonPath)
-        );
+    $validateComposerJson = static function (string $composerJsonPath): void {
+        Shell\execute('php', ['composer.phar', 'validate'], Filesystem\get_directory($composerJsonPath));
     };
 
     $copyGeneratedComposerJson = static function (
         string $sourceComposerJsonPath,
         string $targetComposerJsonPath
-    ) use ($execute): void {
-        $execute(sprintf(
-            'cp %s %s',
-            escapeshellarg($sourceComposerJsonPath),
-            escapeshellarg($targetComposerJsonPath)
-        ));
+    ): void {
+        Shell\execute('cp', [$sourceComposerJsonPath, $targetComposerJsonPath]);
     };
 
-    $commitComposerJson = static function (string $composerJsonPath) use ($execute): void {
-        $parseHead =
-            /** @psalm-return non-empty-list<string> */
-            static function () use ($execute): array {
-                return $execute('git rev-parse HEAD');
-            };
-        $originalHash = runInPath(
-            $parseHead,
-            dirname($composerJsonPath) . '/../security-advisories'
+    $commitComposerJson = static function (string $composerJsonPath): void {
+        $originalHash = Shell\execute('git', ['rev-parse', 'HEAD'], Filesystem\get_directory($composerJsonPath) . '/../security-advisories');
+        $originalHash = Str\trim($originalHash);
+
+        $workingDirectory = Filesystem\get_directory($composerJsonPath);
+        Shell\execute('git', ['add', (string) Filesystem\canonicalize($composerJsonPath)], $workingDirectory);
+
+        $message  = Str\format(
+            'Committing generated "composer.json" file as per "%s"',
+            (new DateTime('now', new DateTimeZone('UTC')))->format(DateTime::W3C)
+        );
+        $message .= "\n" . Str\format(
+            'Original commit: "%s"',
+            'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash[0]
         );
 
-        runInPath(
-            static function () use ($composerJsonPath, $originalHash, $execute): void {
-                $execute('git add ' . escapeshellarg(realpath($composerJsonPath)));
-
-                $message  = sprintf(
-                    'Committing generated "composer.json" file as per "%s"',
-                    (new DateTime('now', new DateTimeZone('UTC')))->format(DateTime::W3C)
-                );
-                $message .= "\n" . sprintf(
-                    'Original commit: "%s"',
-                    'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash[0]
-                );
-
-                $execute('git diff-index --quiet HEAD || git commit -m ' . escapeshellarg($message));
-            },
-            dirname($composerJsonPath)
-        );
+        try {
+            Shell\execute('git', ['diff-index', '--quiet', 'HEAD'], $workingDirectory);
+        } catch (Shell\Exception\FailedExecutionException) {
+            Shell\execute('git', ['commit', '-m', $message], $workingDirectory);
+        }
     };
 
-// cleanup:
+    // cleanup:
     $cleanBuildDir();
     $cloneAdvisories();
     $cloneRoaveAdvisories();
@@ -272,7 +181,7 @@ use const PHP_EOL;
         )),
     ));
 
-// actual work:
+    // actual work:
     $writeJson(
         $buildConflictsJson(
             $baseComposerJson,

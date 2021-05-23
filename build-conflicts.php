@@ -114,16 +114,21 @@ use const E_WARNING;
         /**
          * @param Component[] $components
          *
-         * @return array<non-empty-string, string>
+         * @return array<non-empty-string, non-empty-string>
          */
         static function (array $components): array {
             $conflicts = [];
 
             foreach ($components as $component) {
-                $conflicts[$component->name->packageName] = $component->getConflictConstraint();
+                $constraint = $component->getConflictConstraint();
+                if ($constraint === '') {
+                    continue;
+                }
+
+                $conflicts[$component->name->packageName] = $constraint;
             }
 
-            return Dict\filter(Dict\sort_by_key($conflicts));
+            return Dict\sort_by_key($conflicts);
         };
 
     $buildConflictsJson = static function (array $baseConfig, array $conflicts): string {

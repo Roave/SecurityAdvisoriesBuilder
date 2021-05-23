@@ -72,13 +72,11 @@ final class VersionConstraintSortTest extends TestCase
             Vec\map(
                 $constraints,
                 /**
-                 * @param array{0: non-empty-string, 1: non-empty-string} $entry
+                 * @param array{0: non-empty-string, 1: non-empty-string, 2: int} $entry
                  *
                  * @returns non-empty-string
                  */
-                static function (array $entry): string {
-                    return '"' . $entry[0] . '" <=> "' . $entry[1] . '"';
-                }
+                static fn (array $entry): string => '"' . $entry[0] . '" <=> "' . $entry[1] . '"'
             ),
             Vec\map(
                 $constraints,
@@ -87,13 +85,11 @@ final class VersionConstraintSortTest extends TestCase
                  *
                  * @returns array{0: VersionConstraint, 1: VersionConstraint, 2: int}
                  */
-                static function (array $entry): array {
-                    return [
-                        VersionConstraint::fromString($entry[0]),
-                        VersionConstraint::fromString($entry[1]),
-                        $entry[2],
-                    ];
-                }
+                static fn (array $entry): array => [
+                    VersionConstraint::fromString($entry[0]),
+                    VersionConstraint::fromString($entry[1]),
+                    $entry[2],
+                ]
             )
         );
     }

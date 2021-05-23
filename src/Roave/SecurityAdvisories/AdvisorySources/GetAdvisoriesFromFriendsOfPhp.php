@@ -55,15 +55,14 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
             $this->getAdvisoryFiles(),
             static function (SplFileInfo $advisoryFile): Advisory {
                 $filePath = Type\non_empty_string()->assert($advisoryFile->getRealPath());
+                $yaml     = Filesystem\read_file($filePath);
 
-                /** @var array<array-key, mixed> $definition */
-                $definition = Yaml::parse(Filesystem\read_file($filePath), Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE);
                 $definition = Type\shape([
-                    'branches' => Type\dict(Type\string(), Type\shape([
+                    'branches' => Type\dict(Type\array_key(), Type\shape([
                         'versions' => Type\union(Type\string(), Type\vec(Type\string())),
-                    ])),
+                    ], true)),
                     'reference' => Type\string(),
-                ])->coerce($definition);
+                ], true)->assert(Yaml::parse($yaml, Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE));
 
                 return Advisory::fromArrayData($definition);
             },

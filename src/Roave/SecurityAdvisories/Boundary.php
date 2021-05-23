@@ -4,15 +4,10 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
-use InvalidArgumentException;
-
-use function assert;
-use function in_array;
-use function is_string;
-use function Safe\preg_match;
-use function Safe\sprintf;
-use function str_replace;
-use function strpos;
+use Psl;
+use Psl\Iter;
+use Psl\Regex;
+use Psl\Str;
 
 /**
  * A simple version, such as 1.0 or 1.0.0.0 or 2.0.1.3.2
@@ -21,8 +16,6 @@ use function strpos;
  */
 final class Boundary
 {
-    private const IN_ARRAY_STRICT = true;
-
     private const VALID_ADJACENCY_MAP = [
         ['<', '='],
         ['<', '>='],
@@ -44,28 +37,21 @@ final class Boundary
     /**
      * @return Boundary
      *
-     * @throws InvalidArgumentException
+     * @throws Psl\Exception\InvariantViolationException
      */
     public static function fromString(string $boundary): self
     {
-        if (preg_match(Matchers::BOUNDARY_MATCHER, $boundary, $matches) !== 1) {
-            throw new InvalidArgumentException(sprintf('The given string "%s" is not a valid boundary', $boundary));
-        }
+        $matches = Regex\first_match($boundary, Matchers::BOUNDARY_MATCHER, Regex\capture_groups(['boundary']));
+        Psl\invariant($matches !== null, 'The given string "%s" is not a valid boundary', $boundary);
 
-        assert(isset($matches['boundary']));
-        assert(is_string($matches['boundary']));
+        $boundary = Str\replace($boundary, $matches['boundary'], '');
 
-        $boundary = str_replace($matches['boundary'], '', $boundary);
-
-        return new self(
-            Version::fromString($boundary),
-            $matches['boundary']
-        );
+        return new self(Version::fromString($boundary), $matches['boundary']);
     }
 
     public function limitIncluded(): bool
     {
-        return strpos($this->limitType, '=') !== false;
+        return Str\Byte\contains($this->limitType, '=');
     }
 
     public function adjacentTo(self $other): bool
@@ -74,8 +60,9 @@ final class Boundary
             return false;
         }
 
-        return in_array([$this->limitType, $other->limitType], self::VALID_ADJACENCY_MAP, self::IN_ARRAY_STRICT)
-            || in_array([$other->limitType, $this->limitType], self::VALID_ADJACENCY_MAP, self::IN_ARRAY_STRICT);
+        /** @psalm-suppress ImpureFunctionCall this function is operating in a pure manner */
+        return Iter\contains(self::VALID_ADJACENCY_MAP, [$this->limitType, $other->limitType])
+            || Iter\contains(self::VALID_ADJACENCY_MAP, [$other->limitType, $this->limitType]);
     }
 
     public function getVersion(): Version

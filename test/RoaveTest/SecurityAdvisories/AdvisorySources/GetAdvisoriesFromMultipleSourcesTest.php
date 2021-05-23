@@ -22,11 +22,10 @@ namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 
 use Generator;
 use PHPUnit\Framework\TestCase;
+use Psl\Vec;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisories;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
-
-use function iterator_to_array;
 
 class GetAdvisoriesFromMultipleSourcesTest extends TestCase
 {
@@ -47,7 +46,7 @@ class GetAdvisoriesFromMultipleSourcesTest extends TestCase
                     'branches' => [['versions' => ['<1']]],
                 ]),
             ],
-            iterator_to_array($advisories())
+            Vec\values($advisories())
         );
     }
 

@@ -21,10 +21,9 @@ declare(strict_types=1);
 namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 
 use PHPUnit\Framework\TestCase;
+use Psl\Vec;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
-
-use function iterator_to_array;
 
 class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
 {
@@ -34,19 +33,16 @@ class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
             __DIR__ . '/security-advisories'
         ))();
 
-        self::assertEquals(
-            [
-                Advisory::fromArrayData([
-                    'branches'  => [
-                        '1.x' => [
-                            'time'     => '2017-05-15 09:09:00',
-                            'versions' => ['<1.2'],
-                        ],
+        self::assertEquals([
+            Advisory::fromArrayData([
+                'branches' => [
+                    '1.x' => [
+                        'time' => '2017-05-15 09:09:00',
+                        'versions' => ['<1.2'],
                     ],
-                    'reference' => 'composer://3f/pygmentize',
-                ]),
-            ],
-            iterator_to_array($advisories, false)
-        );
+                ],
+                'reference' => 'composer://3f/pygmentize',
+            ]),
+        ], Vec\values($advisories));
     }
 }

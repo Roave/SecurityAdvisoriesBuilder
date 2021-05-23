@@ -6,14 +6,10 @@ namespace Roave\SecurityAdvisories;
 
 use InvalidArgumentException;
 use LogicException;
-
-use function array_filter;
-use function array_map;
-use function assert;
-use function explode;
-use function implode;
-use function preg_match;
-use function sprintf;
+use Psl;
+use Psl\Regex;
+use Psl\Str;
+use Psl\Vec;
 
 /**
  * A simple version constraint - naively assumes that it is only about ranges like ">=1.2.3,<4.5.6"
@@ -40,8 +36,8 @@ final class VersionConstraint
         $constraintString = $versionConstraint;
         $instance         = new self();
 
-        if (preg_match(Matchers::CLOSED_RANGE_MATCHER, $constraintString, $matches) === 1) {
-            [$left, $right] = explode(',', $constraintString);
+        if (Regex\matches($constraintString, Matchers::CLOSED_RANGE_MATCHER)) {
+            [$left, $right] = Str\split($constraintString, ',');
 
             $instance->lowerBoundary = Boundary::fromString($left);
             $instance->upperBoundary = Boundary::fromString($right);
@@ -49,13 +45,13 @@ final class VersionConstraint
             return $instance;
         }
 
-        if (preg_match(Matchers::LEFT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
+        if (Regex\matches($constraintString, Matchers::LEFT_OPEN_RANGE_MATCHER)) {
             $instance->upperBoundary = Boundary::fromString($constraintString);
 
             return $instance;
         }
 
-        if (preg_match(Matchers::RIGHT_OPEN_RANGE_MATCHER, $constraintString, $matches) === 1) {
+        if (Regex\matches($constraintString, Matchers::RIGHT_OPEN_RANGE_MATCHER)) {
             $instance->lowerBoundary = Boundary::fromString($constraintString);
 
             return $instance;
@@ -73,24 +69,18 @@ final class VersionConstraint
 
     public function getConstraintString(): string
     {
-        if ($this->constraintString !== null) {
-            return $this->constraintString;
-        }
-
-        return implode(
-            ',',
-            array_map(
-                static function (Boundary $boundary) {
+        /** @psalm-suppress ImpureFunctionCall - conditional purity */
+        return $this->constraintString ?? Str\join(
+            Vec\map(Vec\filter_nulls([$this->lowerBoundary, $this->upperBoundary]), static function (Boundary $boundary) {
                     return $boundary->getBoundaryString();
-                },
-                array_filter([$this->lowerBoundary, $this->upperBoundary])
-            )
+            }),
+            ','
         );
     }
 
     public function isLowerBoundIncluded(): bool
     {
-        return $this->lowerBoundary !== null ? $this->lowerBoundary->limitIncluded() : false;
+        return $this->lowerBoundary !== null && $this->lowerBoundary->limitIncluded();
     }
 
     public function getLowerBound(): ?Version
@@ -105,7 +95,7 @@ final class VersionConstraint
 
     public function isUpperBoundIncluded(): bool
     {
-        return $this->upperBoundary !== null ? $this->upperBoundary->limitIncluded() : false;
+        return $this->upperBoundary !== null && $this->upperBoundary->limitIncluded();
     }
 
     public function canMergeWith(self $other): bool
@@ -140,7 +130,7 @@ final class VersionConstraint
             return $this->mergeAdjacent($other);
         }
 
-        throw new LogicException(sprintf(
+        throw new LogicException(Str\format(
             'Cannot merge %s "%s" with %s "%s"',
             self::class,
             $this->getConstraintString(),
@@ -168,10 +158,7 @@ final class VersionConstraint
         }
 
         $isLowerLimitIncluded = $this->lowerBoundary->limitIncluded();
-        if (
-            $isLowerLimitIncluded
-            || ($isLowerLimitIncluded === $otherLowerBoundary->limitIncluded())
-        ) {
+        if ($isLowerLimitIncluded || ! $otherLowerBoundary->limitIncluded()) {
             return $otherLowerBoundary->getVersion()->isGreaterOrEqualThan($this->lowerBoundary->getVersion());
         }
 
@@ -189,8 +176,7 @@ final class VersionConstraint
         }
 
         $upperLimitIncluded = $this->upperBoundary->limitIncluded();
-
-        if ($upperLimitIncluded || ($upperLimitIncluded === $otherUpperBoundary->limitIncluded())) {
+        if ($upperLimitIncluded || ! $otherUpperBoundary->limitIncluded()) {
             return $this->upperBoundary->getVersion()->isGreaterOrEqualThan($otherUpperBoundary->getVersion());
         }
 
@@ -228,7 +214,7 @@ final class VersionConstraint
     private function mergeWithOverlapping(VersionConstraint $other): self
     {
         if (! $this->overlapsWith($other)) {
-            throw new LogicException(sprintf(
+            throw new LogicException(Str\format(
                 '%s "%s" does not overlap with %s "%s"',
                 self::class,
                 $this->getConstraintString(),
@@ -237,16 +223,14 @@ final class VersionConstraint
             ));
         }
 
-        if ($this->strictlyContainsOtherBound($other->lowerBoundary)) {
-            $instance = new self();
+        $instance = new self();
 
+        if ($this->strictlyContainsOtherBound($other->lowerBoundary)) {
             $instance->lowerBoundary = $this->lowerBoundary;
             $instance->upperBoundary = $other->upperBoundary;
 
             return $instance;
         }
-
-        $instance = new self();
 
         $instance->lowerBoundary = $other->lowerBoundary;
         $instance->upperBoundary = $this->upperBoundary;
@@ -254,25 +238,20 @@ final class VersionConstraint
         return $instance;
     }
 
-    /**
-     * @throws LogicException
-     */
     private function mergeAdjacent(VersionConstraint $other): self
     {
+        $instance = new self();
+
         if (
             $this->upperBoundary !== null
             && $other->lowerBoundary !== null
             && $this->upperBoundary->adjacentTo($other->lowerBoundary)
         ) {
-            $instance = new self();
-
             $instance->lowerBoundary = $this->lowerBoundary;
             $instance->upperBoundary = $other->upperBoundary;
 
             return $instance;
         }
-
-        $instance = new self();
 
         $instance->lowerBoundary = $other->lowerBoundary;
         $instance->upperBoundary = $this->upperBoundary;
@@ -290,7 +269,7 @@ final class VersionConstraint
         $boundVersion = $boundary->getVersion();
 
         if ($this->lowerBoundary === null) {
-            assert($this->upperBoundary !== null, 'We either have a lower or an upper boundary, or both');
+            Psl\invariant($this->upperBoundary !== null, 'We either have a lower or an upper boundary, or both');
 
             return $this->upperBoundary->getVersion()->isGreaterThan($boundVersion);
         }

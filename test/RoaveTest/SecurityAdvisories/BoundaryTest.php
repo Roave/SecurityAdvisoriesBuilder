@@ -20,8 +20,8 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use Psl\Exception\InvariantViolationException;
 use Roave\SecurityAdvisories\Boundary;
 use Roave\SecurityAdvisories\Matchers;
 use Roave\SecurityAdvisories\Version;
@@ -43,7 +43,7 @@ final class BoundaryTest extends TestCase
      */
     public function testRejectsInvalidBoundaryStrings(string $boundaryString): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvariantViolationException::class);
 
         Boundary::fromString($boundaryString);
     }

@@ -22,12 +22,11 @@ namespace RoaveTest\SecurityAdvisories;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use Psl\Dict;
+use Psl\Type;
+use Psl\Vec;
 use ReflectionMethod;
 use Roave\SecurityAdvisories\Version;
-use Webmozart\Assert\Assert;
-
-use function array_combine;
-use function array_map;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\Version}
@@ -136,11 +135,7 @@ final class VersionTest extends TestCase
 
         $method->setAccessible(true);
 
-        $value = $method->invoke($version1, $version2);
-
-        Assert::boolean($value);
-
-        return $value;
+        return Type\bool()->assert($method->invoke($version1, $version2));
     }
 
     /**
@@ -242,12 +237,17 @@ final class VersionTest extends TestCase
             ['2.3.2-p2', '2.3.2-p2', false, false],
         ];
 
-        return array_combine(
-            array_map(
-                static function (array $versionData) {
+        return Dict\associate(
+            Vec\map(
+                $versions,
+                /**
+                 * @param array{0: non-empty-string, 1: non-empty-string, 2: bool, 3: bool} $versionData
+                 *
+                 * @return non-empty-string
+                 */
+                static function (array $versionData): string {
                     return $versionData[0] . ' > ' . $versionData[1];
                 },
-                $versions
             ),
             $versions
         );
@@ -313,12 +313,17 @@ final class VersionTest extends TestCase
             ['1-stable.1.1.1.1', '1-stable.1.1.1.1.0', true, true],
         ];
 
-        return array_combine(
-            array_map(
-                static function (array $versionData) {
+        return Dict\associate(
+            Vec\map(
+                $versions,
+                /**
+                 * @param array{0: non-empty-string, 1: non-empty-string, 2: bool, 3: bool} $versionData
+                 *
+                 * @return non-empty-string
+                 */
+                static function (array $versionData): string {
                     return $versionData[0] . ' >= ' . $versionData[1];
                 },
-                $versions
             ),
             $versions
         );

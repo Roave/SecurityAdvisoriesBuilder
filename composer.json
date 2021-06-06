@@ -33,7 +33,7 @@
         "roave/infection-static-analysis-plugin": "^1.8.0",
         "maglnet/composer-require-checker": "^3.2.0",
         "phpunit/phpunit": "^9.5.5",
-        "psalm/plugin-phpunit": "^0.15.2",
+        "psalm/plugin-phpunit": "^0.16.0",
         "roave/no-leaks": "^1.2.0",
         "squizlabs/php_codesniffer": "^3.6.0",
         "vimeo/psalm": "^4.7.3"

@@ -86,7 +86,10 @@ use const E_WARNING;
 
     $cloneRoaveAdvisories = static function () use ($roaveAdvisoriesRepository, $buildDir): void {
         Shell\execute('git', ['clone', $roaveAdvisoriesRepository, $buildDir . '/roave-security-advisories']);
-        Shell\execute('cp', ['-r', $buildDir . '/roave-security-advisories', $buildDir . '/roave-security-advisories-original']);
+        Shell\execute(
+            'cp',
+            ['-r', $buildDir . '/roave-security-advisories', $buildDir . '/roave-security-advisories-original']
+        );
     };
 
     $buildComponents =
@@ -151,7 +154,11 @@ use const E_WARNING;
     };
 
     $commitComposerJson = static function (string $composerJsonPath): void {
-        $originalHash = Shell\execute('git', ['rev-parse', 'HEAD'], Filesystem\get_directory($composerJsonPath) . '/../security-advisories');
+        $originalHash = Shell\execute(
+            'git',
+            ['rev-parse', 'HEAD'],
+            Filesystem\get_directory($composerJsonPath) . '/../security-advisories'
+        );
         $originalHash = Str\trim($originalHash);
 
         $workingDirectory = Filesystem\get_directory($composerJsonPath);

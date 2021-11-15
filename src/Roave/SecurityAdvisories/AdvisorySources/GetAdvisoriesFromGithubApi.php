@@ -60,7 +60,10 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
         ClientInterface $client,
         string $token
     ) {
-        Psl\invariant(! Str\is_empty($token), 'Unable to proceed. Please make sure you have GITHUB_TOKEN environment variable set up.');
+        Psl\invariant(
+            ! Str\is_empty($token),
+            'Unable to proceed. Please make sure you have GITHUB_TOKEN environment variable set up.'
+        );
 
         $this->client = $client;
         $this->token  = $token;

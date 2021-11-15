@@ -37,27 +37,34 @@ final class Version
 
         $this->flag = Flag::build($matches['flag'] ?? '');
 
-        $stability_numbers = $matches['stability_numbers'] ?? null;
-        if ($stability_numbers === null) {
+        $stabilityNumbers = $matches['stability_numbers'] ?? null;
+        if ($stabilityNumbers === null) {
             return;
         }
 
         $this->stabilityNumbers = self::removeTrailingZeroes(Vec\map(
-            Str\split($stability_numbers, '.'),
+            Str\split($stabilityNumbers, '.'),
             static fn (string $versionComponent): int => (int) $versionComponent,
         ));
     }
 
     public static function fromString(string $version): self
     {
-        $matches = Regex\first_match(Str\Byte\lowercase($version), '/^' . Matchers::TAGGED_VERSION_MATCHER . '$/', Type\shape([
-            'version' => Type\string(),
-            'stability_numbers' => Type\optional(Type\string()),
-            'flag' => Type\optional(Type\string()),
-        ]));
+        $matches = Regex\first_match(
+            Str\Byte\lowercase($version),
+            '/^' . Matchers::TAGGED_VERSION_MATCHER . '$/',
+            Type\shape([
+                'version' => Type\string(),
+                'stability_numbers' => Type\optional(Type\string()),
+                'flag' => Type\optional(Type\string()),
+            ])
+        );
 
         if ($matches === null) {
-            throw new InvalidArgumentException(Str\format('Given version "%s" is not a valid version string', $version));
+            throw new InvalidArgumentException(Str\format(
+                'Given version "%s" is not a valid version string',
+                $version
+            ));
         }
 
         return new self($matches);

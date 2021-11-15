@@ -41,7 +41,10 @@ final class Advisory
     }
 
     /**
-     * @param array{branches: array<array-key, array{versions: string|array<array-key, string>}>, reference: string} $config
+     * @psalm-param array{
+     *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
+     *     reference: string
+     * } $config
      *
      * @return Advisory
      *
@@ -86,7 +89,10 @@ final class Advisory
     {
         // @TODO may want to escape this
         return Str\join(
-            Vec\map($this->branchConstraints, static fn (VersionConstraint $versionConstraint) => $versionConstraint->getConstraintString()),
+            Vec\map(
+                $this->branchConstraints,
+                static fn (VersionConstraint $versionConstraint) => $versionConstraint->getConstraintString()
+            ),
             '|'
         ) ?: null;
     }

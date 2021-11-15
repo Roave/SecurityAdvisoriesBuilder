@@ -402,7 +402,8 @@ final class VersionConstraintTest extends TestCase
                  * @return non-empty-string
                  */
                 static function (array $entry) {
-                    return '(∀ x ∈ (' . $entry[0] . '): x ∈ (' . $entry[1] . ')) = ' . Type\literal_scalar($entry[2])->toString();
+                    return '(∀ x ∈ (' . $entry[0] . '): x ∈ (' . $entry[1] . ')) = '
+                        . Type\literal_scalar($entry[2])->toString();
                 }
             ),
             $entries
@@ -679,7 +680,8 @@ final class VersionConstraintTest extends TestCase
 
         $mergeWithOverlappingReflection->setAccessible(true);
 
-        return Type\object(VersionConstraint::class)->assert($mergeWithOverlappingReflection->invoke($versionConstraint, $other));
+        return Type\object(VersionConstraint::class)
+            ->assert($mergeWithOverlappingReflection->invoke($versionConstraint, $other));
     }
 
     /** @psalm-return non-empty-list<array{non-empty-string}> */

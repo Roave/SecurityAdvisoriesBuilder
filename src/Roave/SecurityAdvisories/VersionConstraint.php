@@ -71,9 +71,12 @@ final class VersionConstraint
     {
         /** @psalm-suppress ImpureFunctionCall - conditional purity */
         return $this->constraintString ?? Str\join(
-            Vec\map(Vec\filter_nulls([$this->lowerBoundary, $this->upperBoundary]), static function (Boundary $boundary) {
+            Vec\map(
+                Vec\filter_nulls([$this->lowerBoundary, $this->upperBoundary]),
+                static function (Boundary $boundary) {
                     return $boundary->getBoundaryString();
-            }),
+                }
+            ),
             ','
         );
     }

@@ -41,6 +41,3 @@ jobs:
 
       - name: Memory leaks detection
         run: vendor/bin/roave-no-leaks
-
-      - name: Composer Require Checker
-        run: vendor/bin/composer-require-checker check composer.json

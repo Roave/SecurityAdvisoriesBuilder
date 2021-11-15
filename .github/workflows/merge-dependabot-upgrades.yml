@@ -8,7 +8,7 @@ on:
     types:
       - completed
     workflows:
-      - "Continuous Integration"
+      - "Quality check"
 
 jobs:
   merge-me:

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use Psl\Regex;
+use Psl\Str;
+use Psl\Type;
 use Roave\SecurityAdvisories\Exception\InvalidPackageName;
-use Webmozart\Assert\Assert;
-
-use function preg_match;
-use function str_replace;
 
 /**
  * Small value type around the definition of a package name.
@@ -32,16 +31,17 @@ final class PackageName
      * @throws InvalidPackageName
      *
      * @psalm-pure
+     *
+     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
+     * @psalm-suppress ImpureMethodCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
      */
     public static function fromName(string $name): self
     {
-        if (preg_match('{^[a-z0-9](?:[_.-]?[a-z0-9]+)*/[a-z0-9](?:(?:[_.]?|-{0,2})[a-z0-9]+)*$}iD', $name) !== 1) {
+        if (! Regex\matches($name, '{^[a-z0-9](?:[_.-]?[a-z0-9]+)*/[a-z0-9](?:(?:[_.]?|-{0,2})[a-z0-9]+)*$}iD')) {
             throw InvalidPackageName::fromInvalidName($name);
         }
 
-        Assert::stringNotEmpty($name);
-
-        return new self($name);
+        return new self(Type\non_empty_string()->assert($name));
     }
 
     /**
@@ -51,10 +51,6 @@ final class PackageName
      */
     public static function fromReferenceName(string $reference): self
     {
-        return self::fromName(str_replace(
-            ['composer://', '\\'],
-            ['', '/'],
-            $reference
-        ));
+        return self::fromName(Str\replace_every($reference, ['composer://' => '', '\\' => '/']));
     }
 }

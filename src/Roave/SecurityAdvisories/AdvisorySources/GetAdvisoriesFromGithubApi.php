@@ -22,20 +22,15 @@ namespace Roave\SecurityAdvisories\AdvisorySources;
 
 use Generator;
 use Nyholm\Psr7\Request;
+use Psl;
+use Psl\Json;
+use Psl\Str;
+use Psl\Type;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\Exception\InvalidPackageName;
-use Safe\Exceptions\JsonException;
-use Safe\Exceptions\StringsException;
-use Webmozart\Assert\Assert;
-
-use function count;
-use function explode;
-use function Safe\json_decode;
-use function Safe\json_encode;
-use function Safe\sprintf;
 
 final class GetAdvisoriesFromGithubApi implements GetAdvisories
 {
@@ -65,8 +60,8 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
         ClientInterface $client,
         string $token
     ) {
-        Assert::stringNotEmpty(
-            $token,
+        Psl\invariant(
+            ! Str\is_empty($token),
             'Unable to proceed. Please make sure you have GITHUB_TOKEN environment variable set up.'
         );
 
@@ -78,15 +73,12 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      * @return Generator<Advisory>
      *
      * @throws ClientExceptionInterface
-     * @throws JsonException
-     * @throws StringsException
      */
     public function __invoke(): Generator
     {
         foreach ($this->getAdvisories() as $item) {
-            $versions = explode(',', $item['node']['vulnerableVersionRange']);
-            Assert::lessThanEq(count($versions), 2);
-            Assert::allStringNotEmpty($versions);
+            $versions = Type\shape([0 => Type\non_empty_string(), 1 => Type\optional(Type\non_empty_string())])
+                ->assert(Str\split($item['node']['vulnerableVersionRange'], ','));
 
             try {
                 yield Advisory::fromArrayData(
@@ -119,44 +111,46 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      * }>
      *
      * @throws ClientExceptionInterface
-     * @throws JsonException
-     * @throws StringsException
      */
     private function getAdvisories(): iterable
     {
         $cursor = '';
 
         do {
-            $response = $this->client->sendRequest($this->getRequest($cursor));
-            /** @psalm-var array{
-             * data: array{securityVulnerabilities: array{
-             *   edges: array<int, array{
-             *     cursor: string,
-             *     node: array{vulnerableVersionRange: string, package: array{name: string}}}>,
-             *   pageInfo: array{hasNextPage: bool, endCursor: string}
-             * }}} $data
-             */
-            $data            = json_decode($response->getBody()->__toString(), true);
+            $response        = $this->client->sendRequest($this->getRequest($cursor));
+            $data            = Json\typed($response->getBody()->__toString(), Type\shape([
+                'data' => Type\shape([
+                    'securityVulnerabilities' => Type\shape([
+                        'edges' => Type\dict(Type\int(), Type\shape([
+                            'cursor' => Type\string(),
+                            'node' => Type\shape([
+                                'vulnerableVersionRange' => Type\string(),
+                                'package' => Type\shape(['name' => Type\string()]),
+                            ]),
+                        ])),
+                        'pageInfo' => Type\shape([
+                            'hasNextPage' => Type\bool(),
+                            'endCursor' => Type\nullable(Type\string()),
+                        ]),
+                    ]),
+                ]),
+            ]));
             $vulnerabilities = $data['data']['securityVulnerabilities'];
 
             yield from $vulnerabilities['edges'];
 
             $hasNextPage = $vulnerabilities['pageInfo']['hasNextPage'];
             $cursor      = $vulnerabilities['pageInfo']['endCursor'];
-        } while ($hasNextPage);
+        } while ($hasNextPage && $cursor !== null);
     }
 
-    /**
-     * @throws JsonException
-     * @throws StringsException
-     */
     private function getRequest(string $cursor): RequestInterface
     {
         return new Request(
             'POST',
             'https://api.github.com/graphql',
             [
-                'Authorization' => sprintf('bearer %s', $this->token),
+                'Authorization' => Str\format('bearer %s', $this->token),
                 'Content-Type' => 'application/json',
                 'User-Agent' => 'Curl',
             ],
@@ -164,14 +158,10 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
         );
     }
 
-    /**
-     * @throws JsonException
-     * @throws StringsException
-     */
     private function queryWithCursor(string $cursor): string
     {
-        $after = $cursor === '' ? '' : sprintf(', after: "%s"', $cursor);
+        $after = $cursor === '' ? '' : Str\format(', after: "%s"', $cursor);
 
-        return json_encode(['query' => sprintf(self::GRAPHQL_QUERY, $after)]);
+        return Json\encode(['query' => Str\format(self::GRAPHQL_QUERY, $after)]);
     }
 }

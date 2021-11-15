@@ -22,16 +22,13 @@ namespace RoaveTest\SecurityAdvisories;
 
 use LogicException;
 use PHPUnit\Framework\TestCase;
+use Psl\Dict;
+use Psl\Regex;
+use Psl\Type;
+use Psl\Vec;
 use ReflectionMethod;
 use Roave\SecurityAdvisories\Version;
 use Roave\SecurityAdvisories\VersionConstraint;
-use Webmozart\Assert\Assert;
-
-use function array_column;
-use function array_combine;
-use function array_map;
-use function Safe\preg_match;
-use function var_export;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\VersionConstraint}
@@ -54,8 +51,8 @@ final class VersionConstraintTest extends TestCase
 
         $constraintAsString = $constraint->getConstraintString();
 
-        self::assertSame((bool) preg_match('/>=/', $stringConstraint), $constraint->isLowerBoundIncluded());
-        self::assertSame((bool) preg_match('/<=/', $stringConstraint), $constraint->isUpperBoundIncluded());
+        self::assertSame(Regex\matches($stringConstraint, '/>=/'), $constraint->isLowerBoundIncluded());
+        self::assertSame(Regex\matches($stringConstraint, '/<=/'), $constraint->isUpperBoundIncluded());
         self::assertStringMatchesFormat('%A' . $lowerBound->getVersion() . '%A', $constraintAsString);
         self::assertStringMatchesFormat('%A' . $upperBound->getVersion() . '%A', $constraintAsString);
     }
@@ -255,8 +252,16 @@ final class VersionConstraintTest extends TestCase
             ['>1-stable.1.2,<1-rc.1.2'],
         ];
 
-        return array_combine(
-            array_column($samples, 0),
+        return Dict\associate(
+            Vec\map(
+                $samples,
+                /**
+                 * @param array{0: non-empty-string} $sample
+                 *
+                 * @return non-empty-string
+                 */
+                static fn ($sample) => $sample[0]
+            ),
             $samples
         );
     }
@@ -279,8 +284,16 @@ final class VersionConstraintTest extends TestCase
             ['1-beta.2.0|1-rc.1.2.3'],
         ];
 
-        return array_combine(
-            array_column($samples, 0),
+        return Dict\associate(
+            Vec\map(
+                $samples,
+                /**
+                 * @param array{0: non-empty-string} $sample
+                 *
+                 * @return non-empty-string
+                 */
+                static fn ($sample) => $sample[0]
+            ),
             $samples
         );
     }
@@ -380,12 +393,18 @@ final class VersionConstraintTest extends TestCase
 
         ];
 
-        return array_combine(
-            array_map(
+        return Dict\associate(
+            Vec\map(
+                $entries,
+                /**
+                 * @param array{0: non-empty-string, 1: non-empty-string, 2: bool, 3: bool} $entry
+                 *
+                 * @return non-empty-string
+                 */
                 static function (array $entry) {
-                    return '(∀ x ∈ (' . $entry[0] . '): x ∈ (' . $entry[1] . ')) = ' . var_export($entry[2], true);
-                },
-                $entries
+                    return '(∀ x ∈ (' . $entry[0] . '): x ∈ (' . $entry[1] . ')) = '
+                        . Type\literal_scalar($entry[2])->toString();
+                }
             ),
             $entries
         );
@@ -480,12 +499,17 @@ final class VersionConstraintTest extends TestCase
             ['>1,<1-p', '>1-a,<1-b', false, false],
         ];
 
-        return array_combine(
-            array_map(
+        return Dict\associate(
+            Vec\map(
+                $entries,
+                /**
+                 * @param array{0: non-empty-string, 1: non-empty-string} $entry
+                 *
+                 * @return non-empty-string
+                 */
                 static function (array $entry) {
                     return '((' . $entry[0] . ') ∩ (' . $entry[1] . ')) ≠ ∅';
-                },
-                $entries
+                }
             ),
             $entries
         );
@@ -514,8 +538,16 @@ final class VersionConstraintTest extends TestCase
             ['<=1.0.3.0.5.0-beta.0.5.0.0', '<=1.0.3.0.5-beta.0.5'],
         ];
 
-        return array_combine(
-            array_column($samples, 0),
+        return Dict\associate(
+            Vec\map(
+                $samples,
+                /**
+                 * @param array{0: non-empty-string, 1: non-empty-string} $sample
+                 *
+                 * @return non-empty-string
+                 */
+                static fn ($sample) => $sample[0]
+            ),
             $samples
         );
     }
@@ -559,12 +591,17 @@ final class VersionConstraintTest extends TestCase
             ['>1-a.1.0.1.0,<1-a.4.1', '>1-a.1.0.2,<1-a.5.8', '>1-a.1.0.1,<1-a.5.8'],
         ];
 
-        return array_combine(
-            array_map(
+        return Dict\associate(
+            Vec\map(
+                $entries,
+                /**
+                 * @param array{0: non-empty-string, 1: non-empty-string, 2: non-empty-string} $entry
+                 *
+                 * @return non-empty-string
+                 */
                 static function (array $entry) {
                     return '((' . $entry[0] . ') ∪ (' . $entry[1] . ')) = (' . $entry[2] . ')';
-                },
-                $entries
+                }
             ),
             $entries
         );
@@ -601,12 +638,17 @@ final class VersionConstraintTest extends TestCase
             ['>1-alpha.1,<4-alpha.1', '>2-beta.1,<3-beta.1'], // note: containing, not overlapping.
         ];
 
-        return array_combine(
-            array_map(
-                static function (array $entry) {
+        return Dict\associate(
+            Vec\map(
+                $entries,
+                /**
+                 * @param array{0: non-empty-string, 1: non-empty-string} $entry
+                 *
+                 * @return non-empty-string
+                 */
+                static function (array $entry): string {
                     return '((' . $entry[0] . ') ∩ (' . $entry[1] . ')) = ∅';
-                },
-                $entries
+                }
             ),
             $entries
         );
@@ -618,11 +660,7 @@ final class VersionConstraintTest extends TestCase
 
         $containsReflection->setAccessible(true);
 
-        $contains = $containsReflection->invoke($versionConstraint, $other);
-
-        Assert::boolean($contains);
-
-        return $contains;
+        return Type\bool()->assert($containsReflection->invoke($versionConstraint, $other));
     }
 
     private function callOverlapsWith(VersionConstraint $versionConstraint, VersionConstraint $other): bool
@@ -631,11 +669,7 @@ final class VersionConstraintTest extends TestCase
 
         $overlapsWithReflection->setAccessible(true);
 
-        $overlaps = $overlapsWithReflection->invoke($versionConstraint, $other);
-
-        Assert::boolean($overlaps);
-
-        return $overlaps;
+        return Type\bool()->assert($overlapsWithReflection->invoke($versionConstraint, $other));
     }
 
     private function callMergeWithOverlapping(
@@ -646,11 +680,8 @@ final class VersionConstraintTest extends TestCase
 
         $mergeWithOverlappingReflection->setAccessible(true);
 
-        $merged = $mergeWithOverlappingReflection->invoke($versionConstraint, $other);
-
-        Assert::isInstanceOf($merged, VersionConstraint::class);
-
-        return $versionConstraint;
+        return Type\object(VersionConstraint::class)
+            ->assert($mergeWithOverlappingReflection->invoke($versionConstraint, $other));
     }
 
     /** @psalm-return non-empty-list<array{non-empty-string}> */

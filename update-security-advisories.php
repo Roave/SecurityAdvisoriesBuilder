@@ -21,71 +21,37 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories;
 
 use ErrorException;
+use Psl\Filesystem;
+use Psl\Json;
+use Psl\Shell;
+use Psl\Str;
 
 // Note: this script is responsible for handling incoming requests from the github push notifications,
 // and to re-run the code generation/checks every time
-(function () {
+(static function () {
     set_error_handler(
-        function ($errorCode, $message = '', $file = '', $line = 0) {
+        static function ($errorCode, $message = '', $file = '', $line = 0) {
             throw new ErrorException($message, 0, $errorCode, $file, $line);
         },
         E_STRICT | E_NOTICE | E_WARNING
     );
 
-    $runInPath = function (callable $function, string $path) {
-        $originalPath = getcwd();
-
-        chdir($path);
-
-        try {
-            return $function();
-        } finally {
-            chdir($originalPath);
-        }
+    $getCurrentSha1 = static function (string $directory): string {
+        return Str\trim(Shell\execute('git', ['rev-parse', '--verify', 'HEAD'], $directory));
     };
 
-    $execute = function (string $commandString) : array {
-        // may the gods forgive me for this in-lined command addendum, but I CBA to fix proc_open's handling
-        // of exit codes.
-        exec($commandString . ' 2>&1', $output, $result);
-
-        if (0 !== $result) {
-            throw new \UnexpectedValueException(sprintf(
-                'Command failed: "%s" "%s"',
-                $commandString,
-                implode(PHP_EOL, $output)
-            ));
-        }
-
-        return $output;
-    };
-
-    $getCurrentSha1 = function (string $directory) use ($runInPath, $execute) : string {
-        return $runInPath(
-            function () use ($execute) : string {
-                return $execute('git rev-parse --verify HEAD')[0];
-            },
-            $directory
-        );
-    };
-
-    (function () {
-        require  __DIR__ . '/build-conflicts.php';
+    (static function () {
+        require __DIR__ . '/build-conflicts.php';
     })();
 
-    $previousSha1 = $getCurrentSha1(\realpath(__DIR__ . '/build/roave-security-advisories-original'));
-    $newSha1      = $getCurrentSha1(\realpath(__DIR__ . '/build/roave-security-advisories'));
+    $previousSha1 = $getCurrentSha1((string)Filesystem\canonicalize(__DIR__ . '/build/roave-security-advisories-original'));
+    $newSha1 = $getCurrentSha1((string)Filesystem\canonicalize(__DIR__ . '/build/roave-security-advisories'));
 
-    $runInPath(
-        function () use ($execute) : void {
-            $execute('git push origin master');
-        },
-        realpath(__DIR__ . '/build/roave-security-advisories')
-    );
-    
+    Shell\execute('git', ['push', 'origin', 'master'], (string)Filesystem\canonicalize(__DIR__ . '/build/roave-security-advisories'));
+
     header('Content-Type: application/json');
-    echo json_encode([
+    echo Json\encode([
         'before' => $previousSha1,
-        'after'  => $newSha1,
+        'after' => $newSha1,
     ]);
 })();

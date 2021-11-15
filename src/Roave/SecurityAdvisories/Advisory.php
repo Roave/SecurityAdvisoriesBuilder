@@ -20,15 +20,10 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
-use InvalidArgumentException;
-
-use function array_map;
-use function array_values;
-use function assert;
-use function implode;
-use function is_array;
-use function is_string;
-use function usort;
+use Psl\Str;
+use Psl\Type;
+use Psl\Vec;
+use Roave\SecurityAdvisories\Exception\InvalidPackageName;
 
 /** @psalm-immutable */
 final class Advisory
@@ -46,52 +41,59 @@ final class Advisory
     }
 
     /**
-     * @param string[]|string[][][]|string[][][][] $config
+     * @psalm-param array{
+     *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
+     *     reference: string
+     * } $config
      *
      * @return Advisory
      *
-     * @throws InvalidArgumentException
+     * @throws InvalidPackageName
+     * @throws Type\Exception\CoercionException
      *
-     * @psalm-suppress RedundantCondition
+     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
      */
     public static function fromArrayData(array $config): self
     {
-        $branches = $config['branches'];
-        assert(is_array($branches));
-
-        $reference = $config['reference'];
-        assert(is_string($reference));
-
         return new self(
-            PackageName::fromReferenceName($reference),
-            array_values(array_map(
-                static function (array $branchConfig) {
-                    return VersionConstraint::fromString(implode(',', (array) $branchConfig['versions']));
-                },
-                $branches
-            ))
+            PackageName::fromReferenceName($config['reference']),
+            Vec\map(
+                $config['branches'],
+                /**
+                 * @param array{versions: string|array<array-key, string>} $branchConfig
+                 */
+                static function (array $branchConfig): VersionConstraint {
+                    $versions = $branchConfig['versions'];
+                    if (Type\string()->matches($versions)) {
+                        $versions = [$versions];
+                    }
+
+                    return VersionConstraint::fromString(Str\join(Vec\values($versions), ','));
+                }
+            )
         );
     }
 
     /**
-     * @return VersionConstraint[]
+     * @return list<VersionConstraint>
      */
     public function getVersionConstraints(): array
     {
         return $this->branchConstraints;
     }
 
+    /**
+     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
+     */
     public function getConstraint(): ?string
     {
         // @TODO may want to escape this
-        return implode(
-            '|',
-            array_map(
-                static function (VersionConstraint $versionConstraint) {
-                    return $versionConstraint->getConstraintString();
-                },
-                $this->branchConstraints
-            )
+        return Str\join(
+            Vec\map(
+                $this->branchConstraints,
+                static fn (VersionConstraint $versionConstraint) => $versionConstraint->getConstraintString()
+            ),
+            '|'
         ) ?: null;
     }
 
@@ -104,8 +106,6 @@ final class Advisory
     private function sortVersionConstraints(array $versionConstraints): array
     {
         /** @psalm-suppress ImpureFunctionCall this sorting function is operating in a pure manner */
-        usort($versionConstraints, new VersionConstraintSort());
-
-        return $versionConstraints;
+        return Vec\sort($versionConstraints, new VersionConstraintSort());
     }
 }

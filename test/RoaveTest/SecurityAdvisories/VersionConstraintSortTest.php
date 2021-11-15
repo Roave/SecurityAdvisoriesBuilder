@@ -21,11 +21,10 @@ declare(strict_types=1);
 namespace RoaveTest\SecurityAdvisories;
 
 use PHPUnit\Framework\TestCase;
+use Psl\Dict;
+use Psl\Vec;
 use Roave\SecurityAdvisories\VersionConstraint;
 use Roave\SecurityAdvisories\VersionConstraintSort;
-
-use function array_combine;
-use function array_map;
 
 /**
  * Tests for {@see \Roave\SecurityAdvisories\VersionConstraintSort}
@@ -69,17 +68,29 @@ final class VersionConstraintSortTest extends TestCase
             ['>=1-alpha.9,<=2-alpha.9,>3-alpha.9', '>=1-alpha.9,<=2-alpha.9', 0],
         ];
 
-        return array_combine(
-            array_map(static function (array $entry): string {
-                return '"' . $entry[0] . '" <=> "' . $entry[1] . '"';
-            }, $constraints),
-            array_map(static function (array $entry): array {
-                return [
+        return Dict\associate(
+            Vec\map(
+                $constraints,
+                /**
+                 * @param array{0: non-empty-string, 1: non-empty-string, 2: int} $entry
+                 *
+                 * @returns non-empty-string
+                 */
+                static fn (array $entry): string => '"' . $entry[0] . '" <=> "' . $entry[1] . '"'
+            ),
+            Vec\map(
+                $constraints,
+                /**
+                 * @param array{0: non-empty-string, 1: non-empty-string, 2: int} $entry
+                 *
+                 * @returns array{0: VersionConstraint, 1: VersionConstraint, 2: int}
+                 */
+                static fn (array $entry): array => [
                     VersionConstraint::fromString($entry[0]),
                     VersionConstraint::fromString($entry[1]),
                     $entry[2],
-                ];
-            }, $constraints)
+                ]
+            )
         );
     }
 }

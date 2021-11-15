@@ -39,6 +39,7 @@ use function set_error_handler;
 use const E_NOTICE;
 use const E_STRICT;
 use const E_WARNING;
+use const PHP_BINARY;
 
 (static function (): void {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -143,7 +144,11 @@ use const E_WARNING;
     };
 
     $validateComposerJson = static function (string $composerJsonPath): void {
-        Shell\execute('php', ['composer.phar', 'validate'], Filesystem\get_directory($composerJsonPath));
+        Shell\execute(
+            PHP_BINARY,
+            [__DIR__ . '/vendor/bin/composer', 'validate'],
+            Filesystem\get_directory($composerJsonPath)
+        );
     };
 
     $copyGeneratedComposerJson = static function (

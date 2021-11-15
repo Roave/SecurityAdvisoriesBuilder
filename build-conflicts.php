@@ -209,25 +209,10 @@ use const PHP_EOL;
         file_put_contents($path, $jsonString . "\n");
     };
 
-    $getComposerPhar = static function (string $targetDir) use ($execute): void {
-        runInPath(
-            static function () use ($targetDir, $execute): void {
-                $installerPath = escapeshellarg($targetDir . '/composer-installer.php');
-
-                $execute(sprintf(
-                    'curl -sS https://getcomposer.org/installer -o %s && php %s',
-                    $installerPath,
-                    $installerPath
-                ));
-            },
-            $targetDir
-        );
-    };
-
     $validateComposerJson = static function (string $composerJsonPath) use ($execute): void {
         runInPath(
             static function () use ($execute): void {
-                $execute('php composer.phar validate');
+                $execute('composer validate');
             },
             dirname($composerJsonPath)
         );
@@ -300,7 +285,6 @@ use const PHP_EOL;
         __DIR__ . '/build/composer.json'
     );
 
-    $getComposerPhar(__DIR__ . '/build');
     $validateComposerJson(__DIR__ . '/build/composer.json');
 
     $copyGeneratedComposerJson(

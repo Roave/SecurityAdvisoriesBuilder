@@ -169,13 +169,14 @@ use const PHP_BINARY;
         $workingDirectory = Filesystem\get_directory($composerJsonPath);
         Shell\execute('git', ['add', (string) Filesystem\canonicalize($composerJsonPath)], $workingDirectory);
 
-        $message  = Str\format(
+        $message = Str\format(
             'Committing generated "composer.json" file as per "%s"',
             (new DateTime('now', new DateTimeZone('UTC')))->format(DateTime::W3C)
         );
+
         $message .= "\n" . Str\format(
             'Original commit: "%s"',
-            'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash[0]
+            'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash
         );
 
         try {

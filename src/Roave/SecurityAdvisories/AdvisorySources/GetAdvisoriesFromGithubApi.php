@@ -114,7 +114,8 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      *      cursor: string,
      *      node: array{
      *          vulnerableVersionRange: string,
-     *          package: array{name: string}
+     *          package: array{name: string},
+     *          advisory: array{withdrawnAt: string|null}
      *      }
      * }>
      *

@@ -150,6 +150,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                             "vulnerableVersionRange": "> 0.12.0, < 0.12.1 ",
                             "package": {
                               "name": "enshrined/svg-sanitize"
+                            },
+                            "advisory": {
+                              "withdrawnAt": null
                             }
                           }
                         },
@@ -159,6 +162,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                             "vulnerableVersionRange": "> 1.2.3, < 4.5.6 ",
                             "package": {
                               "name": "foo/bar"
+                            },
+                            "advisory": {
+                              "withdrawnAt": null
                             }
                           }
                         }
@@ -226,6 +232,28 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         );
     }
 
+    /**
+     * @throws ClientExceptionInterface
+     *
+     * @dataProvider correctResponseWithWithdrawnAdvisories
+     */
+    public function testWillSkipWithdrawnAdvisories(ResponseInterface ...$responses): void
+    {
+        $client = $this->createMock(Client::class);
+
+        $client->method('sendRequest')
+            ->willReturnOnConsecutiveCalls(...$responses);
+
+        $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token');
+
+        self::assertEquals([
+            Advisory::fromArrayData([
+                'reference' => 'aa/bb',
+                'branches' => [['versions' => ['<= 1.1.0']]],
+            ]),
+        ], Vec\Values($advisories()));
+    }
+
     /** @psalm-return non-empty-list<list<ResponseInterface>> */
     public function correctResponsesWithInvalidAdvisoryNames(): array
     {
@@ -241,6 +269,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                             "vulnerableVersionRange": "> 0.12.0, < 0.12.1 ",
                             "package": {
                               "name": "aa/bb"
+                            },
+                            "advisory": {
+                              "withdrawnAt": null
                             }
                           }
                         },
@@ -250,6 +281,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                             "vulnerableVersionRange": "> 0.12.0, < 0.12.1 ",
                             "package": {
                               "name": "cc"
+                            },
+                            "advisory": {
+                              "withdrawnAt": null
                             }
                           }
                         },
@@ -259,6 +293,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                             "vulnerableVersionRange": "> 1.2.3, < 4.5.6 ",
                             "package": {
                               "name": "dd/ee"
+                            },
+                            "advisory": {
+                              "withdrawnAt": null
                             }
                           }
                         }
@@ -311,6 +348,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                             "vulnerableVersionRange": "%s",
                             "package": {
                               "name": "enshrined/svg-sanitize"
+                            },
+                            "advisory": {
+                              "withdrawnAt": null
                             }
                           }
                         }
@@ -338,6 +378,51 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         }
 
         return $responses;
+    }
+
+    /** @psalm-return non-empty-list<list<ResponseInterface>> */
+    public function correctResponseWithWithdrawnAdvisories(): array
+    {
+        $query = <<<'QUERY'
+                {
+                  "data": {
+                    "securityVulnerabilities": {
+                      "edges": [
+                        {
+                          "cursor": "Y3Vyc29yOnYyOpK5MjAyMS0xMS0xNVQyMzoyMDo0NyswMTowMM1Qsw==",
+                          "node": {
+                            "vulnerableVersionRange": "<= 2.0",
+                            "package": {
+                              "name": "aa/bb"
+                            },
+                            "advisory": {
+                              "withdrawnAt": "2021-11-17T15:54:51Z"
+                            }
+                          }
+                        },
+                        {
+                          "cursor": "Y3Vyc29yOnYyOpK5MjAyMS0wNS0wNVQwMDo0Njo1MSswMjowMM0_Fg==",
+                          "node": {
+                            "vulnerableVersionRange": "<= 1.1.0",
+                            "package": {
+                              "name": "aa/bb"
+                            },
+                            "advisory": {
+                              "withdrawnAt": null
+                            }
+                          }
+                        }
+                      ],
+                      "pageInfo": {
+                        "hasNextPage": false,
+                        "endCursor": "Y3Vyc29yOnYyOpK5MjAyMS0wNS0wNVQwMDo0Njo1MSswMjowMM0_Fg=="
+                      }
+                    }
+                  }
+                }
+            QUERY;
+
+        return [[new Response(200, [], $query)]];
     }
 
     /** @psalm-return non-empty-list<array{string, bool}> */

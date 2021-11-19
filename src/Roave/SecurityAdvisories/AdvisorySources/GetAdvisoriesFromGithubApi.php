@@ -43,6 +43,9 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                         package {
                             name
                         }
+                        advisory {
+                            withdrawnAt
+                        }
                     }
                 }
                 pageInfo {
@@ -80,6 +83,11 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
             $versions = Type\shape([0 => Type\non_empty_string(), 1 => Type\optional(Type\non_empty_string())])
                 ->assert(Str\split($item['node']['vulnerableVersionRange'], ','));
 
+            if ($item['node']['advisory']['withdrawnAt'] !== null) {
+                // Skip withdrawn advisories.
+                continue;
+            }
+
             try {
                 yield Advisory::fromArrayData(
                     [
@@ -106,7 +114,8 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      *      cursor: string,
      *      node: array{
      *          vulnerableVersionRange: string,
-     *          package: array{name: string}
+     *          package: array{name: string},
+     *          advisory: array{withdrawnAt: string|null}
      *      }
      * }>
      *
@@ -126,6 +135,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                             'node' => Type\shape([
                                 'vulnerableVersionRange' => Type\string(),
                                 'package' => Type\shape(['name' => Type\string()]),
+                                'advisory' => Type\shape(['withdrawnAt' => Type\nullable(Type\string())]),
                             ]),
                         ])),
                         'pageInfo' => Type\shape([

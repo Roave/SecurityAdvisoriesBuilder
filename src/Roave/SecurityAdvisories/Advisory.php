@@ -33,11 +33,14 @@ final class Advisory
     /** @var list<VersionConstraint> */
     private array $branchConstraints;
 
+    public Source $source;
+
     /** @param list<VersionConstraint> $branchConstraints */
-    private function __construct(PackageName $package, array $branchConstraints)
+    private function __construct(PackageName $package, array $branchConstraints, Source $source)
     {
         $this->package           = $package;
         $this->branchConstraints = $this->sortVersionConstraints($branchConstraints);
+        $this->source = $source;
     }
 
     /**
@@ -70,7 +73,8 @@ final class Advisory
 
                     return VersionConstraint::fromString(Str\join(Vec\values($versions), ','));
                 }
-            )
+            ),
+            $config['source'],
         );
     }
 

@@ -31,6 +31,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\Exception\InvalidPackageName;
+use Roave\SecurityAdvisories\Source;
 
 final class GetAdvisoriesFromGithubApi implements GetAdvisories
 {
@@ -45,6 +46,9 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                         }
                         advisory {
                             withdrawnAt
+                            ghsaId
+                            permalink
+                            summary
                         }
                     }
                 }
@@ -83,7 +87,9 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
             $versions = Type\shape([0 => Type\non_empty_string(), 1 => Type\optional(Type\non_empty_string())])
                 ->assert(Str\split($item['node']['vulnerableVersionRange'], ','));
 
-            if ($item['node']['advisory']['withdrawnAt'] !== null) {
+
+            $advisory = $item['node']['advisory'];
+            if ($advisory['withdrawnAt'] !== null) {
                 // Skip withdrawn advisories.
                 continue;
             }
@@ -93,6 +99,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                     [
                         'reference' => $item['node']['package']['name'],
                         'branches'  => [['versions' => $versions]],
+                        'source'=> Source::New($advisory['summary'], $advisory['permalink'])
                     ]
                 );
             } catch (InvalidPackageName) {
@@ -135,7 +142,10 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                             'node' => Type\shape([
                                 'vulnerableVersionRange' => Type\string(),
                                 'package' => Type\shape(['name' => Type\string()]),
-                                'advisory' => Type\shape(['withdrawnAt' => Type\nullable(Type\string())]),
+                                'advisory' => Type\shape([
+                                    'withdrawnAt' => Type\nullable(Type\string()),
+                                    'permalink' => Type\nullable(Type\string()),
+                                    'summary' => Type\string()]), // this is my title or better rename it to summary as well
                             ]),
                         ])),
                         'pageInfo' => Type\shape([
@@ -145,6 +155,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                     ]),
                 ]),
             ]));
+
             $vulnerabilities = $data['data']['securityVulnerabilities'];
 
             yield from $vulnerabilities['edges'];

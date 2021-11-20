@@ -32,8 +32,10 @@ use RecursiveFilterIterator;
 use RecursiveIterator;
 use RecursiveIteratorIterator;
 use Roave\SecurityAdvisories\Advisory;
+use Roave\SecurityAdvisories\Source;
 use SplFileInfo;
 use Symfony\Component\Yaml\Yaml;
+use function Amp\Iterator\concat;
 
 final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
 {
@@ -57,12 +59,21 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
                 $filePath = Type\non_empty_string()->assert($advisoryFile->getRealPath());
                 $yaml     = Filesystem\read_file($filePath);
 
-                $definition = Type\shape([
-                    'branches' => Type\dict(Type\array_key(), Type\shape([
-                        'versions' => Type\union(Type\string(), Type\vec(Type\string())),
-                    ], true)),
-                    'reference' => Type\string(),
-                ], true)->assert(Yaml::parse($yaml, Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE));
+                try {
+                    $definition = Type\shape([
+                        'branches' => Type\dict(Type\array_key(), Type\shape([
+                            'versions' => Type\union(Type\string(), Type\vec(Type\string())),
+                        ], true)),
+                        'reference' => Type\string(),
+                        'title' => Type\string(),
+                        'link' => Type\string(),
+                    ], true)->assert(Yaml::parse($yaml, Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE));
+                } catch (\Exception $e) {
+                    $foo = Yaml::parse($yaml, Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE);
+                    var_dump($e, $foo);
+                }
+
+                $definition['source'] = Type\object(Source::class)->assert(Source::New($definition['title'], $definition['link']));
 
                 return Advisory::fromArrayData($definition);
             },

@@ -87,7 +87,6 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
             $versions = Type\shape([0 => Type\non_empty_string(), 1 => Type\optional(Type\non_empty_string())])
                 ->assert(Str\split($item['node']['vulnerableVersionRange'], ','));
 
-
             $advisory = $item['node']['advisory'];
             if ($advisory['withdrawnAt'] !== null) {
                 // Skip withdrawn advisories.
@@ -99,7 +98,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                     [
                         'reference' => $item['node']['package']['name'],
                         'branches'  => [['versions' => $versions]],
-                        'source'=> Source::New($advisory['summary'], $advisory['permalink'])
+                        'source' => Source::new($advisory['summary'], $advisory['permalink']),
                     ]
                 );
             } catch (InvalidPackageName) {
@@ -122,7 +121,11 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      *      node: array{
      *          vulnerableVersionRange: string,
      *          package: array{name: string},
-     *          advisory: array{withdrawnAt: string|null}
+     *          advisory: array{
+     *              withdrawnAt: string|null,
+     *              permalink: string,
+     *              summary: string,
+     *          }
      *      }
      * }>
      *
@@ -133,8 +136,8 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
         $cursor = '';
 
         do {
-            $response        = $this->client->sendRequest($this->getRequest($cursor));
-            $data            = Json\typed($response->getBody()->__toString(), Type\shape([
+            $response = $this->client->sendRequest($this->getRequest($cursor));
+            $data     = Json\typed($response->getBody()->__toString(), Type\shape([
                 'data' => Type\shape([
                     'securityVulnerabilities' => Type\shape([
                         'edges' => Type\dict(Type\int(), Type\shape([
@@ -144,8 +147,9 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                                 'package' => Type\shape(['name' => Type\string()]),
                                 'advisory' => Type\shape([
                                     'withdrawnAt' => Type\nullable(Type\string()),
-                                    'permalink' => Type\nullable(Type\string()),
-                                    'summary' => Type\string()]), // this is my title or better rename it to summary as well
+                                    'permalink' => Type\string(),
+                                    'summary' => Type\string(),
+                                ]),
                             ]),
                         ])),
                         'pageInfo' => Type\shape([

@@ -36,7 +36,11 @@ use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 use Roave\SecurityAdvisories\Rule\RuleProviderFactory;
 
-use function Psl\Type\array_key;
+use function array_keys;
+use function count;
+use function file_get_contents;
+use function in_array;
+use function json_decode;
 use function set_error_handler;
 
 use const E_NOTICE;
@@ -90,11 +94,10 @@ use const PHP_BINARY;
 
     $cloneRoaveAdvisories = static function () use ($roaveAdvisoriesRepository, $buildDir): void {
         Shell\execute('git', ['clone', $roaveAdvisoriesRepository, $buildDir . '/roave-security-advisories']);
-        // why do we need a copy ?
-//        Shell\execute(
-//            'cp',
-//            ['-r', $buildDir . '/roave-security-advisories', $buildDir . '/roave-security-advisories-original']
-//        );
+        Shell\execute(
+            'cp',
+            ['-r', $buildDir . '/roave-security-advisories', $buildDir . '/roave-security-advisories-original']
+        );
     };
 
     $buildComponents =
@@ -183,23 +186,18 @@ use const PHP_BINARY;
             'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash,
         );
 
-        if (count($addedAdvisories) > 0) {
-            $message .= "\n\nAdded advisories:";
+        if (count($addedAdvisories) === 0) {
+            $message .= "\n\nNo new security advisories were added";
+        } else {
+            $message .= "\n\nNew security advisories added:";
 
             foreach ($addedAdvisories as $advisory) {
-                $message .= "\n" . Str\format(
-                        '   Package name: "%s"',
-                        $advisory->package->packageName,
-                    );
-                $message .= "\n" . Str\format(
-                        '   Summary: "%s"',
-                        $advisory->source->summary,
-                    );
-                $message .= "\n" . Str\format(
-                        '   URI: "%s"',
-                        $advisory->source->uri,
-                    );
-                $message .= "\n";
+                $message .= Str\format(
+                    "\n\tPackage name: %s\n\tSummary: %s\n\tURI: %s\n",
+                    $advisory->package->packageName,
+                    $advisory->source->summary,
+                    $advisory->source->uri,
+                );
             }
 
             $message .= "\n";
@@ -207,19 +205,17 @@ use const PHP_BINARY;
 
         print $message;
 
-
-
-//        try {
-//            Shell\execute('git', ['diff-index', '--quiet', 'HEAD'], $workingDirectory);
-//        } catch (Shell\Exception\FailedExecutionException) {
-//            Shell\execute('git', ['commit', '-m', $message], $workingDirectory);
-//        }
+        try {
+            Shell\execute('git', ['diff-index', '--quiet', 'HEAD'], $workingDirectory);
+        } catch (Shell\Exception\FailedExecutionException) {
+            Shell\execute('git', ['commit', '-m', $message], $workingDirectory);
+        }
     };
 
     // cleanup:
-//    $cleanBuildDir();
-//    $cloneAdvisories();
-//    $cloneRoaveAdvisories();
+    $cleanBuildDir();
+    $cloneAdvisories();
+    $cloneRoaveAdvisories();
 
     $getAdvisories = new GetAdvisoriesAdvisoryRuleDecorator(
         (new GetAdvisoriesFromMultipleSources(
@@ -232,99 +228,42 @@ use const PHP_BINARY;
         (new RuleProviderFactory())(),
     );
 
+    $prevComposerJSONFileData = file_get_contents(__DIR__ . '/build/roave-security-advisories/composer.json');
+    $prevComposerDecodedData  = json_decode($prevComposerJSONFileData, true);
+    $oldConflictPackages      = array_keys($prevComposerDecodedData['conflict']);
 
-//    echo "iterating";
-//
-//    foreach  ($getAdvisories() as $val ) {
-//        var_dump($val);
-//    }
-//    sleep(10);
-//    echo "Iterating";
-//
-
-    $a = file_get_contents( __DIR__ . '/build/roave-security-advisories/composer.json');
-    $foo = json_decode($a, true);
-    $prevConflicts = $foo['conflict'];
-    $oldConflictPackages = array_keys($prevConflicts);
-
-
+//    /** @var list<Advisory> $addedAdvisories */
+    /**
+     * @psalm-param $addedAdvisories Advisory
+     */
     $addedAdvisories = [];
-    foreach  ($getAdvisories() as $val ) {
-        if (!in_array($val->package->packageName, $oldConflictPackages, true)) {
-            $addedAdvisories[] = $val;
+    foreach ($getAdvisories() as $advisory) {
+        if (in_array($advisory->package->packageName, $oldConflictPackages, true)) {
+            continue;
         }
+
+        $addedAdvisories[] = $advisory;
     }
 
-
-
-
-//
-
-
     // actual work:
-//    $writeJson(
-//        $buildConflictsJson(
-//            $baseComposerJson,
-//            $buildConflicts(
-//                $buildComponents(
-//                    $getAdvisories()
-//                )
-//            )
-//        ),
-//        __DIR__ . '/build/composer.json'
-//    );
-//
-//    $validateComposerJson(__DIR__ . '/build/composer.json');
+    $writeJson(
+        $buildConflictsJson(
+            $baseComposerJson,
+            $buildConflicts(
+                $buildComponents(
+                    $getAdvisories()
+                )
+            )
+        ),
+        __DIR__ . '/build/composer.json'
+    );
 
-//    $copyGeneratedComposerJson(
-//        __DIR__ . '/build/composer.json',
-//        __DIR__ . '/build/roave-security-advisories/composer.json'
-//    );
+    $validateComposerJson(__DIR__ . '/build/composer.json');
 
+    $copyGeneratedComposerJson(
+        __DIR__ . '/build/composer.json',
+        __DIR__ . '/build/roave-security-advisories/composer.json'
+    );
 
-//    $a = file_get_contents( __DIR__ . '/build/roave-security-advisories/composer.json');
-//    $foo = json_decode($a, true);
-//    $prevConflicts = $foo['conflict'];
-////    foreach ($foo['conflict'] as $k => $v ) {
-////        printf("%s %s \n", $k, $v);
-////    }
-//
-//    echo '----------------------------------------------------------------------------------------------------------';
-//
-//    $b = file_get_contents( __DIR__ . '/build/composer.json');
-//    $bar = json_decode($b, true);
-//    $currConflicts = $bar['conflict'];
-//    foreach ($bar['conflict'] as $k => $v ) {
-//        printf("%s %s \n", $k, $v);
-//    }
-
-
-//    var_dump( array_diff_assoc($prevConflicts, $currConflicts));
-//    var_dump(array_diff_key($bar['conflict'], $foo['conflict']));
-//    var_dump(array_diff_key($foo['conflict'], $bar['conflict']));
-//    var_dump($foo);
-
-    // deleted in current
-    // "3f/pygmentize": "<1.2",
-    // updated in current
-    // "adodb/adodb-php": "<6.20.12", // <----- updated vrom 5. to 6.
-
-    // compare by key against current
-    // shows what was deleted in current
-//    var_dump(array_diff_key($prevConflicts, $currConflicts));
-
-    // now try to get what value was changed in current
-//    var_dump(array_diff_assoc($prevConflicts, $currConflicts));
-
-
-
-    /*
-     *  take two json files
-     *  figure the diff what was deleted, what was appended, what is updated
-     *  for each also show source and content
-     *
-     */
-
-
-    $commitComposerJson(__DIR__ . '/build/roave-security-advisories/composer.json', $addedAdvisories);// pass here generated message
+    $commitComposerJson(__DIR__ . '/build/roave-security-advisories/composer.json', $addedAdvisories);
 })();

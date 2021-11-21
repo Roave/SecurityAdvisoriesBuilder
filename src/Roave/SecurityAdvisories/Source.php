@@ -1,24 +1,34 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Roave\SecurityAdvisories;
 
 // value object
+use Psl\Type;
+
 final class Source
 {
+    /** @var non-empty-string */
     public string $summary;
+
+    /** @var non-empty-string */
     public string $uri;
 
-    private function __construct( string $summary , string $uri)
+    /**
+     * @param non-empty-string $summary
+     * @param non-empty-string $uri
+     */
+    private function __construct(string $summary, string $uri)
     {
         $this->summary = $summary;
-        $this->uri = $uri;
+        $this->uri     = $uri;
     }
 
-    public static function New(string $summary, string $uri): self
+    /**
+     */
+    public static function new(string $summary, string $uri): self
     {
-        return new self($summary, $uri);
+        return new self(Type\non_empty_string()->assert($summary), Type\non_empty_string()->assert($uri));
     }
 }
-
-
-

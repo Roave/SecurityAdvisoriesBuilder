@@ -98,7 +98,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                     [
                         'reference' => $item['node']['package']['name'],
                         'branches'  => [['versions' => $versions]],
-                        'source' => Source::new($advisory['summary'], $advisory['permalink']),
+                        'source' => ['summary' => $advisory['summary'], 'link' => $advisory['permalink']],
                     ]
                 );
             } catch (InvalidPackageName) {

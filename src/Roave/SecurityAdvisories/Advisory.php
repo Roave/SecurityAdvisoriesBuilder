@@ -52,6 +52,7 @@ final class Advisory
      * @psalm-param array{
      *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
      *     reference: string,
+     *     source: array{summary: string, link:string},
      * } $config
      *
      * @return Advisory
@@ -79,7 +80,7 @@ final class Advisory
                     return VersionConstraint::fromString(Str\join(Vec\values($versions), ','));
                 }
             ),
-            Type\object(Source::class)->assert($config['source']),
+            Source::new($config['source']['summary'], $config['source']['link']),
         );
     }
 

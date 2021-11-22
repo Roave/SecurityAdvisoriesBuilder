@@ -25,8 +25,6 @@ final class Source
         $this->uri     = $uri;
     }
 
-    /**
-     */
     public static function new(string $summary, string $uri): self
     {
         return new self(Type\non_empty_string()->assert($summary), Type\non_empty_string()->assert($uri));

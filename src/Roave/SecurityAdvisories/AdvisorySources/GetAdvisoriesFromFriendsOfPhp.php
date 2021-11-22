@@ -32,7 +32,6 @@ use RecursiveFilterIterator;
 use RecursiveIterator;
 use RecursiveIteratorIterator;
 use Roave\SecurityAdvisories\Advisory;
-use Roave\SecurityAdvisories\Source;
 use SplFileInfo;
 use Symfony\Component\Yaml\Yaml;
 

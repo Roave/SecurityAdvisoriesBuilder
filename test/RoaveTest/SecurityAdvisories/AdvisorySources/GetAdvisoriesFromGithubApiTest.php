@@ -98,12 +98,12 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                 Advisory::fromArrayData([
                     'reference' => 'enshrined/svg-sanitize',
                     'branches'  => [['versions' => ['> 0.12.0, < 0.12.1 ']]],
-                    'source' => ['summary' => 'some summary', 'link' => 'https://example.com']
+                    'source' => ['summary' => 'some summary', 'link' => 'https://example.com'],
                 ]),
                 Advisory::fromArrayData([
                     'reference' => 'foo/bar',
                     'branches'  => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
-                    'source' => ['summary' => 'some summary', 'link' => 'https://example.com']
+                    'source' => ['summary' => 'some summary', 'link' => 'https://example.com'],
                 ]),
             ],
             Vec\values($advisories())
@@ -228,12 +228,12 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                 Advisory::fromArrayData([
                     'reference' => 'aa/bb',
                     'branches'  => [['versions' => ['> 0.12.0, < 0.12.1 ']]],
-                    'source' => ['summary' => 'some summary', 'link' => 'https://example.com']
+                    'source' => ['summary' => 'some summary', 'link' => 'https://example.com'],
                 ]),
                 Advisory::fromArrayData([
                     'reference' => 'dd/ee',
                     'branches'  => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
-                    'source' => ['summary' => 'some summary', 'link' => 'https://example.com']
+                    'source' => ['summary' => 'some summary', 'link' => 'https://example.com'],
                 ]),
             ],
             Vec\values($advisories())
@@ -258,7 +258,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
             Advisory::fromArrayData([
                 'reference' => 'aa/bb',
                 'branches' => [['versions' => ['<= 1.1.0']]],
-                'source' => ['summary' => 'some summary', 'link' => 'https://example.com']
+                'source' => ['summary' => 'some summary', 'link' => 'https://example.com'],
             ]),
         ], Vec\Values($advisories()));
     }

@@ -43,7 +43,7 @@ final class AdvisoryTest extends TestCase
                     'versions' => ['>=2.0', '<2.1'],
                 ],
             ],
-            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com']
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
 
         self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
@@ -68,7 +68,7 @@ final class AdvisoryTest extends TestCase
                     'versions' => ['>=2.0-rc.5', '<2.1-rc.6'],
                 ],
             ],
-            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com']
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
 
         self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
@@ -89,7 +89,7 @@ final class AdvisoryTest extends TestCase
                 '1.0.x' => ['versions' => '<1.1'],
                 '2.0.x' => ['versions' => '<2.1'],
             ],
-            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com']
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
 
         self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
@@ -110,7 +110,7 @@ final class AdvisoryTest extends TestCase
                 '1.0.x' => ['versions' => '<1.1-beta.0.1'],
                 '2.0.x' => ['versions' => '<2.1-beta.0.1'],
             ],
-            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com']
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
 
         self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
@@ -128,7 +128,7 @@ final class AdvisoryTest extends TestCase
         $advisory = Advisory::fromArrayData([
             'reference' => 'composer://foo\bar',
             'branches'  => [],
-            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com']
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
 
         self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
@@ -151,7 +151,7 @@ final class AdvisoryTest extends TestCase
                 '2.0.x' => ['versions' => $versionConstraint2],
                 '1.0.x' => ['versions' => $versionConstraint1],
             ],
-            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com']
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
 
         self::assertSame($expected, $advisory->getConstraint());

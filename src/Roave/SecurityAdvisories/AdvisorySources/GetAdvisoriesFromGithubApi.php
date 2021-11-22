@@ -31,7 +31,6 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\Exception\InvalidPackageName;
-use Roave\SecurityAdvisories\Source;
 
 final class GetAdvisoriesFromGithubApi implements GetAdvisories
 {

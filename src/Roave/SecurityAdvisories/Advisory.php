@@ -33,13 +33,10 @@ final class Advisory
     /** @var list<VersionConstraint> */
     private array $branchConstraints;
 
-    /** @var Source $source */
     public Source $source;
 
     /**
-     * @param PackageName $package
      * @param list<VersionConstraint> $branchConstraints
-     * @param Source $source
      */
     private function __construct(PackageName $package, array $branchConstraints, Source $source)
     {

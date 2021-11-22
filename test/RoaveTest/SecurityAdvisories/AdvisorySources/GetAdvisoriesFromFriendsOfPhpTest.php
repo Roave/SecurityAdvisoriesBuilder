@@ -45,7 +45,7 @@ class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
                 'source' => [
                     'summary' => 'Remote Code Execution',
                     'link' => 'https://github.com/dedalozzo/pygmentize/issues/1',
-                ]
+                ],
             ]),
         ], Vec\values($advisories));
     }

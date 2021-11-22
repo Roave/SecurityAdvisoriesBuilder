@@ -44,6 +44,7 @@ class GetAdvisoriesFromMultipleSourcesTest extends TestCase
                 Advisory::fromArrayData([
                     'reference' => 'test/package',
                     'branches' => [['versions' => ['<1']]],
+                    'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com']
                 ]),
             ],
             Vec\values($advisories())
@@ -55,6 +56,7 @@ class GetAdvisoriesFromMultipleSourcesTest extends TestCase
         return yield Advisory::fromArrayData([
             'reference' => 'test/package',
             'branches' => [['versions' => ['<1']]],
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com']
         ]);
     }
 }

@@ -42,6 +42,10 @@ class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
                     ],
                 ],
                 'reference' => 'composer://3f/pygmentize',
+                'source' => [
+                    'summary' => 'Remote Code Execution',
+                    'link' => 'https://github.com/dedalozzo/pygmentize/issues/1',
+                ]
             ]),
         ], Vec\values($advisories));
     }

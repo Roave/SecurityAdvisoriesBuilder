@@ -67,8 +67,7 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
                     'link' => Type\string(),
                 ], true)->assert(Yaml::parse($yaml, Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE));
 
-                $definition['source'] =
-                    Type\object(Source::class)->assert(Source::new($definition['title'], $definition['link']));
+                $definition['source'] = ['summary' => $definition['title'], 'link' => $definition['link']];
 
                 return Advisory::fromArrayData($definition);
             },

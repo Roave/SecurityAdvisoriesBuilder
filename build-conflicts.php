@@ -165,6 +165,9 @@ use const PHP_BINARY;
         Shell\execute('cp', [$sourceComposerJsonPath, $targetComposerJsonPath]);
     };
 
+    /**
+     * @psalm-suppress MixedAssignment
+     */
     $commitComposerJson = static function (string $composerJsonPath, array $addedAdvisories): void {
         $originalHash = Shell\execute(
             'git',
@@ -229,13 +232,14 @@ use const PHP_BINARY;
     );
 
     $prevComposerJSONFileData = file_get_contents(__DIR__ . '/build/roave-security-advisories/composer.json');
+
+    /** @var array $prevComposerDecodedData
+     */
     $prevComposerDecodedData  = json_decode($prevComposerJSONFileData, true);
+
+    /** @var array<array-key, string> $oldConflictPackages */
     $oldConflictPackages      = array_keys($prevComposerDecodedData['conflict']);
 
-//    /** @var list<Advisory> $addedAdvisories */
-    /**
-     * @psalm-param $addedAdvisories Advisory
-     */
     $addedAdvisories = [];
     foreach ($getAdvisories() as $advisory) {
         if (in_array($advisory->package->packageName, $oldConflictPackages, true)) {

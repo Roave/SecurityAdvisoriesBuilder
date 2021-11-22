@@ -28,11 +28,13 @@ use Roave\SecurityAdvisories\Exception\InvalidPackageName;
 /** @psalm-immutable */
 final class Advisory
 {
+    /** @var PackageName  */
     public PackageName $package;
 
     /** @var list<VersionConstraint> */
     private array $branchConstraints;
 
+    /** @var Source */
     public Source $source;
 
     /**

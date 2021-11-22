@@ -9,10 +9,10 @@ use Psl\Type;
 
 final class Source
 {
-    /** @var non-empty-string */
+    /** @var non-empty-string $summary */
     public string $summary;
 
-    /** @var non-empty-string */
+    /** @var non-empty-string $uri */
     public string $uri;
 
     /**

@@ -19,7 +19,7 @@
         "php": "^8.0",
         "ext-json": "*",
         "ext-pcre": "*",
-        "azjezz/psl": "^1.9.2",
+        "azjezz/psl": "^1.9.3",
         "composer/composer": "^2.1.14",
         "nyholm/psr7": "^1.4.1",
         "ocramius/package-versions": "^2.3.0",

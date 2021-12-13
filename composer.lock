@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "23a8d3cff8e7a2ffad664113d53e4b6b",
+    "content-hash": "68ea57cf0684e4c0f39307ee88545de8",
     "packages": [
         {
             "name": "azjezz/psl",
-            "version": "1.9.2",
+            "version": "1.9.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/azjezz/psl.git",
-                "reference": "ebbc67d4ad71de1d1c308da67bbb844182f2718b"
+                "reference": "5c20649db277565d6a40a66edfc2bbf8dc7f19e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/azjezz/psl/zipball/ebbc67d4ad71de1d1c308da67bbb844182f2718b",
-                "reference": "ebbc67d4ad71de1d1c308da67bbb844182f2718b",
+                "url": "https://api.github.com/repos/azjezz/psl/zipball/5c20649db277565d6a40a66edfc2bbf8dc7f19e0",
+                "reference": "5c20649db277565d6a40a66edfc2bbf8dc7f19e0",
                 "shasum": ""
             },
             "require": {
@@ -43,7 +43,8 @@
             },
             "autoload": {
                 "psr-4": {
-                    "Psl\\Integration\\": "integration"
+                    "Psl\\Integration\\": "integration",
+                    "Psl\\": "src/Psl"
                 },
                 "files": [
                     "src/bootstrap.php"
@@ -62,7 +63,7 @@
             "description": "PHP Standard Library",
             "support": {
                 "issues": "https://github.com/azjezz/psl/issues",
-                "source": "https://github.com/azjezz/psl/tree/1.9.2"
+                "source": "https://github.com/azjezz/psl/tree/1.9.3"
             },
             "funding": [
                 {
@@ -70,7 +71,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2021-11-10T19:56:56+00:00"
+            "time": "2021-12-10T10:34:36+00:00"
         },
         {
             "name": "clue/stream-filter",

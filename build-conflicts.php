@@ -36,11 +36,11 @@ use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 use Roave\SecurityAdvisories\Rule\RuleProviderFactory;
 
-use function array_keys;
-use function count;
+use function assert;
 use function file_get_contents;
-use function in_array;
+use function is_array;
 use function json_decode;
+use function printf;
 use function set_error_handler;
 
 use const E_NOTICE;
@@ -168,7 +168,7 @@ use const PHP_BINARY;
     /**
      * @psalm-suppress MixedAssignment
      */
-    $commitComposerJson = static function (string $composerJsonPath, array $addedAdvisories): void {
+    $commitComposerJson = static function (string $composerJsonPath, iterable $addedAdvisories): void {
         $originalHash = Shell\execute(
             'git',
             ['rev-parse', 'HEAD'],
@@ -189,24 +189,28 @@ use const PHP_BINARY;
             'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash,
         );
 
-        if (count($addedAdvisories) === 0) {
-            $message .= "\n\nNo new security advisories were added";
-        } else {
-            $message .= "\n\nNew security advisories added:";
-
-            foreach ($addedAdvisories as $advisory) {
-                $message .= Str\format(
-                    "\n\tPackage name: %s\n\tSummary: %s\n\tURI: %s\n",
-                    $advisory->package->packageName,
-                    $advisory->source->summary,
-                    $advisory->source->uri,
-                );
-            }
-
-            $message .= "\n";
+        $updatedAdvisoriesMessage = '';
+        foreach ($addedAdvisories as $advisory) {
+            $updatedAdvisoriesMessage .= Str\format(
+                "\n\t%-15s| %s\n\t%-15s| %s\n\t%-15s| %s\n",
+                'Package name',
+                $advisory->package->packageName,
+                'Summary',
+                $advisory->source->summary,
+                'URI',
+                $advisory->source->uri,
+            );
         }
 
-        print $message;
+        $updatedAdvisoriesMessage .= "\n";
+
+        if (Str\Grapheme\length($updatedAdvisoriesMessage) === 0) {
+            $updatedAdvisoriesMessage = "\n\nNo security advisories were updated";
+        } else {
+            $updatedAdvisoriesMessage = "\n\n Security advisories updated:" . $updatedAdvisoriesMessage;
+        }
+
+        $message .= $updatedAdvisoriesMessage;
 
         try {
             Shell\execute('git', ['diff-index', '--quiet', 'HEAD'], $workingDirectory);
@@ -231,24 +235,6 @@ use const PHP_BINARY;
         (new RuleProviderFactory())(),
     );
 
-    $prevComposerJSONFileData = file_get_contents(__DIR__ . '/build/roave-security-advisories/composer.json');
-
-    /** @var array $prevComposerDecodedData
-     */
-    $prevComposerDecodedData  = json_decode($prevComposerJSONFileData, true);
-
-    /** @var array<array-key, string> $oldConflictPackages */
-    $oldConflictPackages      = array_keys($prevComposerDecodedData['conflict']);
-
-    $addedAdvisories = [];
-    foreach ($getAdvisories() as $advisory) {
-        if (in_array($advisory->package->packageName, $oldConflictPackages, true)) {
-            continue;
-        }
-
-        $addedAdvisories[] = $advisory;
-    }
-
     // actual work:
     $writeJson(
         $buildConflictsJson(
@@ -264,10 +250,16 @@ use const PHP_BINARY;
 
     $validateComposerJson(__DIR__ . '/build/composer.json');
 
+    // get updated advisories
+    $prevComposerJSONFileData = file_get_contents(__DIR__ . '/build/roave-security-advisories/composer.json');
+    $prevComposerDecodedData = json_decode($prevComposerJSONFileData, true);
+    assert(is_array($prevComposerDecodedData));
+    $updatedAdvisories = Conflicts::fromArray($prevComposerDecodedData['conflict'])->filterNewAdvisories($getAdvisories());
+
     $copyGeneratedComposerJson(
         __DIR__ . '/build/composer.json',
         __DIR__ . '/build/roave-security-advisories/composer.json'
     );
 
-    $commitComposerJson(__DIR__ . '/build/roave-security-advisories/composer.json', $addedAdvisories);
+    $commitComposerJson(__DIR__ . '/build/roave-security-advisories/composer.json', $updatedAdvisories);
 })();

@@ -142,7 +142,7 @@ final class VersionConstraint
         ));
     }
 
-    private function contains(self $other): bool
+    public function contains(self $other): bool
     {
         return $this->isSimpleRangeString()  // cannot compare - too complex :-(
             && $other->isSimpleRangeString() // cannot compare - too complex :-(

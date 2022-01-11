@@ -38,6 +38,9 @@ jobs:
 
       - name: Mutation testing
         run: phpdbg -qrr vendor/bin/roave-infection-static-analysis-plugin
+        env:
+          INFECTION_DASHBOARD_API_KEY: ${{ secrets.INFECTION_DASHBOARD_API_KEY }}
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
 
       - name: Memory leaks detection
         run: vendor/bin/roave-no-leaks

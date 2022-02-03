@@ -30,9 +30,11 @@ use Psl\Filesystem;
 use Psl\Json;
 use Psl\Shell;
 use Psl\Str;
+use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesAdvisoryRuleDecorator;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
+use Roave\SecurityAdvisories\Rule\RuleProviderFactory;
 
 use function set_error_handler;
 
@@ -191,13 +193,21 @@ use const PHP_BINARY;
     $cloneAdvisories();
     $cloneRoaveAdvisories();
 
-    $getAdvisories = (new GetAdvisoriesFromMultipleSources(
+    // sources:
+    $getAdvisoriesSources = (new GetAdvisoriesFromMultipleSources(
         (new GetAdvisoriesFromFriendsOfPhp($buildDir . '/security-advisories')),
         (new GetAdvisoriesFromGithubApi(
             new Client(),
             $token,
         )),
     ));
+
+    $overwriteRuleProvider = (new RuleProviderFactory())();
+
+    $getAdvisories = new GetAdvisoriesAdvisoryRuleDecorator(
+        $getAdvisoriesSources,
+        $overwriteRuleProvider,
+    );
 
     // actual work:
     $writeJson(

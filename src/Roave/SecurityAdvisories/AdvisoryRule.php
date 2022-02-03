@@ -41,7 +41,8 @@ final class AdvisoryRule implements Rule
 
     public function canApplyTo(Advisory $advisory): bool
     {
-        return $this->packageName->packageName === $advisory->package->packageName;
+        return $this->packageName->packageName === $advisory->package->packageName
+            && $advisory->getConstraint() === $this->targetConstrain;
     }
 
     public function applyTo(Advisory $advisory): Advisory

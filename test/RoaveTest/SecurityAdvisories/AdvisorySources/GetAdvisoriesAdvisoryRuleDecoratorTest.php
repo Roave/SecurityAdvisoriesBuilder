@@ -31,9 +31,10 @@ use Roave\SecurityAdvisories\PackageName;
 use Roave\SecurityAdvisories\Rule\AdvisoryRuleProvider;
 
 use function assert;
+use function count;
 use function method_exists;
 
-class GetAdvisoriesOverwriteVersionConstraintsDecoratorTest extends TestCase
+class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
 {
     public function testThatAdvisoriesAreDecoratedAfterBuiltFromYamlFilesAndConstraintIsChanged(): void
     {
@@ -248,8 +249,8 @@ class GetAdvisoriesOverwriteVersionConstraintsDecoratorTest extends TestCase
 
         $getAdvisories = $this->getTempProvideGetAdvisories();
 
-        assert(method_exists($getAdvisories, 'setAdvisory'));
-        $getAdvisories->setAdvisory(
+        assert(method_exists($getAdvisories, 'addAdvisory'));
+        $getAdvisories->addAdvisory(
             Advisory::fromArrayData([
                 'branches' => [
                     '2.17.x' => [
@@ -312,17 +313,125 @@ class GetAdvisoriesOverwriteVersionConstraintsDecoratorTest extends TestCase
         ], Vec\values($decoratedAdvisories));
     }
 
+    public function testThatRuleToOverwriteLaminasFormConstrainsWorksAsExpectedAndOnlyToTargetedConstraint(): void
+    {
+        // Arrange
+        $ruleToFixLaminasFormConstraint = new AdvisoryRule(
+            PackageName::fromName('laminas/laminas-form'),
+            '<2.17.2|>=3,<3.0.2|>=3.1,<3.1.1',
+            [
+                '2.17.x' => [
+                    'versions' => ['<2.17.1'],
+                ],
+                '3.0.x' => [
+                    'versions' => ['>=3','<3.0.2'],
+                ],
+                '3.1.x' => [
+                    'versions' => ['>=3.1','<3.1.1'],
+                ],
+            ],
+        );
+
+        $overwriteRuleProvider = new AdvisoryRuleProvider([$ruleToFixLaminasFormConstraint]);
+
+        $getAdvisories = $this->getTempProvideGetAdvisories();
+
+        assert(method_exists($getAdvisories, 'addAdvisory'));
+        $getAdvisories->addAdvisory(
+            Advisory::fromArrayData([
+                'branches' => [
+                    '2.17.x' => [
+                        'versions' => ['<2.17.2'],
+                    ],
+                    '3.0.x' => [
+                        'versions' => ['>=3','<3.0.2'],
+                    ],
+                    '3.1.x' => [
+                        'versions' => ['>=3.1','<3.1.1'],
+                    ],
+                ],
+                'reference' => 'composer://laminas/laminas-form',
+            ]),
+        );
+        $getAdvisories->addAdvisory(
+            Advisory::fromArrayData([
+                'branches' => [
+                    '3.0.x' => [
+                        'versions' => ['>=3','<3.0.2'],
+                    ],
+                ],
+                'reference' => 'composer://laminas/laminas-form',
+            ]),
+        );
+
+        $decoratedAdvisories = (new GetAdvisoriesAdvisoryRuleDecorator(
+            $getAdvisories,
+            $overwriteRuleProvider,
+        ));
+
+        // Act
+        $decoratedAdvisories = $decoratedAdvisories();
+
+        // Assert
+        // check decorated handling and see version lowered and one branch added
+        self::assertEquals([
+            Advisory::fromArrayData([
+                'branches' => [
+                    '1.x' => [
+                        'time' => '2017-05-15 09:09:00',
+                        'versions' => ['<1.2'],
+                    ],
+                ],
+                'reference' => 'composer://3f/pygmentize',
+            ]),
+            Advisory::fromArrayData([
+                'branches' => [
+                    '3.x' => [
+                        'time' => '2012-05-15 09:09:00',
+                        'versions' => ['<2|>4'],
+                    ],
+                ],
+                'reference' => 'composer://other/package-name',
+            ]),
+            Advisory::fromArrayData([
+                'branches' => [
+                    '2.17.x' => [
+                        'versions' => ['<2.17.1'],
+                    ],
+                    '3.0.x' => [
+                        'versions' => ['>=3','<3.0.2'],
+                    ],
+                    '3.1.x' => [
+                        'versions' => ['>=3.1','<3.1.1'],
+                    ],
+                ],
+                'reference' => 'composer://laminas/laminas-form',
+            ]),
+            Advisory::fromArrayData([
+                'branches' => [
+                    '3.0.x' => [
+                        'versions' => ['>=3','<3.0.2'],
+                    ],
+                ],
+                'reference' => 'composer://laminas/laminas-form',
+            ]),
+        ], Vec\values($decoratedAdvisories));
+    }
+
     private function getTempProvideGetAdvisories(): GetAdvisories
     {
         return new class implements GetAdvisories {
+            /**
+             * @param array<Advisory> $advisories
+             */
             public function __construct(
-                private ?Advisory $advisory = null
+                private array $advisories = []
             ) {
             }
 
-            public function setAdvisory(?Advisory $advisory): void
+            public function addAdvisory(Advisory $advisory): void
             {
-                $this->advisory = $advisory;
+                $this->advisories[] = $advisory;
             }
 
             /**
@@ -350,11 +459,13 @@ class GetAdvisoriesOverwriteVersionConstraintsDecoratorTest extends TestCase
                     'reference' => 'composer://other/package-name',
                 ]);
 
-                if ($this->advisory === null) {
+                if (count($this->advisories) === 0) {
                     return;
                 }
 
-                yield $this->advisory;
+                foreach ($this->advisories as $advisory) {
+                    yield $advisory;
+                }
             }
         };
     }

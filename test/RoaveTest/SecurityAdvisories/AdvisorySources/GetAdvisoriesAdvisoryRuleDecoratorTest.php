@@ -24,16 +24,18 @@ use Generator;
 use PHPUnit\Framework\TestCase;
 use Psl\Vec;
 use Roave\SecurityAdvisories\Advisory;
-use Roave\SecurityAdvisories\AdvisoryRule;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisories;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesAdvisoryRuleDecorator;
-use Roave\SecurityAdvisories\PackageName;
-use Roave\SecurityAdvisories\Rule\AdvisoryRuleProvider;
 
 use function assert;
 use function count;
 use function method_exists;
 
+/**
+ * Tests for {@see \Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesAdvisoryRuleDecorator}
+ *
+ * @covers \Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesAdvisoryRuleDecorator
+ */
 class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
 {
     public function testThatAdvisoriesAreDecoratedAfterBuiltFromYamlFilesAndConstraintIsChanged(): void
@@ -41,24 +43,42 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
         // Arrange
         $advisories = $this->getTempProvideGetAdvisories();
 
-        $ruleToChangeLowerVersionConstraintRule = new AdvisoryRule(
-            PackageName::fromName('3f/pygmentize'),
-            '<1.2',
-            [
-                '1.x' => [
-                    'versions' => ['<1.1'],
-                ],
-                '2.x' => [
-                    'versions' => ['>2.0'],
-                ],
-            ],
-        );
+        $ruleToChangeLowerVersionConstraintRule =
+            static function (Advisory $advisory): Advisory {
+                $packageName = '3f/pygmentize';
+                if ($advisory->package->packageName !== $packageName) {
+                    return $advisory;
+                }
 
-        $overwriteRuleProvider = new AdvisoryRuleProvider([$ruleToChangeLowerVersionConstraintRule]);
+                if ($advisory->getConstraint() !== '<1.2') {
+                    return $advisory;
+                }
+
+               /**
+                * @psalm-var array{
+                *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
+                *     reference: string
+                * } $config
+                */
+                $config              = [];
+                $config['reference'] = $packageName;
+                $config['branches']  = [
+                    '1.x' => [
+                        'time' => '2017-05-15 09:09:00',
+                        'versions' => ['<1.1'],
+                    ],
+                    '2.x' => [
+                        'time' => '2017-05-15 09:09:00',
+                        'versions' => ['>2.0'],
+                    ],
+                ];
+
+                return Advisory::fromArrayData($config);
+            };
 
         $decoratedAdvisories = (new GetAdvisoriesAdvisoryRuleDecorator(
             $advisories,
-            $overwriteRuleProvider,
+            [$ruleToChangeLowerVersionConstraintRule],
         ));
 
         // Act
@@ -120,11 +140,9 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
         // Arrange
         $advisories = $this->getTempProvideGetAdvisories();
 
-        $overwriteRuleProvider = new AdvisoryRuleProvider([]);
-
         $decoratedAdvisories = (new GetAdvisoriesAdvisoryRuleDecorator(
             $advisories,
-            $overwriteRuleProvider,
+            [],
         ));
 
         // Act
@@ -180,23 +198,40 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
     public function testThatRuleIsAddedToExpectedAdvisory(): void
     {
         // Arrange
-        $ruleToChangeLowerVersionConstraintRule = new AdvisoryRule(
-            PackageName::fromName('3f/pygmentize'),
-            '<1.2',
-            [
-                '1.x' => [
-                    'versions' => ['<1.0|>2.0'],
-                ],
-            ],
-        );
+        $ruleToChangeLowerVersionConstraintRule =
+            static function (Advisory $advisory): Advisory {
+                $packageName = '3f/pygmentize';
+                if ($advisory->package->packageName !== $packageName) {
+                    return $advisory;
+                }
 
-        $overwriteRuleProvider = new AdvisoryRuleProvider([$ruleToChangeLowerVersionConstraintRule]);
+                if ($advisory->getConstraint() !== '<1.2') {
+                    return $advisory;
+                }
+
+                /**
+                 * @psalm-var array{
+                 *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
+                 *     reference: string
+                 * } $config
+                 */
+                $config              = [];
+                $config['reference'] = $packageName;
+                $config['branches']  = [
+                    '1.x' => [
+                        'time' => '2017-05-15 09:09:00',
+                        'versions' => ['<1.0|>2.0'],
+                    ],
+                ];
+
+                return Advisory::fromArrayData($config);
+            };
 
         $getAdvisories = $this->getTempProvideGetAdvisories();
 
         $decoratedAdvisories = (new GetAdvisoriesAdvisoryRuleDecorator(
             $getAdvisories,
-            $overwriteRuleProvider,
+            [$ruleToChangeLowerVersionConstraintRule],
         ));
 
         // Act
@@ -229,23 +264,41 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
     public function testThatRuleToOverwriteLaminasFormConstrainsWorksAsExpected(): void
     {
         // Arrange
-        $ruleToFixLaminasFormConstraint = new AdvisoryRule(
-            PackageName::fromName('laminas/laminas-form'),
-            '<2.17.2|>=3,<3.0.2|>=3.1,<3.1.1',
-            [
-                '2.17.x' => [
-                    'versions' => ['<2.17.1'],
-                ],
-                '3.0.x' => [
-                    'versions' => ['>=3','<3.0.2'],
-                ],
-                '3.1.x' => [
-                    'versions' => ['>=3.1','<3.1.1'],
-                ],
-            ],
-        );
+        $ruleToFixLaminasFormConstraint =
+            static function (Advisory $advisory): Advisory {
+                $packageName      = 'laminas/laminas-form';
+                $targetConstraint = '<2.17.2|>=3,<3.0.2|>=3.1,<3.1.1';
 
-        $overwriteRuleProvider = new AdvisoryRuleProvider([$ruleToFixLaminasFormConstraint]);
+                if ($advisory->package->packageName !== $packageName) {
+                    return $advisory;
+                }
+
+                if ($advisory->getConstraint() !== $targetConstraint) {
+                    return $advisory;
+                }
+
+                /**
+                 * @psalm-var array{
+                 *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
+                 *     reference: string
+                 * } $config
+                 */
+                $config              = [];
+                $config['reference'] = $packageName;
+                $config['branches']  = [
+                    '2.17.x' => [
+                        'versions' => ['<2.17.1'], // change constraint to <2.17.1
+                    ],
+                    '3.0.x' => [
+                        'versions' => ['>=3','<3.0.2'],
+                    ],
+                    '3.1.x' => [
+                        'versions' => ['>=3.1','<3.1.1'],
+                    ],
+                ];
+
+                return Advisory::fromArrayData($config);
+            };
 
         $getAdvisories = $this->getTempProvideGetAdvisories();
 
@@ -269,7 +322,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
 
         $decoratedAdvisories = (new GetAdvisoriesAdvisoryRuleDecorator(
             $getAdvisories,
-            $overwriteRuleProvider,
+            [$ruleToFixLaminasFormConstraint],
         ));
 
         // Act
@@ -316,23 +369,41 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
     public function testThatRuleToOverwriteLaminasFormConstrainsWorksAsExpectedAndOnlyToTargetedConstraint(): void
     {
         // Arrange
-        $ruleToFixLaminasFormConstraint = new AdvisoryRule(
-            PackageName::fromName('laminas/laminas-form'),
-            '<2.17.2|>=3,<3.0.2|>=3.1,<3.1.1',
-            [
-                '2.17.x' => [
-                    'versions' => ['<2.17.1'],
-                ],
-                '3.0.x' => [
-                    'versions' => ['>=3','<3.0.2'],
-                ],
-                '3.1.x' => [
-                    'versions' => ['>=3.1','<3.1.1'],
-                ],
-            ],
-        );
+        $ruleToFixLaminasFormConstraint =
+            static function (Advisory $advisory): Advisory {
+                $packageName      = 'laminas/laminas-form';
+                $targetConstraint = '<2.17.2|>=3,<3.0.2|>=3.1,<3.1.1';
 
-        $overwriteRuleProvider = new AdvisoryRuleProvider([$ruleToFixLaminasFormConstraint]);
+                if ($advisory->package->packageName !== $packageName) {
+                    return $advisory;
+                }
+
+                if ($advisory->getConstraint() !== $targetConstraint) {
+                    return $advisory;
+                }
+
+                /**
+                 * @psalm-var array{
+                 *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
+                 *     reference: string
+                 * } $config
+                 */
+                $config              = [];
+                $config['reference'] = $packageName;
+                $config['branches']  = [
+                    '2.17.x' => [
+                        'versions' => ['<2.17.1'], // change constraint to <2.17.1
+                    ],
+                    '3.0.x' => [
+                        'versions' => ['>=3','<3.0.2'],
+                    ],
+                    '3.1.x' => [
+                        'versions' => ['>=3.1','<3.1.1'],
+                    ],
+                ];
+
+                return Advisory::fromArrayData($config);
+            };
 
         $getAdvisories = $this->getTempProvideGetAdvisories();
 
@@ -366,7 +437,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
 
         $decoratedAdvisories = (new GetAdvisoriesAdvisoryRuleDecorator(
             $getAdvisories,
-            $overwriteRuleProvider,
+            [$ruleToFixLaminasFormConstraint],
         ));
 
         // Act

@@ -193,20 +193,15 @@ use const PHP_BINARY;
     $cloneAdvisories();
     $cloneRoaveAdvisories();
 
-    // sources:
-    $getAdvisoriesSources = (new GetAdvisoriesFromMultipleSources(
-        (new GetAdvisoriesFromFriendsOfPhp($buildDir . '/security-advisories')),
-        (new GetAdvisoriesFromGithubApi(
-            new Client(),
-            $token,
-        )),
-    ));
-
-    $overwriteRuleProvider = (new RuleProviderFactory())();
-
     $getAdvisories = new GetAdvisoriesAdvisoryRuleDecorator(
-        $getAdvisoriesSources,
-        $overwriteRuleProvider,
+        (new GetAdvisoriesFromMultipleSources(
+            (new GetAdvisoriesFromFriendsOfPhp($buildDir . '/security-advisories')),
+            (new GetAdvisoriesFromGithubApi(
+                new Client(),
+                $token,
+            )),
+        )),
+        (new RuleProviderFactory())(),
     );
 
     // actual work:

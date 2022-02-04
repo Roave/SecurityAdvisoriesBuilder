@@ -22,14 +22,15 @@ namespace Roave\SecurityAdvisories\AdvisorySources;
 
 use Generator;
 use Roave\SecurityAdvisories\Advisory;
-use Roave\SecurityAdvisories\Rule\Rule;
-use Roave\SecurityAdvisories\Rule\RuleProvider;
 
 final class GetAdvisoriesAdvisoryRuleDecorator implements GetAdvisories
 {
+    /**
+     * @psalm-param list<callable(Advisory): Advisory> $overwriteRuleProvider
+     */
     public function __construct(
         private GetAdvisories $source,
-        private RuleProvider $overwriteRuleProvider,
+        private array $overwriteRuleProvider,
     ) {
     }
 
@@ -37,45 +38,11 @@ final class GetAdvisoriesAdvisoryRuleDecorator implements GetAdvisories
     public function __invoke(): Generator
     {
         foreach (($this->source)() as $advisory) {
-            // get rules for package
-            $rules = $this->getOverwriteRules($advisory);
-
-            yield $this->doApplyRules(
-                $rules,
-                $advisory
-            );
-        }
-    }
-
-    /**
-     * @psalm-param Advisory $advisory
-     *
-     * @psalm-return Generator<Rule>
-     */
-    private function getOverwriteRules(Advisory $advisory): Generator
-    {
-        foreach (($this->overwriteRuleProvider)() as $rule) {
-            if ($rule->canApplyTo($advisory) === false) {
-                continue;
+            foreach ($this->overwriteRuleProvider as $rule) {
+                $advisory = $rule($advisory);
             }
 
-            yield $rule;
+            yield $advisory;
         }
-    }
-
-    /**
-     * @psalm-param Generator<Rule> $rules
-     */
-    private function doApplyRules(Generator $rules, Advisory $advisory): Advisory
-    {
-        foreach ($rules as $rule) {
-            if ($rule->canApplyTo($advisory) === false) {
-                continue;
-            }
-
-            $advisory = $rule->applyTo($advisory);
-        }
-
-        return $advisory;
     }
 }

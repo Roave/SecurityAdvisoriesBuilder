@@ -20,29 +20,50 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories\Rule;
 
-use Roave\SecurityAdvisories\AdvisoryRule;
-use Roave\SecurityAdvisories\PackageName;
+use Roave\SecurityAdvisories\Advisory;
 
-class RuleProviderFactory
+final class RuleProviderFactory
 {
-    public function __invoke(): RuleProvider
+    /**
+     * @psalm-return list<callable(Advisory): Advisory>
+     */
+    public function __invoke(): array
     {
-        $ruleToFixLaminasFormConstraint = new AdvisoryRule(
-            PackageName::fromName('laminas/laminas-form'),
-            '<2.17.2|>=3,<3.0.2|>=3.1,<3.1.1',
-            [
-                '2.17.x' => [
-                    'versions' => ['<2.17.1'], // change constraint to <2.17.1
-                ],
-                '3.0.x' => [
-                    'versions' => ['>=3','<3.0.2'],
-                ],
-                '3.1.x' => [
-                    'versions' => ['>=3.1','<3.1.1'],
-                ],
-            ],
-        );
+        return [
+            static function (Advisory $advisory): Advisory {
+                $packageName      = 'laminas/laminas-form';
+                $targetConstraint = '<2.17.2|>=3,<3.0.2|>=3.1,<3.1.1';
 
-        return new AdvisoryRuleProvider([$ruleToFixLaminasFormConstraint]);
+                if ($advisory->package->packageName !== $packageName) {
+                    return $advisory;
+                }
+
+                if ($advisory->getConstraint() !== $targetConstraint) {
+                    return $advisory;
+                }
+
+                /**
+                 * @psalm-var array{
+                 *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
+                 *     reference: string
+                 * } $config
+                 */
+                $config              = [];
+                $config['reference'] = $packageName;
+                $config['branches']  = [
+                    '2.17.x' => [
+                        'versions' => ['<2.17.1'], // change constraint to <2.17.1
+                    ],
+                    '3.0.x' => [
+                        'versions' => ['>=3','<3.0.2'],
+                    ],
+                    '3.1.x' => [
+                        'versions' => ['>=3.1','<3.1.1'],
+                    ],
+                ];
+
+                return Advisory::fromArrayData($config);
+            },
+        ];
     }
 }

@@ -42,12 +42,6 @@ final class RuleProviderFactory
                     return $advisory;
                 }
 
-                /**
-                 * @psalm-var array{
-                 *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
-                 *     reference: string
-                 * } $config
-                 */
                 $config              = [];
                 $config['reference'] = $packageName;
                 $config['branches']  = [

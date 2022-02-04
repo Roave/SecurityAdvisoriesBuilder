@@ -54,12 +54,6 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                     return $advisory;
                 }
 
-               /**
-                * @psalm-var array{
-                *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
-                *     reference: string
-                * } $config
-                */
                 $config              = [];
                 $config['reference'] = $packageName;
                 $config['branches']  = [
@@ -76,38 +70,45 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                 return Advisory::fromArrayData($config);
             };
 
-        $decoratedAdvisories = (new GetAdvisoriesAdvisoryRuleDecorator(
-            $advisories,
-            [$ruleToChangeLowerVersionConstraintRule],
-        ));
+        $changeOtherPackageConstraintRule =
+            static function (Advisory $advisory): Advisory {
+                $packageName = 'other/package-name';
+                if ($advisory->package->packageName !== $packageName) {
+                    return $advisory;
+                }
 
-        // Act
-        $notDecoratedAdvisories = $advisories();
-        $decoratedAdvisories    = $decoratedAdvisories();
+                if ($advisory->getConstraint() !== '<2|>4') {
+                    return $advisory;
+                }
 
-        // Assert
-        // check default handling
-        self::assertEquals([
-            Advisory::fromArrayData([
-                'branches' => [
+                $config              = [];
+                $config['reference'] = $packageName;
+                $config['branches']  = [
                     '1.x' => [
                         'time' => '2017-05-15 09:09:00',
-                        'versions' => ['<1.2'],
+                        'versions' => ['>=3'],
                     ],
-                ],
-                'reference' => 'composer://3f/pygmentize',
-            ]),
-            Advisory::fromArrayData([
-                'branches' => [
-                    '3.x' => [
-                        'time' => '2012-05-15 09:09:00',
-                        'versions' => ['<2|>4'],
-                    ],
-                ],
-                'reference' => 'composer://other/package-name',
-            ]),
-        ], Vec\values($notDecoratedAdvisories));
+                ];
 
+                return Advisory::fromArrayData($config);
+            };
+
+        $nullRule =
+            static function (Advisory $advisory): Advisory {
+                return $advisory;
+            };
+
+        // Act
+        $decoratedAdvisories = (new GetAdvisoriesAdvisoryRuleDecorator(
+            $advisories,
+            [
+                $changeOtherPackageConstraintRule,
+                $nullRule,
+                $ruleToChangeLowerVersionConstraintRule,
+            ],
+        ))();
+
+        // Assert
         // check decorated handling and see version lowered and one branch added
         self::assertEquals([
             Advisory::fromArrayData([
@@ -127,7 +128,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                 'branches' => [
                     '3.x' => [
                         'time' => '2012-05-15 09:09:00',
-                        'versions' => ['<2|>4'],
+                        'versions' => ['>=3'],
                     ],
                 ],
                 'reference' => 'composer://other/package-name',
@@ -209,12 +210,6 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                     return $advisory;
                 }
 
-                /**
-                 * @psalm-var array{
-                 *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
-                 *     reference: string
-                 * } $config
-                 */
                 $config              = [];
                 $config['reference'] = $packageName;
                 $config['branches']  = [
@@ -277,12 +272,6 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                     return $advisory;
                 }
 
-                /**
-                 * @psalm-var array{
-                 *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
-                 *     reference: string
-                 * } $config
-                 */
                 $config              = [];
                 $config['reference'] = $packageName;
                 $config['branches']  = [
@@ -382,12 +371,6 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                     return $advisory;
                 }
 
-                /**
-                 * @psalm-var array{
-                 *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
-                 *     reference: string
-                 * } $config
-                 */
                 $config              = [];
                 $config['reference'] = $packageName;
                 $config['branches']  = [

@@ -32,7 +32,7 @@ final class RuleProviderFactory
         return [
             static function (Advisory $advisory): Advisory {
                 $packageName      = 'laminas/laminas-form';
-                $targetConstraint = '<2.17.2|>=3,<3.0.2|>=3.1,<3.1.1';
+                $targetConstraint = '<2.17.2';
 
                 if ($advisory->package->packageName !== $packageName) {
                     return $advisory;

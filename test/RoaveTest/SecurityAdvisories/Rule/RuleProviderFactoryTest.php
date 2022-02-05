@@ -54,15 +54,7 @@ final class RuleProviderFactoryTest extends TestCase
         $config              = [];
         $config['reference'] = 'laminas/laminas-form';
         $config['branches']  = [
-            '2.17.x' => [
-                'versions' => ['<2.17.2'],
-            ],
-            '3.0.x' => [
-                'versions' => ['>=3','<3.0.2'],
-            ],
-            '3.1.x' => [
-                'versions' => ['>=3.1','<3.1.1'],
-            ],
+            ['versions' => ['<2.17.2']],
         ];
 
         $advisory = Advisory::fromArrayData($config);
@@ -71,7 +63,7 @@ final class RuleProviderFactoryTest extends TestCase
         $rules = $provider();
 
         // Assert
-        $this->assertSame('<2.17.2|>=3,<3.0.2|>=3.1,<3.1.1', $advisory->getConstraint());
+        $this->assertSame('<2.17.2', $advisory->getConstraint());
 
         $this->assertCount(1, $rules);
         $rule = current($rules);
@@ -80,7 +72,7 @@ final class RuleProviderFactoryTest extends TestCase
         $advisory = $rule($advisory);
         $this->assertInstanceOf(Advisory::class, $advisory);
 
-        $this->assertSame('<2.17.1|>=3,<3.0.2|>=3.1,<3.1.1', $advisory->getConstraint());
+        $this->assertSame('<2.17.1', $advisory->getConstraint());
     }
 
     public function testProviderProvidesRuleNotAppliedBecauseOfPackageName(): void
@@ -122,8 +114,8 @@ final class RuleProviderFactoryTest extends TestCase
         $config              = [];
         $config['reference'] = 'laminas/laminas-form';
         $config['branches']  = [
-            '2.17.x' => [
-                'versions' => ['<2.17.2'],
+            '3.0.x' => [
+                'versions' => ['>3.2'],
             ],
         ];
 
@@ -133,7 +125,7 @@ final class RuleProviderFactoryTest extends TestCase
         $rules = $provider();
 
         // Assert
-        $this->assertSame('<2.17.2', $advisory->getConstraint());
+        $this->assertSame('>3.2', $advisory->getConstraint());
 
         $this->assertCount(1, $rules);
         $rule = current($rules);
@@ -142,6 +134,6 @@ final class RuleProviderFactoryTest extends TestCase
         $advisory = $rule($advisory);
         $this->assertInstanceOf(Advisory::class, $advisory);
 
-        $this->assertSame('<2.17.2', $advisory->getConstraint());
+        $this->assertSame('>3.2', $advisory->getConstraint());
     }
 }

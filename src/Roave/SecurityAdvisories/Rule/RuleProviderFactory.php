@@ -32,7 +32,7 @@ final class RuleProviderFactory
         return [
             static function (Advisory $advisory): Advisory {
                 $packageName      = 'laminas/laminas-form';
-                $targetConstraint = '<2.17.2|>=3,<3.0.2|>=3.1,<3.1.1';
+                $targetConstraint = '<2.17.2';
 
                 if ($advisory->package->packageName !== $packageName) {
                     return $advisory;
@@ -42,21 +42,12 @@ final class RuleProviderFactory
                     return $advisory;
                 }
 
-                $config              = [];
-                $config['reference'] = $packageName;
-                $config['branches']  = [
-                    '2.17.x' => [
-                        'versions' => ['<2.17.1'], // change constraint to <2.17.1
+                return Advisory::fromArrayData([
+                    'reference' => $packageName,
+                    'branches'  => [
+                        ['versions' => ['<2.17.1']],
                     ],
-                    '3.0.x' => [
-                        'versions' => ['>=3','<3.0.2'],
-                    ],
-                    '3.1.x' => [
-                        'versions' => ['>=3.1','<3.1.1'],
-                    ],
-                ];
-
-                return Advisory::fromArrayData($config);
+                ]);
             },
         ];
     }

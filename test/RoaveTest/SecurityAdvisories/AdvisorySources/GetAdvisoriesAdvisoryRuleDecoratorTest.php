@@ -54,20 +54,10 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                     return $advisory;
                 }
 
-                $config              = [];
-                $config['reference'] = $packageName;
-                $config['branches']  = [
-                    '1.x' => [
-                        'time' => '2017-05-15 09:09:00',
-                        'versions' => ['<1.1'],
-                    ],
-                    '2.x' => [
-                        'time' => '2017-05-15 09:09:00',
-                        'versions' => ['>2.0'],
-                    ],
-                ];
-
-                return Advisory::fromArrayData($config);
+                return Advisory::fromArrayData([
+                    'reference' => $packageName,
+                    'branches' => [['versions' => ['<1.1']]],
+                ]);
             };
 
         $changeOtherPackageConstraintRule =
@@ -81,16 +71,10 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                     return $advisory;
                 }
 
-                $config              = [];
-                $config['reference'] = $packageName;
-                $config['branches']  = [
-                    '1.x' => [
-                        'time' => '2017-05-15 09:09:00',
-                        'versions' => ['>=3'],
-                    ],
-                ];
-
-                return Advisory::fromArrayData($config);
+                return Advisory::fromArrayData([
+                    'reference' => $packageName,
+                    'branches' => [['versions' => ['>=3']]],
+                ]);
             };
 
         $nullRule =
@@ -113,23 +97,26 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
         self::assertEquals([
             Advisory::fromArrayData([
                 'branches' => [
-                    '1.x' => [
-                        'time' => '2017-05-15 09:09:00',
-                        'versions' => ['<1.1'],
-                    ],
-                    '2.x' => [
-                        'time' => '2017-05-15 09:09:00',
-                        'versions' => ['>2.0'],
-                    ],
+                    ['versions' => ['>2.2']],
                 ],
                 'reference' => 'composer://3f/pygmentize',
             ]),
             Advisory::fromArrayData([
                 'branches' => [
-                    '3.x' => [
-                        'time' => '2012-05-15 09:09:00',
-                        'versions' => ['>=3'],
-                    ],
+                    ['versions' => ['<1.1']], // changed by rule
+                ],
+                'reference' => 'composer://3f/pygmentize',
+            ]),
+            Advisory::fromArrayData([
+                'branches' => [
+                    ['versions' => ['>=3']], // changed by rule
+                ],
+                'reference' => 'composer://other/package-name',
+            ]),
+
+            Advisory::fromArrayData([
+                'branches' => [
+                    ['versions' => ['>5']],
                 ],
                 'reference' => 'composer://other/package-name',
             ]),
@@ -151,49 +138,11 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
         $decoratedAdvisories    = $decoratedAdvisories();
 
         // Assert
-        // check default handling
-        self::assertEquals([
-            Advisory::fromArrayData([
-                'branches' => [
-                    '1.x' => [
-                        'time' => '2017-05-15 09:09:00',
-                        'versions' => ['<1.2'],
-                    ],
-                ],
-                'reference' => 'composer://3f/pygmentize',
-            ]),
-            Advisory::fromArrayData([
-                'branches' => [
-                    '3.x' => [
-                        'time' => '2012-05-15 09:09:00',
-                        'versions' => ['<2|>4'],
-                    ],
-                ],
-                'reference' => 'composer://other/package-name',
-            ]),
-        ], Vec\values($notDecoratedAdvisories));
-
         // check decorated handling and see version lowered and one branch added
-        self::assertEquals([
-            Advisory::fromArrayData([
-                'branches' => [
-                    '1.x' => [
-                        'time' => '2017-05-15 09:09:00',
-                        'versions' => ['<1.2'],
-                    ],
-                ],
-                'reference' => 'composer://3f/pygmentize',
-            ]),
-            Advisory::fromArrayData([
-                'branches' => [
-                    '3.x' => [
-                        'time' => '2012-05-15 09:09:00',
-                        'versions' => ['<2|>4'],
-                    ],
-                ],
-                'reference' => 'composer://other/package-name',
-            ]),
-        ], Vec\values($decoratedAdvisories));
+        self::assertEquals(
+            Vec\values($notDecoratedAdvisories),
+            Vec\values($decoratedAdvisories)
+        );
     }
 
     public function testThatRuleIsAddedToExpectedAdvisory(): void
@@ -212,12 +161,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
 
                 $config              = [];
                 $config['reference'] = $packageName;
-                $config['branches']  = [
-                    '1.x' => [
-                        'time' => '2017-05-15 09:09:00',
-                        'versions' => ['<1.0|>2.0'],
-                    ],
-                ];
+                $config['branches']  = [['versions' => ['<1.0|>2.0']]];
 
                 return Advisory::fromArrayData($config);
             };
@@ -234,26 +178,35 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
 
         // Assert
         // check decorated handling and see version lowered and one branch added
-        self::assertEquals([
-            Advisory::fromArrayData([
-                'branches' => [
-                    '1.x' => [
-                        'time' => '2017-05-15 09:09:00',
-                        'versions' => ['<1.0|>2.0'],
+        self::assertEquals(
+            [
+                Advisory::fromArrayData([
+                    'branches' => [
+                        ['versions' => ['>2.2']],
                     ],
-                ],
-                'reference' => 'composer://3f/pygmentize',
-            ]),
-            Advisory::fromArrayData([
-                'branches' => [
-                    '3.x' => [
-                        'time' => '2012-05-15 09:09:00',
-                        'versions' => ['<2|>4'],
+                    'reference' => 'composer://3f/pygmentize',
+                ]),
+                Advisory::fromArrayData([
+                    'branches' => [
+                        ['versions' => ['<1.0|>2.0']],
                     ],
-                ],
-                'reference' => 'composer://other/package-name',
-            ]),
-        ], Vec\values($decoratedAdvisories));
+                    'reference' => 'composer://3f/pygmentize',
+                ]),
+                Advisory::fromArrayData([
+                    'branches' => [
+                        ['versions' => ['<2|>4']],
+                    ],
+                    'reference' => 'composer://other/package-name',
+                ]),
+                Advisory::fromArrayData([
+                    'branches' => [
+                        ['versions' => ['>5']],
+                    ],
+                    'reference' => 'composer://other/package-name',
+                ]),
+            ],
+            Vec\values($decoratedAdvisories)
+        );
     }
 
     public function testThatRuleToOverwriteLaminasFormConstrainsWorksAsExpected(): void
@@ -262,7 +215,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
         $ruleToFixLaminasFormConstraint =
             static function (Advisory $advisory): Advisory {
                 $packageName      = 'laminas/laminas-form';
-                $targetConstraint = '<2.17.2|>=3,<3.0.2|>=3.1,<3.1.1';
+                $targetConstraint = '<2.17.2';
 
                 if ($advisory->package->packageName !== $packageName) {
                     return $advisory;
@@ -275,14 +228,8 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                 $config              = [];
                 $config['reference'] = $packageName;
                 $config['branches']  = [
-                    '2.17.x' => [
+                    [
                         'versions' => ['<2.17.1'], // change constraint to <2.17.1
-                    ],
-                    '3.0.x' => [
-                        'versions' => ['>=3','<3.0.2'],
-                    ],
-                    '3.1.x' => [
-                        'versions' => ['>=3.1','<3.1.1'],
                     ],
                 ];
 
@@ -294,17 +241,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
         assert(method_exists($getAdvisories, 'addAdvisory'));
         $getAdvisories->addAdvisory(
             Advisory::fromArrayData([
-                'branches' => [
-                    '2.17.x' => [
-                        'versions' => ['<2.17.2'],
-                    ],
-                    '3.0.x' => [
-                        'versions' => ['>=3','<3.0.2'],
-                    ],
-                    '3.1.x' => [
-                        'versions' => ['>=3.1','<3.1.1'],
-                    ],
-                ],
+                'branches' => [['versions' => ['<2.17.2']]],
                 'reference' => 'composer://laminas/laminas-form',
             ]),
         );
@@ -319,40 +256,39 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
 
         // Assert
         // check decorated handling and see version lowered and one branch added
-        self::assertEquals([
-            Advisory::fromArrayData([
-                'branches' => [
-                    '1.x' => [
-                        'time' => '2017-05-15 09:09:00',
-                        'versions' => ['<1.2'],
+        self::assertEquals(
+            [
+                Advisory::fromArrayData([
+                    'branches' => [
+                        ['versions' => ['>2.2']],
                     ],
-                ],
-                'reference' => 'composer://3f/pygmentize',
-            ]),
-            Advisory::fromArrayData([
-                'branches' => [
-                    '3.x' => [
-                        'time' => '2012-05-15 09:09:00',
-                        'versions' => ['<2|>4'],
+                    'reference' => 'composer://3f/pygmentize',
+                ]),
+                Advisory::fromArrayData([
+                    'branches' => [
+                        ['versions' => ['<1.2']],
                     ],
-                ],
-                'reference' => 'composer://other/package-name',
-            ]),
-            Advisory::fromArrayData([
-                'branches' => [
-                    '2.17.x' => [
-                        'versions' => ['<2.17.1'],
+                    'reference' => 'composer://3f/pygmentize',
+                ]),
+                Advisory::fromArrayData([
+                    'branches' => [
+                        ['versions' => ['<2|>4']],
                     ],
-                    '3.0.x' => [
-                        'versions' => ['>=3','<3.0.2'],
+                    'reference' => 'composer://other/package-name',
+                ]),
+                Advisory::fromArrayData([
+                    'branches' => [
+                        ['versions' => ['>5']],
                     ],
-                    '3.1.x' => [
-                        'versions' => ['>=3.1','<3.1.1'],
-                    ],
-                ],
-                'reference' => 'composer://laminas/laminas-form',
-            ]),
-        ], Vec\values($decoratedAdvisories));
+                    'reference' => 'composer://other/package-name',
+                ]),
+                Advisory::fromArrayData([
+                    'branches' => [['versions' => ['<2.17.1']]],
+                    'reference' => 'composer://laminas/laminas-form',
+                ]),
+            ],
+            Vec\values($decoratedAdvisories)
+        );
     }
 
     public function testThatRuleToOverwriteLaminasFormConstrainsWorksAsExpectedAndOnlyToTargetedConstraint(): void
@@ -361,7 +297,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
         $ruleToFixLaminasFormConstraint =
             static function (Advisory $advisory): Advisory {
                 $packageName      = 'laminas/laminas-form';
-                $targetConstraint = '<2.17.2|>=3,<3.0.2|>=3.1,<3.1.1';
+                $targetConstraint = '<2.17.2';
 
                 if ($advisory->package->packageName !== $packageName) {
                     return $advisory;
@@ -374,14 +310,8 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                 $config              = [];
                 $config['reference'] = $packageName;
                 $config['branches']  = [
-                    '2.17.x' => [
+                    [
                         'versions' => ['<2.17.1'], // change constraint to <2.17.1
-                    ],
-                    '3.0.x' => [
-                        'versions' => ['>=3','<3.0.2'],
-                    ],
-                    '3.1.x' => [
-                        'versions' => ['>=3.1','<3.1.1'],
                     ],
                 ];
 
@@ -396,12 +326,6 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                 'branches' => [
                     '2.17.x' => [
                         'versions' => ['<2.17.2'],
-                    ],
-                    '3.0.x' => [
-                        'versions' => ['>=3','<3.0.2'],
-                    ],
-                    '3.1.x' => [
-                        'versions' => ['>=3.1','<3.1.1'],
                     ],
                 ],
                 'reference' => 'composer://laminas/laminas-form',
@@ -431,41 +355,37 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
         self::assertEquals([
             Advisory::fromArrayData([
                 'branches' => [
-                    '1.x' => [
-                        'time' => '2017-05-15 09:09:00',
-                        'versions' => ['<1.2'],
-                    ],
+                    ['versions' => ['>2.2']],
                 ],
                 'reference' => 'composer://3f/pygmentize',
             ]),
             Advisory::fromArrayData([
                 'branches' => [
-                    '3.x' => [
-                        'time' => '2012-05-15 09:09:00',
-                        'versions' => ['<2|>4'],
-                    ],
+                    ['versions' => ['<1.2']],
+                ],
+                'reference' => 'composer://3f/pygmentize',
+            ]),
+            Advisory::fromArrayData([
+                'branches' => [
+                    ['versions' => ['<2|>4']],
                 ],
                 'reference' => 'composer://other/package-name',
             ]),
             Advisory::fromArrayData([
                 'branches' => [
-                    '2.17.x' => [
-                        'versions' => ['<2.17.1'],
-                    ],
-                    '3.0.x' => [
-                        'versions' => ['>=3','<3.0.2'],
-                    ],
-                    '3.1.x' => [
-                        'versions' => ['>=3.1','<3.1.1'],
-                    ],
+                    ['versions' => ['>5']],
+                ],
+                'reference' => 'composer://other/package-name',
+            ]),
+            Advisory::fromArrayData([
+                'branches' => [
+                    ['versions' => ['<2.17.1']],
                 ],
                 'reference' => 'composer://laminas/laminas-form',
             ]),
             Advisory::fromArrayData([
                 'branches' => [
-                    '3.0.x' => [
-                        'versions' => ['>=3','<3.0.2'],
-                    ],
+                    ['versions' => ['>=3', '<3.0.2']],
                 ],
                 'reference' => 'composer://laminas/laminas-form',
             ]),
@@ -495,20 +415,28 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
             {
                 yield Advisory::fromArrayData([
                     'branches' => [
-                        '1.x' => [
-                            'time' => '2017-05-15 09:09:00',
-                            'versions' => ['<1.2'],
-                        ],
+                        ['versions' => ['>2.2']],
                     ],
                     'reference' => 'composer://3f/pygmentize',
                 ]);
 
                 yield Advisory::fromArrayData([
                     'branches' => [
-                        '3.x' => [
-                            'time' => '2012-05-15 09:09:00',
-                            'versions' => ['<2|>4'],
-                        ],
+                        ['versions' => ['<1.2']],
+                    ],
+                    'reference' => 'composer://3f/pygmentize',
+                ]);
+
+                yield Advisory::fromArrayData([
+                    'branches' => [
+                        ['versions' => ['<2|>4']],
+                    ],
+                    'reference' => 'composer://other/package-name',
+                ]);
+
+                yield Advisory::fromArrayData([
+                    'branches' => [
+                        ['versions' => ['>5']],
                     ],
                     'reference' => 'composer://other/package-name',
                 ]);

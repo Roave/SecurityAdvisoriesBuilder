@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6fef68847d14edc508aba341f1bac7cf",
+    "content-hash": "54baeb744978267ca58a41bf98952349",
     "packages": [
         {
             "name": "azjezz/psl",
@@ -3601,16 +3601,16 @@
         },
         {
             "name": "php-standard-library/psalm-plugin",
-            "version": "1.1.4",
+            "version": "1.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-standard-library/psalm-plugin.git",
-                "reference": "294e1cba8d6bd868f5e5291bde4848828b97968a"
+                "reference": "134176c5e36f0aed80bc791095d9c8e1bde9c1b6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-standard-library/psalm-plugin/zipball/294e1cba8d6bd868f5e5291bde4848828b97968a",
-                "reference": "294e1cba8d6bd868f5e5291bde4848828b97968a",
+                "url": "https://api.github.com/repos/php-standard-library/psalm-plugin/zipball/134176c5e36f0aed80bc791095d9c8e1bde9c1b6",
+                "reference": "134176c5e36f0aed80bc791095d9c8e1bde9c1b6",
                 "shasum": ""
             },
             "require": {
@@ -3646,9 +3646,9 @@
             "description": "Psalm plugin for the PHP Standard Library",
             "support": {
                 "issues": "https://github.com/php-standard-library/psalm-plugin/issues",
-                "source": "https://github.com/php-standard-library/psalm-plugin/tree/1.1.4"
+                "source": "https://github.com/php-standard-library/psalm-plugin/tree/1.1.5"
             },
-            "time": "2022-02-06T18:26:09+00:00"
+            "time": "2022-02-27T20:14:21+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",

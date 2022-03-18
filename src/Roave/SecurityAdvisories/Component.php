@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use Closure;
 use Psl\Iter;
 use Psl\Str;
 use Psl\Vec;
@@ -87,7 +88,7 @@ final class Component
         // All constraints were merged together
         if (Iter\count($inputConstraintsByName) === Iter\count($mergedConstraintsByName)) {
             /** @psalm-suppress ImpureFunctionCall this sorting function is operating in a pure manner */
-            return Vec\sort($merged, new VersionConstraintSort());
+            return Vec\sort($merged, Closure::fromCallable(new VersionConstraintSort()));
         }
 
         // Recursion: one de-duplication did not suffice

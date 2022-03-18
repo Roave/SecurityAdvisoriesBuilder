@@ -26,10 +26,12 @@ use ErrorException;
 use Http\Client\Curl\Client;
 use Psl\Dict;
 use Psl\Env;
+use Psl\File;
 use Psl\Filesystem;
 use Psl\Json;
 use Psl\Shell;
 use Psl\Str;
+use Psl\Type;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesAdvisoryRuleDecorator;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
@@ -141,17 +143,15 @@ use const PHP_BINARY;
         return Json\encode(Dict\merge($baseConfig, ['conflict' => $conflicts]), true);
     };
 
-    $writeJson = static function (string $jsonString, string $path): void {
-        Filesystem\write_file($path, $jsonString . "\n");
-    };
-
-    $validateComposerJson = static function (string $composerJsonPath): void {
-        Shell\execute(
-            PHP_BINARY,
-            [__DIR__ . '/vendor/bin/composer', 'validate'],
-            Filesystem\get_directory($composerJsonPath)
-        );
-    };
+    $validateComposerJson =
+    /** @param non-empty-string $composerJsonPath */
+        static function (string $composerJsonPath): void {
+            Shell\execute(
+                Type\non_empty_string()->assert(PHP_BINARY),
+                [__DIR__ . '/vendor/bin/composer', 'validate'],
+                Filesystem\get_directory($composerJsonPath)
+            );
+        };
 
     $copyGeneratedComposerJson = static function (
         string $sourceComposerJsonPath,
@@ -160,33 +160,35 @@ use const PHP_BINARY;
         Shell\execute('cp', [$sourceComposerJsonPath, $targetComposerJsonPath]);
     };
 
-    $commitComposerJson = static function (string $composerJsonPath): void {
-        $originalHash = Shell\execute(
-            'git',
-            ['rev-parse', 'HEAD'],
-            Filesystem\get_directory($composerJsonPath) . '/../security-advisories'
-        );
-        $originalHash = Str\trim($originalHash);
+    $commitComposerJson =
+        /** @param non-empty-string $composerJsonPath */
+        static function (string $composerJsonPath): void {
+            $workingDirectory = Filesystem\get_directory($composerJsonPath);
+            $originalHash     = Shell\execute(
+                'git',
+                ['rev-parse', 'HEAD'],
+                $workingDirectory . '/../security-advisories'
+            );
+            $originalHash     = Str\trim($originalHash);
 
-        $workingDirectory = Filesystem\get_directory($composerJsonPath);
-        Shell\execute('git', ['add', (string) Filesystem\canonicalize($composerJsonPath)], $workingDirectory);
+            Shell\execute('git', ['add', (string) Filesystem\canonicalize($composerJsonPath)], $workingDirectory);
 
-        $message = Str\format(
-            'Committing generated "composer.json" file as per "%s"',
-            (new DateTime('now', new DateTimeZone('UTC')))->format(DateTime::W3C)
-        );
+            $message = Str\format(
+                'Committing generated "composer.json" file as per "%s"',
+                (new DateTime('now', new DateTimeZone('UTC')))->format(DateTime::W3C)
+            );
 
-        $message .= "\n" . Str\format(
-            'Original commit: "%s"',
-            'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash
-        );
+            $message .= "\n" . Str\format(
+                'Original commit: "%s"',
+                'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash
+            );
 
-        try {
-            Shell\execute('git', ['diff-index', '--quiet', 'HEAD'], $workingDirectory);
-        } catch (Shell\Exception\FailedExecutionException) {
-            Shell\execute('git', ['commit', '-m', $message], $workingDirectory);
-        }
-    };
+            try {
+                Shell\execute('git', ['diff-index', '--quiet', 'HEAD'], $workingDirectory);
+            } catch (Shell\Exception\FailedExecutionException) {
+                Shell\execute('git', ['commit', '-m', $message], $workingDirectory);
+            }
+        };
 
     // cleanup:
     $cleanBuildDir();
@@ -205,7 +207,8 @@ use const PHP_BINARY;
     );
 
     // actual work:
-    $writeJson(
+    File\write(
+        __DIR__ . '/build/composer.json',
         $buildConflictsJson(
             $baseComposerJson,
             $buildConflicts(
@@ -213,8 +216,7 @@ use const PHP_BINARY;
                     $getAdvisories()
                 )
             )
-        ),
-        __DIR__ . '/build/composer.json'
+        ) . "\n"
     );
 
     $validateComposerJson(__DIR__ . '/build/composer.json');

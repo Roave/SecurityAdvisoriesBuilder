@@ -173,7 +173,11 @@ final class Version
     {
         foreach (Vec\reverse(Vec\keys($versionNumbers)) as $key) {
             if ($versionNumbers[$key] !== 0) {
-                return Vec\values(Dict\slice($versionNumbers, 0, $key + 1));
+                return Vec\values(Dict\slice(
+                    $versionNumbers,
+                    0,
+                    Type\positive_int()->assert($key + 1)
+                ));
             }
         }
 

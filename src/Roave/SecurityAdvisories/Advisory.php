@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use Closure;
 use Psl\Str;
 use Psl\Type;
 use Psl\Vec;
@@ -106,6 +107,6 @@ final class Advisory
     private function sortVersionConstraints(array $versionConstraints): array
     {
         /** @psalm-suppress ImpureFunctionCall this sorting function is operating in a pure manner */
-        return Vec\sort($versionConstraints, new VersionConstraintSort());
+        return Vec\sort($versionConstraints, Closure::fromCallable(new VersionConstraintSort()));
     }
 }

@@ -29,64 +29,64 @@ use Roave\SecurityAdvisories\PackageName;
 /** @covers \Roave\SecurityAdvisories\PackageName */
 final class PackageNameTest extends TestCase
 {
-    /** @dataProvider validPackageNames */
-    public function testStoresValidPackageName(string $name): void
+    /**
+     * @param non-empty-lowercase-string $expected
+     *
+     * @dataProvider validPackageNames
+     */
+    public function testStoresValidPackageName(string $name, string $expected): void
     {
-        self::assertSame($name, PackageName::fromName($name)->packageName);
+        self::assertSame($expected, PackageName::fromName($name)->packageName);
     }
 
-    /** @return non-empty-list<array{string}> */
+    /** @return non-empty-list<array{string, non-empty-lowercase-string}> */
     public function validPackageNames(): array
     {
         return [
-            ['foo/bar'],
-            ['a/b'],
-            ['1/2'],
-            ['a-b/c-d'],
-            ['a_b/c_d'],
+            ['foo/bar', 'foo/bar'],
+            ['a/b', 'a/b'],
+            ['1/2', '1/2'],
+            ['a-b/c-d', 'a-b/c-d'],
+            ['a_b/c_d', 'a_b/c_d'],
+            ['Foo/bar', 'foo/bar'],
+            ['foo/Bar', 'foo/bar'],
         ];
     }
 
-    /** @dataProvider validReferenceNames */
-    public function testStoresValidPackageFromReferenceName(string $reference, string $name): void
+    /**
+     * @param non-empty-lowercase-string $expected
+     *
+     * @dataProvider validReferenceNames
+     */
+    public function testStoresValidPackageFromReferenceName(string $reference, string $expected): void
     {
-        self::assertSame($name, PackageName::fromReferenceName($reference)->packageName);
+        self::assertSame($expected, PackageName::fromReferenceName($reference)->packageName);
     }
 
-    /**
-     * @return list<array{0: string, 1: string}>
-     */
+    /** @return list<array{string, non-empty-lowercase-string}> */
     public function validReferenceNames(): array
     {
         $references = $this->validPackageNames();
 
         return Vec\concat(
+            $references,
             Vec\map(
                 $references,
                 /**
-                 * @param array{0: string} $names
+                 * @param array{string, non-empty-lowercase-string} $names
                  *
-                 * @return array{0: string, 1: string}
+                 * @return array{string, non-empty-lowercase-string}
                  */
-                static fn (array $names): array => [$names[0], $names[0]]
+                static fn (array $names): array => [Str\replace($names[0], '/', '\\'), $names[1]],
             ),
             Vec\map(
                 $references,
                 /**
-                 * @param array{0: string} $names
+                 * @param array{string, non-empty-lowercase-string} $names
                  *
-                 * @return array{0: string, 1: string}
+                 * @return array{string, non-empty-lowercase-string}
                  */
-                static fn (array $names): array => [Str\replace($names[0], '/', '\\'), $names[0]],
-            ),
-            Vec\map(
-                $references,
-                /**
-                 * @param array{0: string} $names
-                 *
-                 * @return array{0: string, 1: string}
-                 */
-                static fn (array $names): array => ['composer://' . $names[0], $names[0]],
+                static fn (array $names): array => ['composer://' . $names[0], $names[1]],
             ),
         );
     }

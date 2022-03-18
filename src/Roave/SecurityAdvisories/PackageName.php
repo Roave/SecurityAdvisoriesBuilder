@@ -18,10 +18,10 @@ use Roave\SecurityAdvisories\Exception\InvalidPackageName;
  */
 final class PackageName
 {
-    /** @var non-empty-string */
+    /** @var non-empty-lowercase-string */
     public string $packageName;
 
-    /** @param non-empty-string $packageName */
+    /** @param non-empty-lowercase-string $packageName */
     private function __construct(string $packageName)
     {
         $this->packageName = $packageName;
@@ -41,7 +41,7 @@ final class PackageName
             throw InvalidPackageName::fromInvalidName($name);
         }
 
-        return new self(Type\non_empty_string()->assert($name));
+        return new self(Str\lowercase(Type\non_empty_string()->assert($name)));
     }
 
     /**

@@ -20,7 +20,7 @@
         "ext-json": "*",
         "ext-pcre": "*",
         "azjezz/psl": "^1.9.3",
-        "composer/composer": "^2.3.4",
+        "composer/composer": "^2.3.5",
         "nyholm/psr7": "^1.5.0",
         "ocramius/package-versions": "^2.5.1",
         "php-http/curl-client": "^2.2.1",

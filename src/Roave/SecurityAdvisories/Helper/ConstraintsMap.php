@@ -1,0 +1,101 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Roave\SecurityAdvisories\Helper;
+
+use Roave\SecurityAdvisories\Advisory;
+use Roave\SecurityAdvisories\VersionConstraint;
+
+use function array_key_exists;
+use function assert;
+use function Psl\Str\split;
+
+final class ConstraintsMap
+{
+    /** @var array<string, array<VersionConstraint>> $map */
+    private array $map;
+
+    private function __construct()
+    {
+    }
+
+    /**
+     * @param array<string, array<string, string>> $packageConflictsParsedData
+     *
+     * @return ConstraintsMap
+     */
+    public static function fromArray(array $packageConflictsParsedData): self
+    {
+        $packageConflicts = [];
+
+        foreach ($packageConflictsParsedData as $referenceName => $constraintsString) {
+            $packageConstraints = [];
+            foreach (split($constraintsString, '|') as $range) {
+                $packageConstraints[] = VersionConstraint::fromString($range);
+            }
+
+            $packageConflicts[$referenceName] = $packageConstraints;
+        }
+
+        $conflicts      = new self();
+        $conflicts->map = $packageConflicts;
+
+        return $conflicts;
+    }
+
+    /**
+     * @param array<Advisory> $advisoriesToFilter
+     *
+     * @return array<Advisory>
+     */
+    public function advisoriesDiff(array $advisoriesToFilter): array
+    {
+        $filteredAdvisories = [];
+
+        foreach ($advisoriesToFilter as $advisoryToFilter) {
+            assert($advisoryToFilter instanceof Advisory);
+            $pkgNameKey = $advisoryToFilter->package->packageName;
+
+            $isNewAdvisory = ! array_key_exists($pkgNameKey, $this->map);
+
+            if ($isNewAdvisory) {
+                $filteredAdvisories[] = $advisoryToFilter;
+                continue;
+            }
+
+            $isUpdateAdvisory = $this->isAdvisoryUpdate($pkgNameKey, $advisoryToFilter);
+
+            if (! $isUpdateAdvisory) {
+                continue;
+            }
+
+            $filteredAdvisories[] = $advisoryToFilter;
+        }
+
+        return $filteredAdvisories;
+    }
+
+    private function isAdvisoryUpdate(string $packageName, Advisory $advisoryToCheck): bool
+    {
+        $packageConstraints = $this->map[$packageName];
+
+        foreach ($advisoryToCheck->getVersionConstraints() as $advisoryConstraint) {
+            assert($advisoryConstraint instanceof VersionConstraint);
+            $included = false;
+            foreach ($packageConstraints as $pkgConstraint) {
+                assert($pkgConstraint instanceof VersionConstraint);
+                if ($pkgConstraint->contains($advisoryConstraint)) {
+                    $included = true;
+                    break;
+                }
+            }
+
+            if (! $included) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}

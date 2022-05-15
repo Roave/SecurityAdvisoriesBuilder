@@ -56,6 +56,7 @@ final class RuleProviderFactoryTest extends TestCase
         $config['branches']  = [
             ['versions' => ['<2.17.2']],
         ];
+        $config['source']    = ['summary' => 'summary', 'link' => 'link'];
 
         $advisory = Advisory::fromArrayData($config);
 
@@ -87,6 +88,7 @@ final class RuleProviderFactoryTest extends TestCase
                 'versions' => ['<2.17.2'],
             ],
         ];
+        $config['source']    = ['summary' => 'summary', 'link' => 'link'];
 
         $advisory = Advisory::fromArrayData($config);
 
@@ -118,6 +120,7 @@ final class RuleProviderFactoryTest extends TestCase
                 'versions' => ['>3.2'],
             ],
         ];
+        $config['source']    = ['summary' => 'summary', 'link' => 'link'];
 
         $advisory = Advisory::fromArrayData($config);
 

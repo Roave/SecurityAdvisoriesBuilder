@@ -57,6 +57,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                 return Advisory::fromArrayData([
                     'reference' => $packageName,
                     'branches' => [['versions' => ['<1.1']]],
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]);
             };
 
@@ -74,6 +75,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                 return Advisory::fromArrayData([
                     'reference' => $packageName,
                     'branches' => [['versions' => ['>=3']]],
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]);
             };
 
@@ -100,18 +102,21 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                     ['versions' => ['>2.2']],
                 ],
                 'reference' => 'composer://3f/pygmentize',
+                'source' => ['summary' => 'summary', 'link' => 'link'],
             ]),
             Advisory::fromArrayData([
                 'branches' => [
                     ['versions' => ['<1.1']], // changed by rule
                 ],
                 'reference' => 'composer://3f/pygmentize',
+                'source' => ['summary' => 'summary', 'link' => 'link'],
             ]),
             Advisory::fromArrayData([
                 'branches' => [
                     ['versions' => ['>=3']], // changed by rule
                 ],
                 'reference' => 'composer://other/package-name',
+                'source' => ['summary' => 'summary', 'link' => 'link'],
             ]),
 
             Advisory::fromArrayData([
@@ -119,6 +124,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                     ['versions' => ['>5']],
                 ],
                 'reference' => 'composer://other/package-name',
+                'source' => ['summary' => 'summary', 'link' => 'link'],
             ]),
         ], Vec\values($decoratedAdvisories));
     }
@@ -163,6 +169,8 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                 $config['reference'] = $packageName;
                 $config['branches']  = [['versions' => ['<1.0|>2.0']]];
 
+                $config['source'] = ['summary' => 'summary', 'link' => 'link'];
+
                 return Advisory::fromArrayData($config);
             };
 
@@ -185,24 +193,28 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                         ['versions' => ['>2.2']],
                     ],
                     'reference' => 'composer://3f/pygmentize',
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]),
                 Advisory::fromArrayData([
                     'branches' => [
                         ['versions' => ['<1.0|>2.0']],
                     ],
                     'reference' => 'composer://3f/pygmentize',
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]),
                 Advisory::fromArrayData([
                     'branches' => [
                         ['versions' => ['<2|>4']],
                     ],
                     'reference' => 'composer://other/package-name',
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]),
                 Advisory::fromArrayData([
                     'branches' => [
                         ['versions' => ['>5']],
                     ],
                     'reference' => 'composer://other/package-name',
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]),
             ],
             Vec\values($decoratedAdvisories)
@@ -232,6 +244,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                         'versions' => ['<2.17.1'], // change constraint to <2.17.1
                     ],
                 ];
+                $config['source']    = ['summary' => 'summary', 'link' => 'link'];
 
                 return Advisory::fromArrayData($config);
             };
@@ -243,6 +256,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
             Advisory::fromArrayData([
                 'branches' => [['versions' => ['<2.17.2']]],
                 'reference' => 'composer://laminas/laminas-form',
+                'source' => ['summary' => 'summary', 'link' => 'link'],
             ]),
         );
 
@@ -263,28 +277,33 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                         ['versions' => ['>2.2']],
                     ],
                     'reference' => 'composer://3f/pygmentize',
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]),
                 Advisory::fromArrayData([
                     'branches' => [
                         ['versions' => ['<1.2']],
                     ],
                     'reference' => 'composer://3f/pygmentize',
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]),
                 Advisory::fromArrayData([
                     'branches' => [
                         ['versions' => ['<2|>4']],
                     ],
                     'reference' => 'composer://other/package-name',
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]),
                 Advisory::fromArrayData([
                     'branches' => [
                         ['versions' => ['>5']],
                     ],
                     'reference' => 'composer://other/package-name',
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]),
                 Advisory::fromArrayData([
                     'branches' => [['versions' => ['<2.17.1']]],
                     'reference' => 'composer://laminas/laminas-form',
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]),
             ],
             Vec\values($decoratedAdvisories)
@@ -314,6 +333,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                         'versions' => ['<2.17.1'], // change constraint to <2.17.1
                     ],
                 ];
+                $config['source']    = ['summary' => 'summary', 'link' => 'link'];
 
                 return Advisory::fromArrayData($config);
             };
@@ -329,6 +349,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                     ],
                 ],
                 'reference' => 'composer://laminas/laminas-form',
+                'source' => ['summary' => 'summary', 'link' => 'link'],
             ]),
         );
         $getAdvisories->addAdvisory(
@@ -339,6 +360,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                     ],
                 ],
                 'reference' => 'composer://laminas/laminas-form',
+                'source' => ['summary' => 'summary', 'link' => 'link'],
             ]),
         );
 
@@ -358,36 +380,42 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                     ['versions' => ['>2.2']],
                 ],
                 'reference' => 'composer://3f/pygmentize',
+                'source' => ['summary' => 'summary', 'link' => 'link'],
             ]),
             Advisory::fromArrayData([
                 'branches' => [
                     ['versions' => ['<1.2']],
                 ],
                 'reference' => 'composer://3f/pygmentize',
+                'source' => ['summary' => 'summary', 'link' => 'link'],
             ]),
             Advisory::fromArrayData([
                 'branches' => [
                     ['versions' => ['<2|>4']],
                 ],
                 'reference' => 'composer://other/package-name',
+                'source' => ['summary' => 'summary', 'link' => 'link'],
             ]),
             Advisory::fromArrayData([
                 'branches' => [
                     ['versions' => ['>5']],
                 ],
                 'reference' => 'composer://other/package-name',
+                'source' => ['summary' => 'summary', 'link' => 'link'],
             ]),
             Advisory::fromArrayData([
                 'branches' => [
                     ['versions' => ['<2.17.1']],
                 ],
                 'reference' => 'composer://laminas/laminas-form',
+                'source' => ['summary' => 'summary', 'link' => 'link'],
             ]),
             Advisory::fromArrayData([
                 'branches' => [
                     ['versions' => ['>=3', '<3.0.2']],
                 ],
                 'reference' => 'composer://laminas/laminas-form',
+                'source' => ['summary' => 'summary', 'link' => 'link'],
             ]),
         ], Vec\values($decoratedAdvisories));
     }
@@ -418,6 +446,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                         ['versions' => ['>2.2']],
                     ],
                     'reference' => 'composer://3f/pygmentize',
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]);
 
                 yield Advisory::fromArrayData([
@@ -425,6 +454,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                         ['versions' => ['<1.2']],
                     ],
                     'reference' => 'composer://3f/pygmentize',
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]);
 
                 yield Advisory::fromArrayData([
@@ -432,6 +462,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                         ['versions' => ['<2|>4']],
                     ],
                     'reference' => 'composer://other/package-name',
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]);
 
                 yield Advisory::fromArrayData([
@@ -439,6 +470,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                         ['versions' => ['>5']],
                     ],
                     'reference' => 'composer://other/package-name',
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]);
 
                 if (count($this->advisories) === 0) {

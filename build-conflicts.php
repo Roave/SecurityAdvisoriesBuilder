@@ -39,7 +39,6 @@ use function file_get_contents;
 use function iterator_to_array;
 use function json_decode;
 use function set_error_handler;
-use function var_dump;
 
 use const E_NOTICE;
 use const E_STRICT;
@@ -198,9 +197,9 @@ use const PHP_BINARY;
             );
         }
 
-        if (Str\Grapheme\length($updatedAdvisoriesMessage) != 0) {
+        if (Str\Grapheme\length($updatedAdvisoriesMessage) !== 0) {
             $updatedAdvisoriesMessage = "\n\n Security advisories updated:" . $updatedAdvisoriesMessage;
-            $message .= $updatedAdvisoriesMessage . "\n";
+            $message                 .= $updatedAdvisoriesMessage . "\n";
         }
 
         try {

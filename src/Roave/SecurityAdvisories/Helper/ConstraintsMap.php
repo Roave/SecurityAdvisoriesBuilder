@@ -8,7 +8,6 @@ use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\VersionConstraint;
 
 use function array_key_exists;
-use function assert;
 use function Psl\Str\split;
 
 final class ConstraintsMap
@@ -54,7 +53,6 @@ final class ConstraintsMap
         $filteredAdvisories = [];
 
         foreach ($advisoriesToFilter as $advisoryToFilter) {
-            assert($advisoryToFilter instanceof Advisory);
             $pkgNameKey = $advisoryToFilter->package->packageName;
 
             $isNewAdvisory = ! array_key_exists($pkgNameKey, $this->map);
@@ -81,10 +79,8 @@ final class ConstraintsMap
         $packageConstraints = $this->map[$packageName];
 
         foreach ($advisoryToCheck->getVersionConstraints() as $advisoryConstraint) {
-            assert($advisoryConstraint instanceof VersionConstraint);
             $included = false;
             foreach ($packageConstraints as $pkgConstraint) {
-                assert($pkgConstraint instanceof VersionConstraint);
                 if ($pkgConstraint->contains($advisoryConstraint)) {
                     $included = true;
                     break;

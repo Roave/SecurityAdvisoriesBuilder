@@ -23,6 +23,7 @@ namespace Roave\SecurityAdvisories;
 use DateTime;
 use DateTimeZone;
 use ErrorException;
+use Exception;
 use Http\Client\Curl\Client;
 use Psl\Dict;
 use Psl\Env;
@@ -37,6 +38,7 @@ use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 use Roave\SecurityAdvisories\Helper\ConstraintsMap;
 use Roave\SecurityAdvisories\Rule\RuleProviderFactory;
 
+use function assert;
 use function file_get_contents;
 use function iterator_to_array;
 use function set_error_handler;
@@ -159,6 +161,14 @@ use const PHP_BINARY;
         Shell\execute('cp', [$sourceComposerJsonPath, $targetComposerJsonPath]);
     };
 
+    /**
+     * @param string $composerJsonPath
+     * @param array<Advisory> $addedAdvisories
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
     $commitComposerJson = static function (string $composerJsonPath, array $addedAdvisories): void {
         $originalHash = Shell\execute(
             'git',
@@ -182,6 +192,7 @@ use const PHP_BINARY;
 
         $updatedAdvisoriesMessage = '';
         foreach ($addedAdvisories as $advisory) {
+            assert($advisory instanceof Advisory);
             $updatedAdvisoriesMessage .= Str\format(
                 "\n\t%-15s| %s\n\t%-15s| %s\n\t%-15s| %s\n\t%-15s| %s\n",
                 'Package name',

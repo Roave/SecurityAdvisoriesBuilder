@@ -31,6 +31,8 @@ use Psl\Shell;
 use Psl\Str;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesAdvisoryRuleDecorator;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
+use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
+use Http\Client\Curl\Client;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 use Roave\SecurityAdvisories\Helper\ConstraintsMap;
 use Roave\SecurityAdvisories\Rule\RuleProviderFactory;
@@ -158,9 +160,6 @@ use const PHP_BINARY;
         Shell\execute('cp', [$sourceComposerJsonPath, $targetComposerJsonPath]);
     };
 
-    /**
-     * @psalm-suppress MixedAssignment
-     */
     $commitComposerJson = static function (string $composerJsonPath, array $addedAdvisories): void {
         $originalHash = Shell\execute(
             'git',
@@ -183,6 +182,7 @@ use const PHP_BINARY;
         );
 
         $updatedAdvisoriesMessage = '';
+        /** @var Advisory $advisory */
         foreach ($addedAdvisories as $advisory) {
             $updatedAdvisoriesMessage .= Str\format(
                 "\n\t%-15s| %s\n\t%-15s| %s\n\t%-15s| %s\n\t%-15s| %s\n",
@@ -193,7 +193,7 @@ use const PHP_BINARY;
                 'URI',
                 $advisory->source->uri,
                 'Constraints',
-                $advisory->getConstraint(),
+                $advisory->getConstraint() ?? "",
             );
         }
 
@@ -241,7 +241,8 @@ use const PHP_BINARY;
     $validateComposerJson(__DIR__ . '/build/composer.json');
 
     $prevComposerJSONFileData = file_get_contents(__DIR__ . '/build/roave-security-advisories/composer.json');
-    $prevComposerDecodedData  = json_decode($prevComposerJSONFileData, true);
+    /** @var array<string, array<string, array<string, string>>> $prevComposerDecodedData */
+    $prevComposerDecodedData  = Json\decode($prevComposerJSONFileData, true);
     $currentConstraints       = ConstraintsMap::fromArray($prevComposerDecodedData['conflict']);
     $updatedAdvisories        = $currentConstraints->advisoriesDiff(iterator_to_array($getAdvisories()));
 

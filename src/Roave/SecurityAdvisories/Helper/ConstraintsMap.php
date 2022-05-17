@@ -15,12 +15,16 @@ final class ConstraintsMap
     /** @var array<string, array<VersionConstraint>> $map */
     private array $map;
 
-    private function __construct()
+    /**
+     * @param array<string, array<VersionConstraint>> $conflicts
+     */
+    private function __construct(array $conflicts)
     {
+        $this->map = $conflicts;
     }
 
     /**
-     * @param array<string, array<string, string>> $packageConflictsParsedData
+     * @param array<string, string> $packageConflictsParsedData
      *
      * @return ConstraintsMap
      */
@@ -37,10 +41,7 @@ final class ConstraintsMap
             $packageConflicts[$referenceName] = $packageConstraints;
         }
 
-        $conflicts      = new self();
-        $conflicts->map = $packageConflicts;
-
-        return $conflicts;
+        return new self($packageConflicts);
     }
 
     /**

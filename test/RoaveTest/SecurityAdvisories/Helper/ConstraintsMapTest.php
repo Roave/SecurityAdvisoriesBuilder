@@ -32,8 +32,8 @@ use Roave\SecurityAdvisories\Helper\ConstraintsMap;
 final class ConstraintsMapTest extends TestCase
 {
     /**
-     * @param array<string, array<string, array<string, string>>> $data
-     * @param array<Advisory>                                     $incomingAdvisories
+     * @param array<string, array<string, string>> $data
+     * @param array<Advisory>                      $incomingAdvisories
      *
      * @dataProvider newAdvisoriesDataProvider
      */
@@ -50,8 +50,8 @@ final class ConstraintsMapTest extends TestCase
     }
 
     /**
-     * @param array<string, array<string, array<string, string>>> $data
-     * @param array<Advisory>                                     $incomingAdvisories
+     * @param array<string, array<string, string>> $data
+     * @param array<Advisory>                      $incomingAdvisories
      *
      * @dataProvider sameAdvisoriesDataProvider
      */

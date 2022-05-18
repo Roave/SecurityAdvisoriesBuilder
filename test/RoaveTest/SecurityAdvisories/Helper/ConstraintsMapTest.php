@@ -55,7 +55,7 @@ final class ConstraintsMapTest extends TestCase
      *
      * @dataProvider sameAdvisoriesDataProvider
      */
-    public function testAdvisoriesDiffDetectsNonUpdatedAdvisory(
+    public function testSameAdvisoriesAreFilteredOut(
         array $data,
         array $incomingAdvisories,
     ): void {
@@ -63,63 +63,6 @@ final class ConstraintsMapTest extends TestCase
         $result = $map->advisoriesDiff($incomingAdvisories);
 
         self::assertCount(0, $result);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function sameAdvisoriesDataProvider(): array
-    {
-        return [
-            'single range equals to already existing range' => [
-                [
-                    'conflict' => ['foo/bar' => '>=4,<4.4.56|>=4.5,<4.9.18|>=4.10,<4.11.7|>=4.13,<4.13.3'],
-                ],
-                [
-                    Advisory::fromArrayData([
-                        'branches' => [
-                            ['versions' => ['>=4,<4.4.56']],
-                        ],
-                        'reference' => 'composer://foo/bar',
-                        'source' => ['summary' => 'summary', 'link' => 'link'],
-                    ]),
-                ],
-                '>=4,<4.4.56',
-            ],
-            'all ranges are fully included' => [
-                [
-                    'conflict' => ['foo/bar' => '>=4,<4.4.56|>=4.5,<4.9.18|>=4.10,<4.11.7|>=4.13,<4.13.3'],
-                ],
-                [
-                    Advisory::fromArrayData([
-                        'branches' => [
-                            ['versions' => ['>=4,<4.4.56']],
-                            ['versions' => ['>=4.5,<4.9.18']],
-                            ['versions' => ['>=4.10,<4.11.7']],
-                            ['versions' => ['>=4.13,<4.13.3']],
-                        ],
-                        'reference' => 'composer://foo/bar',
-                        'source' => ['summary' => 'summary', 'link' => 'link'],
-                    ]),
-                ],
-                '>=4,<4.4.56',
-            ],
-            'smaller single range fully included' => [
-                [
-                    'conflict' => ['foo/bar' => '>=4,<4.4.56|>=4.5,<4.9.18|>=4.10,<4.11.7|>=4.13,<4.13.3'],
-                ],
-                [
-                    Advisory::fromArrayData([
-                        'branches' => [
-                            ['versions' => ['>4.1,<4.2']],
-                        ],
-                        'reference' => 'composer://foo/bar',
-                        'source' => ['summary' => 'summary', 'link' => 'link'],
-                    ]),
-                ],
-                '>=4,<4.4.56',
-            ],
-        ];
     }
 
     /**
@@ -167,7 +110,7 @@ final class ConstraintsMapTest extends TestCase
                         'branches' => [
                             [
                                 'versions' =>
-                                    ['>=4.13', '<4.13.4'], // just a bit over the edge
+                                    ['>=4.13', '<4.13.4'],
                             ],
                         ],
                         'reference' => 'composer://foo/bar',
@@ -197,6 +140,88 @@ final class ConstraintsMapTest extends TestCase
                     ]),
                 ],
                 '>=4.13,<4.13.3|>6',
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function sameAdvisoriesDataProvider(): array
+    {
+        return [
+            'single range equals to already existing range' => [
+                [
+                    'conflict' => ['foo/bar' => '>=4,<4.4.56|>=4.5,<4.9.18|>=4.10,<4.11.7|>=4.13,<4.13.3'],
+                ],
+                [
+                    Advisory::fromArrayData([
+                        'branches' => [
+                            ['versions' => ['>=4,<4.4.56']],
+                        ],
+                        'reference' => 'composer://foo/bar',
+                        'source' => ['summary' => 'summary', 'link' => 'link'],
+                    ]),
+                ],
+            ],
+            'all ranges are fully included' => [
+                [
+                    'conflict' => ['foo/bar' => '>=4,<4.4.56|>=4.5,<4.9.18|>=4.10,<4.11.7|>=4.13,<4.13.3'],
+                ],
+                [
+                    Advisory::fromArrayData([
+                        'branches' => [
+                            ['versions' => ['>=4,<4.4.56']],
+                            ['versions' => ['>=4.5,<4.9.18']],
+                            ['versions' => ['>=4.10,<4.11.7']],
+                            ['versions' => ['>=4.13,<4.13.3']],
+                        ],
+                        'reference' => 'composer://foo/bar',
+                        'source' => ['summary' => 'summary', 'link' => 'link'],
+                    ]),
+                ],
+            ],
+            'smaller single range fully included' => [
+                [
+                    'conflict' => ['foo/bar' => '>=4,<4.4.56|>=4.5,<4.9.18|>=4.10,<4.11.7|>=4.13,<4.13.3'],
+                ],
+                [
+                    Advisory::fromArrayData([
+                        'branches' => [
+                            ['versions' => ['>4.1,<4.2']],
+                        ],
+                        'reference' => 'composer://foo/bar',
+                        'source' => ['summary' => 'summary', 'link' => 'link'],
+                    ]),
+                ],
+            ],
+            'complex range with stability flags' => [
+                [
+                    'conflict' => ['snipe/snipe-it' => '<5.4.3|>=6.0.0-RC-1,<=6.0.0-RC-5'],
+                ],
+                [
+                    Advisory::fromArrayData([
+                        'branches' => [
+                            ['versions' => ['>=6.0.0-RC-1, <=6.0.0-RC-5']],
+                        ],
+                        'reference' => 'composer://snipe/snipe-it',
+                        'source' => ['summary' => 'summary', 'link' => 'link'],
+                    ]),
+                ],
+            ],
+            'a simple ranges and fixed version advisories' => [
+                [
+                    'conflict' => ['october/cms' => '=1.1.1|=1.0.471|=1.0.469|>=1.0.319,<1.0.469'],
+                ],
+                [
+                    Advisory::fromArrayData([
+                        'branches' => [
+                            ['versions' => ['=1.0.471']],
+                        ],
+                        'reference' => 'composer://october/cms',
+                        'source' => ['summary' => 'summary', 'link' => 'link'],
+                    ]),
+                ],
             ],
         ];
     }

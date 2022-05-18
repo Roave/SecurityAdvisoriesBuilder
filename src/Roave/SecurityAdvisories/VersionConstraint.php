@@ -11,6 +11,8 @@ use Psl\Regex;
 use Psl\Str;
 use Psl\Vec;
 
+use function strcmp;
+
 /**
  * A simple version constraint - naively assumes that it is only about ranges like ">=1.2.3,<4.5.6"
  *
@@ -144,6 +146,10 @@ final class VersionConstraint
 
     public function contains(self $other): bool
     {
+        if ($this->constraintString !== null && $other->constraintString !== null) {
+            return strcmp($this->constraintString, $other->constraintString) === 0;
+        }
+
         return $this->isSimpleRangeString()  // cannot compare - too complex :-(
             && $other->isSimpleRangeString() // cannot compare - too complex :-(
             && $this->containsLowerBound($other->lowerBoundary)

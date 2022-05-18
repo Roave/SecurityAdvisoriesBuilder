@@ -280,7 +280,7 @@ final class VersionConstraintTest extends TestCase
             ['>1a2b3,<4c5d6'],
             ['>1-a.2'],
             ['<1-a.2'],
-            ['<1-a.2, >1-p.1.2'],
+            ['<1-a.2,>1-p.1.2'],
             ['1-beta.2.0|1-rc.1.2.3'],
         ];
 
@@ -519,6 +519,7 @@ final class VersionConstraintTest extends TestCase
     public function normalizableRangesProvider(): array
     {
         $samples = [
+            ['= 1.1.1', '=1.1.1'],
             ['>1.0,<2.0', '>1,<2'],
             ['>=1.0,<2.0', '>=1,<2'],
             ['>1.0,<=2.0', '>1,<=2'],
@@ -536,6 +537,8 @@ final class VersionConstraintTest extends TestCase
             ['<1.0', '<1'],
             ['<=1.0', '<=1'],
             ['<=1.0.3.0.5.0-beta.0.5.0.0', '<=1.0.3.0.5-beta.0.5'],
+            ['>= 6.0.0-RC-1', '>=6.0.0-RC-1'],
+            ['<= 6.0.0-RC-5', '<=6.0.0-RC-5'],
         ];
 
         return Dict\associate(

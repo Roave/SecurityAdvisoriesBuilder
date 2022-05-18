@@ -33,7 +33,7 @@ final class VersionConstraint
      */
     public static function fromString(string $versionConstraint): self
     {
-        $constraintString = $versionConstraint;
+        $constraintString = Str\replace($versionConstraint, ' ', '');
         $instance         = new self();
 
         if (Regex\matches($constraintString, Matchers::CLOSED_RANGE_MATCHER)) {

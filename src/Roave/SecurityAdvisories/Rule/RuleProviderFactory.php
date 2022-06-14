@@ -47,6 +47,7 @@ final class RuleProviderFactory
                     'branches'  => [
                         ['versions' => ['<2.17.1']],
                     ],
+                    'source' => ['summary' => 'summary', 'link' => 'link'],
                 ]);
             },
         ];

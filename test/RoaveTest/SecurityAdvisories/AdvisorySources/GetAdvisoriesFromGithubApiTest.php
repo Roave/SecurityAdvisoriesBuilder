@@ -98,10 +98,12 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                 Advisory::fromArrayData([
                     'reference' => 'enshrined/svg-sanitize',
                     'branches'  => [['versions' => ['> 0.12.0, < 0.12.1 ']]],
+                    'source' => ['summary' => 'some summary', 'link' => 'https://example.com'],
                 ]),
                 Advisory::fromArrayData([
                     'reference' => 'foo/bar',
                     'branches'  => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
+                    'source' => ['summary' => 'some summary', 'link' => 'https://example.com'],
                 ]),
             ],
             Vec\values($advisories())
@@ -152,7 +154,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "enshrined/svg-sanitize"
                             },
                             "advisory": {
-                              "withdrawnAt": null
+                              "withdrawnAt": null,
+                              "summary": "some summary",
+                              "permalink": "https://example.com"
                             }
                           }
                         },
@@ -164,7 +168,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "foo/bar"
                             },
                             "advisory": {
-                              "withdrawnAt": null
+                              "withdrawnAt": null,
+                              "summary": "some summary",
+                              "permalink": "https://example.com"
                             }
                           }
                         }
@@ -222,10 +228,12 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                 Advisory::fromArrayData([
                     'reference' => 'aa/bb',
                     'branches'  => [['versions' => ['> 0.12.0, < 0.12.1 ']]],
+                    'source' => ['summary' => 'some summary', 'link' => 'https://example.com'],
                 ]),
                 Advisory::fromArrayData([
                     'reference' => 'dd/ee',
                     'branches'  => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
+                    'source' => ['summary' => 'some summary', 'link' => 'https://example.com'],
                 ]),
             ],
             Vec\values($advisories())
@@ -250,6 +258,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
             Advisory::fromArrayData([
                 'reference' => 'aa/bb',
                 'branches' => [['versions' => ['<= 1.1.0']]],
+                'source' => ['summary' => 'some summary', 'link' => 'https://example.com'],
             ]),
         ], Vec\Values($advisories()));
     }
@@ -271,7 +280,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "aa/bb"
                             },
                             "advisory": {
-                              "withdrawnAt": null
+                              "withdrawnAt": null,
+                              "summary": "some summary",
+                              "permalink": "https://example.com"
                             }
                           }
                         },
@@ -283,7 +294,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "cc"
                             },
                             "advisory": {
-                              "withdrawnAt": null
+                              "withdrawnAt": null,
+                              "summary": "some summary",
+                              "permalink": "https://example.com"
                             }
                           }
                         },
@@ -295,7 +308,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "dd/ee"
                             },
                             "advisory": {
-                              "withdrawnAt": null
+                              "withdrawnAt": null,
+                              "summary": "some summary",
+                              "permalink": "https://example.com"
                             }
                           }
                         }
@@ -350,7 +365,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "enshrined/svg-sanitize"
                             },
                             "advisory": {
-                              "withdrawnAt": null
+                              "withdrawnAt": null,
+                              "summary": "some summary",
+                              "permalink": "https://example.com"
                             }
                           }
                         }
@@ -396,7 +413,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "aa/bb"
                             },
                             "advisory": {
-                              "withdrawnAt": "2021-11-17T15:54:51Z"
+                              "withdrawnAt": "2021-11-17T15:54:51Z",
+                              "summary": "some summary",
+                              "permalink": "https://example.com"
                             }
                           }
                         },
@@ -408,7 +427,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "aa/bb"
                             },
                             "advisory": {
-                              "withdrawnAt": null
+                              "withdrawnAt": null,
+                              "summary": "some summary",
+                              "permalink": "https://example.com"
                             }
                           }
                         }

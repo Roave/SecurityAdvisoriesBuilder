@@ -62,7 +62,11 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
                         'versions' => Type\union(Type\string(), Type\vec(Type\string())),
                     ], true)),
                     'reference' => Type\string(),
+                    'title' => Type\string(),
+                    'link' => Type\string(),
                 ], true)->assert(Yaml::parse($yaml, Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE));
+
+                $definition['source'] = ['summary' => $definition['title'], 'link' => $definition['link']];
 
                 return Advisory::fromArrayData($definition);
             },

@@ -44,6 +44,7 @@ final class ComponentTest extends TestCase
                     'versions' => ['>=2.0-beta.1.1', '<2.1-beta.1.1'],
                 ],
             ],
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
         $advisory2 = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
@@ -55,6 +56,7 @@ final class ComponentTest extends TestCase
                     'versions' => ['>=4.0-beta.1.1', '<4.1-beta.1.1'],
                 ],
             ],
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
 
         $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2);
@@ -77,6 +79,7 @@ final class ComponentTest extends TestCase
                     'versions' => ['>=2.0', '<2.1'],
                 ],
             ],
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
         $advisory2 = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
@@ -94,6 +97,7 @@ final class ComponentTest extends TestCase
                     'versions' => ['>=3.0', '<3.1'],
                 ],
             ],
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
         $advisory3 = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
@@ -103,6 +107,7 @@ final class ComponentTest extends TestCase
                     'versions' => ['>=3.0.1', '<3.0.99'],
                 ],
             ],
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
 
         $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2, $advisory3);
@@ -123,6 +128,7 @@ final class ComponentTest extends TestCase
                     'versions' => ['>=2.0-rc', '<2.1-p'],
                 ],
             ],
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
         $advisory2 = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
@@ -140,6 +146,7 @@ final class ComponentTest extends TestCase
                     'versions' => ['>=3.0-stable.5', '<3.1'],
                 ],
             ],
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
         $advisory3 = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',
@@ -149,6 +156,7 @@ final class ComponentTest extends TestCase
                     'versions' => ['>=3.0.1', '<3.0.99'],
                 ],
             ],
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
 
         $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2, $advisory3);
@@ -167,6 +175,7 @@ final class ComponentTest extends TestCase
                     'versions' => ['>=3.1.0', '<=3.1.9'],
                 ],
             ],
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
         $advisory2 = clone $advisory1;
         $advisory3 = Advisory::fromArrayData([
@@ -179,6 +188,7 @@ final class ComponentTest extends TestCase
                     'versions' => ['>=3.1.0', '<3.1.11'],
                 ],
             ],
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
 
         $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2, $advisory3);
@@ -203,11 +213,13 @@ final class ComponentTest extends TestCase
         $advisory1 = Advisory::fromArrayData([
             'reference' => $reference,
             'branches' => $advisory1Branches,
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
         $advisory2 = clone $advisory1;
         $advisory3 = Advisory::fromArrayData([
             'reference' => $reference,
             'branches' => $advisory2Branches,
+            'source' => ['summary' => 'some vulnerability', 'link' => 'https://example.com'],
         ]);
 
         $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2, $advisory3);

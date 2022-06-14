@@ -23,6 +23,7 @@ namespace Roave\SecurityAdvisories;
 use DateTime;
 use DateTimeZone;
 use ErrorException;
+use Exception;
 use Http\Client\Curl\Client;
 use Psl\Dict;
 use Psl\Env;
@@ -34,8 +35,12 @@ use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesAdvisoryRuleDecorator;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
+use Roave\SecurityAdvisories\Helper\ConstraintsMap;
 use Roave\SecurityAdvisories\Rule\RuleProviderFactory;
 
+use function assert;
+use function file_get_contents;
+use function iterator_to_array;
 use function set_error_handler;
 
 use const E_NOTICE;
@@ -89,10 +94,6 @@ use const PHP_BINARY;
 
     $cloneRoaveAdvisories = static function () use ($roaveAdvisoriesRepository, $buildDir): void {
         Shell\execute('git', ['clone', $roaveAdvisoriesRepository, $buildDir . '/roave-security-advisories']);
-        Shell\execute(
-            'cp',
-            ['-r', $buildDir . '/roave-security-advisories', $buildDir . '/roave-security-advisories-original']
-        );
     };
 
     $buildComponents =
@@ -160,7 +161,15 @@ use const PHP_BINARY;
         Shell\execute('cp', [$sourceComposerJsonPath, $targetComposerJsonPath]);
     };
 
-    $commitComposerJson = static function (string $composerJsonPath): void {
+    /**
+     * @param string $composerJsonPath
+     * @param array<Advisory> $addedAdvisories
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
+    $commitComposerJson = static function (string $composerJsonPath, array $addedAdvisories): void {
         $originalHash = Shell\execute(
             'git',
             ['rev-parse', 'HEAD'],
@@ -178,8 +187,29 @@ use const PHP_BINARY;
 
         $message .= "\n" . Str\format(
             'Original commit: "%s"',
-            'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash
+            'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash,
         );
+
+        $updatedAdvisoriesMessage = '';
+        foreach ($addedAdvisories as $advisory) {
+            assert($advisory instanceof Advisory);
+            $updatedAdvisoriesMessage .= Str\format(
+                "\n\t%-15s| %s\n\t%-15s| %s\n\t%-15s| %s\n\t%-15s| %s\n",
+                'Package name',
+                $advisory->package->packageName,
+                'Summary',
+                $advisory->source->summary,
+                'URI',
+                $advisory->source->uri,
+                'Constraints',
+                $advisory->getConstraint() ?? '',
+            );
+        }
+
+        if (Str\Grapheme\length($updatedAdvisoriesMessage) !== 0) {
+            $updatedAdvisoriesMessage = "\n\n Security advisories updated:" . $updatedAdvisoriesMessage;
+            $message                 .= $updatedAdvisoriesMessage . "\n";
+        }
 
         try {
             Shell\execute('git', ['diff-index', '--quiet', 'HEAD'], $workingDirectory);
@@ -219,9 +249,16 @@ use const PHP_BINARY;
 
     $validateComposerJson(__DIR__ . '/build/composer.json');
 
+    $prevComposerJSONFileData = file_get_contents(__DIR__ . '/build/roave-security-advisories/composer.json');
+    /** @var array<string,  array<string, string>> $prevComposerDecodedData */
+    $prevComposerDecodedData = Json\decode($prevComposerJSONFileData, true);
+    $currentConstraints      = ConstraintsMap::fromArray($prevComposerDecodedData['conflict']);
+    $updatedAdvisories       = $currentConstraints->advisoriesDiff(iterator_to_array($getAdvisories()));
+
     $copyGeneratedComposerJson(
         __DIR__ . '/build/composer.json',
         __DIR__ . '/build/roave-security-advisories/composer.json'
     );
-    $commitComposerJson(__DIR__ . '/build/roave-security-advisories/composer.json');
+
+    $commitComposerJson(__DIR__ . '/build/roave-security-advisories/composer.json', $updatedAdvisories);
 })();

@@ -33,17 +33,23 @@ final class Advisory
     /** @var list<VersionConstraint> */
     private array $branchConstraints;
 
-    /** @param list<VersionConstraint> $branchConstraints */
-    private function __construct(PackageName $package, array $branchConstraints)
+    public Source $source;
+
+    /**
+     * @param list<VersionConstraint> $branchConstraints
+     */
+    private function __construct(PackageName $package, array $branchConstraints, Source $source)
     {
         $this->package           = $package;
         $this->branchConstraints = $this->sortVersionConstraints($branchConstraints);
+        $this->source            = $source;
     }
 
     /**
      * @psalm-param array{
      *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
-     *     reference: string
+     *     reference: string,
+     *     source: array{summary: string, link:string},
      * } $config
      *
      * @return Advisory
@@ -70,7 +76,8 @@ final class Advisory
 
                     return VersionConstraint::fromString(Str\join(Vec\values($versions), ','));
                 }
-            )
+            ),
+            Source::new($config['source']['summary'], $config['source']['link']),
         );
     }
 

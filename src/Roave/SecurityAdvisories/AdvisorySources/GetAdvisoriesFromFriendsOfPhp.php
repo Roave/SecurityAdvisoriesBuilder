@@ -51,20 +51,21 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
      */
     public function __invoke(): Generator
     {
+        $advisoryDefinition = Type\shape([
+            'branches' => Type\dict(Type\array_key(), Type\shape([
+                'versions' => Type\union(Type\string(), Type\vec(Type\string())),
+            ], true)),
+            'reference' => Type\string(),
+        ], true);
+
         return yield from Vec\map(
             $this->getAdvisoryFiles(),
-            static function (SplFileInfo $advisoryFile): Advisory {
-                $definition = Type\shape([
-                    'branches' => Type\dict(Type\array_key(), Type\shape([
-                        'versions' => Type\union(Type\string(), Type\vec(Type\string())),
-                    ], true)),
-                    'reference' => Type\string(),
-                ], true)
-                    ->assert(Yaml::parse(
-                        File\read(Type\non_empty_string()
-                            ->assert($advisoryFile->getRealPath())),
-                        Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE
-                    ));
+            static function (SplFileInfo $advisoryFile) use ($advisoryDefinition): Advisory {
+                $definition = $advisoryDefinition->assert(Yaml::parse(
+                    File\read(Type\non_empty_string()
+                        ->assert($advisoryFile->getRealPath())),
+                    Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE
+                ));
 
                 return Advisory::fromArrayData($definition);
             },
@@ -83,7 +84,8 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
                 ),
             ),
             static function (SplFileInfo $advisoryFile): bool {
-                return $advisoryFile->isFile() && $advisoryFile->getExtension() === self::ADVISORY_EXTENSION;
+                return $advisoryFile->isFile()
+                    && $advisoryFile->getExtension() === self::ADVISORY_EXTENSION;
             }
         );
     }

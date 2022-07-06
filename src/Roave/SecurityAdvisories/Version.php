@@ -48,6 +48,10 @@ final class Version
         ));
     }
 
+    /**
+     * @psalm-pure
+     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
+     */
     public static function fromString(string $version): self
     {
         $matches = Regex\first_match(
@@ -173,7 +177,11 @@ final class Version
     {
         foreach (Vec\reverse(Vec\keys($versionNumbers)) as $key) {
             if ($versionNumbers[$key] !== 0) {
-                return Vec\values(Dict\slice($versionNumbers, 0, $key + 1));
+                return Vec\values(Dict\slice(
+                    $versionNumbers,
+                    0,
+                    Type\positive_int()->assert($key + 1)
+                ));
             }
         }
 

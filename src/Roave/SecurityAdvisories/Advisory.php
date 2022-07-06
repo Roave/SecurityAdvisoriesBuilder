@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use Closure;
 use Psl\Str;
 use Psl\Type;
 use Psl\Vec;
@@ -62,14 +63,9 @@ final class Advisory
                 /**
                  * @param array{versions: string|array<array-key, string>} $branchConfig
                  */
-                static function (array $branchConfig): VersionConstraint {
-                    $versions = $branchConfig['versions'];
-                    if (Type\string()->matches($versions)) {
-                        $versions = [$versions];
-                    }
-
-                    return VersionConstraint::fromString(Str\join(Vec\values($versions), ','));
-                }
+                static fn (array $branchConfig): VersionConstraint => VersionConstraint::fromString(
+                    Str\join(Vec\values((array) $branchConfig['versions']), ',')
+                )
             )
         );
     }
@@ -106,6 +102,6 @@ final class Advisory
     private function sortVersionConstraints(array $versionConstraints): array
     {
         /** @psalm-suppress ImpureFunctionCall this sorting function is operating in a pure manner */
-        return Vec\sort($versionConstraints, new VersionConstraintSort());
+        return Vec\sort($versionConstraints, Closure::fromCallable(new VersionConstraintSort()));
     }
 }

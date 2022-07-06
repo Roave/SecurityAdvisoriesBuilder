@@ -678,9 +678,7 @@ final class VersionConstraintTest extends TestCase
     ): VersionConstraint {
         $mergeWithOverlappingReflection = new ReflectionMethod($versionConstraint, 'mergeWithOverlapping');
 
-        $mergeWithOverlappingReflection->setAccessible(true);
-
-        return Type\object(VersionConstraint::class)
+        return Type\instance_of(VersionConstraint::class)
             ->assert($mergeWithOverlappingReflection->invoke($versionConstraint, $other));
     }
 

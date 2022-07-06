@@ -48,6 +48,10 @@ final class Version
         ));
     }
 
+    /**
+     * @psalm-pure
+     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
+     */
     public static function fromString(string $version): self
     {
         $matches = Regex\first_match(

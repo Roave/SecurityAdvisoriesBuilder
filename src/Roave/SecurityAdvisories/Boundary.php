@@ -35,9 +35,11 @@ final class Boundary
     }
 
     /**
-     * @return Boundary
-     *
      * @throws Psl\Exception\InvariantViolationException
+     *
+     * @psalm-pure
+     *
+     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
      */
     public static function fromString(string $boundary): self
     {

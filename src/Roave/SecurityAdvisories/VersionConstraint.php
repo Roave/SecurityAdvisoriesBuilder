@@ -30,6 +30,8 @@ final class VersionConstraint
 
     /**
      * @throws InvalidArgumentException
+     *
+     * @psalm-pure
      */
     public static function fromString(string $versionConstraint): self
     {

@@ -63,14 +63,9 @@ final class Advisory
                 /**
                  * @param array{versions: string|array<array-key, string>} $branchConfig
                  */
-                static function (array $branchConfig): VersionConstraint {
-                    $versions = $branchConfig['versions'];
-                    if (Type\string()->matches($versions)) {
-                        $versions = [$versions];
-                    }
-
-                    return VersionConstraint::fromString(Str\join(Vec\values($versions), ','));
-                }
+                static fn (array $branchConfig): VersionConstraint => VersionConstraint::fromString(
+                    Str\join(Vec\values((array) $branchConfig['versions']), ',')
+                )
             )
         );
     }

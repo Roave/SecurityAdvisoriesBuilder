@@ -18,11 +18,11 @@ use Psl\Vec;
  */
 final class VersionConstraint
 {
-    private ?string $constraintString = null;
+    private string|null $constraintString = null;
 
-    private ?Boundary $lowerBoundary = null;
+    private Boundary|null $lowerBoundary = null;
 
-    private ?Boundary $upperBoundary = null;
+    private Boundary|null $upperBoundary = null;
 
     private function __construct()
     {
@@ -77,9 +77,9 @@ final class VersionConstraint
                 Vec\filter_nulls([$this->lowerBoundary, $this->upperBoundary]),
                 static function (Boundary $boundary) {
                     return $boundary->getBoundaryString();
-                }
+                },
             ),
-            ','
+            ',',
         );
     }
 
@@ -88,14 +88,14 @@ final class VersionConstraint
         return $this->lowerBoundary !== null && $this->lowerBoundary->limitIncluded();
     }
 
-    public function getLowerBound(): ?Version
+    public function getLowerBound(): Version|null
     {
-        return $this->lowerBoundary !== null ? $this->lowerBoundary->getVersion() : null;
+        return $this->lowerBoundary?->getVersion();
     }
 
-    public function getUpperBound(): ?Version
+    public function getUpperBound(): Version|null
     {
-        return $this->upperBoundary !== null ? $this->upperBoundary->getVersion() : null;
+        return $this->upperBoundary?->getVersion();
     }
 
     public function isUpperBoundIncluded(): bool
@@ -140,7 +140,7 @@ final class VersionConstraint
             self::class,
             $this->getConstraintString(),
             self::class,
-            $other->getConstraintString()
+            $other->getConstraintString(),
         ));
     }
 
@@ -152,7 +152,7 @@ final class VersionConstraint
             && $this->containsUpperBound($other->upperBoundary);
     }
 
-    private function containsLowerBound(?Boundary $otherLowerBoundary): bool
+    private function containsLowerBound(Boundary|null $otherLowerBoundary): bool
     {
         if ($this->lowerBoundary === null) {
             return true;
@@ -170,7 +170,7 @@ final class VersionConstraint
         return $otherLowerBoundary->getVersion()->isGreaterThan($this->lowerBoundary->getVersion());
     }
 
-    private function containsUpperBound(?Boundary $otherUpperBoundary): bool
+    private function containsUpperBound(Boundary|null $otherUpperBoundary): bool
     {
         if ($this->upperBoundary === null) {
             return true;
@@ -213,9 +213,7 @@ final class VersionConstraint
             && $this->upperBoundary->adjacentTo($other->lowerBoundary);
     }
 
-    /**
-     * @throws LogicException
-     */
+    /** @throws LogicException */
     private function mergeWithOverlapping(VersionConstraint $other): self
     {
         if (! $this->overlapsWith($other)) {
@@ -224,7 +222,7 @@ final class VersionConstraint
                 self::class,
                 $this->getConstraintString(),
                 self::class,
-                $other->getConstraintString()
+                $other->getConstraintString(),
             ));
         }
 
@@ -265,7 +263,7 @@ final class VersionConstraint
     }
 
     /** Note: most of the limitations/complication probably go away if we define a `Bound` VO */
-    private function strictlyContainsOtherBound(?Boundary $boundary): bool
+    private function strictlyContainsOtherBound(Boundary|null $boundary): bool
     {
         if ($boundary === null) {
             return false;

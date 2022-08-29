@@ -61,13 +61,13 @@ final class Version
                 'version' => Type\string(),
                 'stability_numbers' => Type\optional(Type\string()),
                 'flag' => Type\optional(Type\string()),
-            ])
+            ]),
         );
 
         if ($matches === null) {
             throw new InvalidArgumentException(Str\format(
                 'Given version "%s" is not a valid version string',
-                $version
+                $version,
             ));
         }
 
@@ -81,9 +81,7 @@ final class Version
             && $this->stabilityNumbers === $other->stabilityNumbers;
     }
 
-    /**
-     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
-     */
+    /** @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130} */
     public function isGreaterThan(self $other): bool
     {
         foreach (Vec\keys(Dict\intersect_by_key($this->versionNumbers, $other->versionNumbers)) as $index) {
@@ -110,9 +108,7 @@ final class Version
         return $this->isStabilityGreaterThan($other);
     }
 
-    /**
-     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
-     */
+    /** @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130} */
     private function isStabilityGreaterThan(self $other): bool
     {
         if (! $this->flag->isEqual($other->flag)) {
@@ -142,14 +138,12 @@ final class Version
         return $this->equalTo($other) || $this->isGreaterThan($other);
     }
 
-    /**
-     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
-     */
+    /** @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130} */
     public function getVersion(): string
     {
         $version = Str\join(Vec\map(
             $this->versionNumbers,
-            static fn (int $number): string => (string) $number
+            static fn (int $number): string => (string) $number,
         ), '.');
 
         $flagLiteral = $this->flag->getLiteral();
@@ -159,7 +153,7 @@ final class Version
             if ($this->stabilityNumbers !== []) {
                 $version .= '.' . Str\join(Vec\map(
                     $this->stabilityNumbers,
-                    static fn (int $number): string => (string) $number
+                    static fn (int $number): string => (string) $number,
                 ), '.');
             }
         }
@@ -180,7 +174,7 @@ final class Version
                 return Vec\values(Dict\slice(
                     $versionNumbers,
                     0,
-                    Type\positive_int()->assert($key + 1)
+                    Type\positive_int()->assert($key + 1),
                 ));
             }
         }

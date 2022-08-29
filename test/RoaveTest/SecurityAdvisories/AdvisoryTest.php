@@ -138,7 +138,7 @@ final class AdvisoryTest extends TestCase
     public function testFromArrayGeneratesSortedResult(
         array $versionConstraint1,
         array $versionConstraint2,
-        string $expected
+        string $expected,
     ): void {
         $advisory = Advisory::fromArrayData([
             'reference' => 'composer://foo/bar',

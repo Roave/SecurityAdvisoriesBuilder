@@ -39,11 +39,8 @@ final class Flag
         'a'         => 0,
     ];
 
-    private string $literal;
-
-    private function __construct(string $literal)
+    private function __construct(private string $literal)
     {
-        $this->literal = $literal;
     }
 
     public static function build(string $literal): self

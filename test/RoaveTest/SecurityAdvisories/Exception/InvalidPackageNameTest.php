@@ -31,7 +31,7 @@ final class InvalidPackageNameTest extends TestCase
         self::assertSame(
             'Package "aaa" has invalid name',
             InvalidPackageName::fromInvalidName('aaa')
-                ->getMessage()
+                ->getMessage(),
         );
     }
 }

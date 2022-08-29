@@ -141,7 +141,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
         // check decorated handling and see version lowered and one branch added
         self::assertEquals(
             Vec\values($notDecoratedAdvisories),
-            Vec\values($decoratedAdvisories)
+            Vec\values($decoratedAdvisories),
         );
     }
 
@@ -205,7 +205,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                     'reference' => 'composer://other/package-name',
                 ]),
             ],
-            Vec\values($decoratedAdvisories)
+            Vec\values($decoratedAdvisories),
         );
     }
 
@@ -287,7 +287,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                     'reference' => 'composer://laminas/laminas-form',
                 ]),
             ],
-            Vec\values($decoratedAdvisories)
+            Vec\values($decoratedAdvisories),
         );
     }
 
@@ -395,11 +395,9 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
     private function getTempProvideGetAdvisories(): GetAdvisories
     {
         return new class implements GetAdvisories {
-            /**
-             * @param array<Advisory> $advisories
-             */
+            /** @param array<Advisory> $advisories */
             public function __construct(
-                private array $advisories = []
+                private array $advisories = [],
             ) {
             }
 
@@ -408,9 +406,7 @@ class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
                 $this->advisories[] = $advisory;
             }
 
-            /**
-             * @return Generator<Advisory>
-             */
+            /** @return Generator<Advisory> */
             public function __invoke(): Generator
             {
                 yield Advisory::fromArrayData([

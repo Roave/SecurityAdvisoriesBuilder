@@ -29,15 +29,12 @@ use Roave\SecurityAdvisories\Exception\InvalidPackageName;
 /** @psalm-immutable */
 final class Advisory
 {
-    public PackageName $package;
-
     /** @var list<VersionConstraint> */
     private array $branchConstraints;
 
     /** @param list<VersionConstraint> $branchConstraints */
-    private function __construct(PackageName $package, array $branchConstraints)
+    private function __construct(public PackageName $package, array $branchConstraints)
     {
-        $this->package           = $package;
         $this->branchConstraints = $this->sortVersionConstraints($branchConstraints);
     }
 
@@ -60,28 +57,22 @@ final class Advisory
             PackageName::fromReferenceName($config['reference']),
             Vec\map(
                 $config['branches'],
-                /**
-                 * @param array{versions: string|array<array-key, string>} $branchConfig
-                 */
+                /** @param array{versions: string|array<array-key, string>} $branchConfig */
                 static fn (array $branchConfig): VersionConstraint => VersionConstraint::fromString(
-                    Str\join(Vec\values((array) $branchConfig['versions']), ',')
+                    Str\join(Vec\values((array) $branchConfig['versions']), ','),
                 )
-            )
+            ),
         );
     }
 
-    /**
-     * @return list<VersionConstraint>
-     */
+    /** @return list<VersionConstraint> */
     public function getVersionConstraints(): array
     {
         return $this->branchConstraints;
     }
 
-    /**
-     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
-     */
-    public function getConstraint(): ?string
+    /** @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130} */
+    public function getConstraint(): string|null
     {
         // @TODO may want to escape this
         return Str\join(
@@ -89,7 +80,7 @@ final class Advisory
                 $this->branchConstraints,
                 static fn (VersionConstraint $versionConstraint) => $versionConstraint->getConstraintString()
             ),
-            '|'
+            '|',
         ) ?: null;
     }
 

@@ -25,8 +25,6 @@ use Roave\SecurityAdvisories\Advisory;
 
 interface GetAdvisories
 {
-    /**
-     * @return Generator<Advisory>
-     */
+    /** @return Generator<Advisory> */
     public function __invoke(): Generator;
 }

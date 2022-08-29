@@ -30,14 +30,12 @@ use Roave\SecurityAdvisories\Flag;
  */
 final class FlagTest extends TestCase
 {
-    /**
-     * @dataProvider isGreaterFlagDataProvider
-     */
+    /** @dataProvider isGreaterFlagDataProvider */
     public function testFlagIsGreaterThanOther(
         string $firstFlag,
         string $otherFlag,
         bool $firstExpected,
-        bool $secondExpected
+        bool $secondExpected,
     ): void {
         $first  = Flag::build($firstFlag);
         $second = Flag::build($otherFlag);
@@ -46,14 +44,12 @@ final class FlagTest extends TestCase
         self::assertEquals($secondExpected, $second->isGreaterThan($first));
     }
 
-    /**
-     * @dataProvider isEqualDataProvider
-     */
+    /** @dataProvider isEqualDataProvider */
     public function testFlagIsEqualThanOther(
         string $firstFlag,
         string $otherFlag,
         bool $firstExpected,
-        bool $secondExpected
+        bool $secondExpected,
     ): void {
         $first  = Flag::build($firstFlag);
         $second = Flag::build($otherFlag);
@@ -62,12 +58,10 @@ final class FlagTest extends TestCase
         self::assertEquals($secondExpected, $second->isEqual($first));
     }
 
-    /**
-     * @dataProvider getterTestDataProvider
-     */
+    /** @dataProvider getterTestDataProvider */
     public function testThatGetterWorks(
         string $literal,
-        string $expected
+        string $expected,
     ): void {
         $flag = Flag::build($literal);
 

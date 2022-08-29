@@ -30,7 +30,7 @@ class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
     public function testThatAdvisoriesAreBuiltFromYamlFiles(): void
     {
         $advisories = (new GetAdvisoriesFromFriendsOfPhp(
-            __DIR__ . '/security-advisories'
+            __DIR__ . '/security-advisories',
         ))();
 
         self::assertEquals([

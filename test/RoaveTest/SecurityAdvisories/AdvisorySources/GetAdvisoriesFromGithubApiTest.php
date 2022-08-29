@@ -104,7 +104,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                     'branches'  => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
                 ]),
             ],
-            Vec\values($advisories())
+            Vec\values($advisories()),
         );
     }
 
@@ -205,9 +205,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider correctResponsesWithInvalidAdvisoryNames
-     */
+    /** @dataProvider correctResponsesWithInvalidAdvisoryNames */
     public function testWillSkipAdvisoriesWithMalformedNames(ResponseInterface ...$responses): void
     {
         $client = $this->createMock(Client::class);
@@ -228,7 +226,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                     'branches'  => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
                 ]),
             ],
-            Vec\values($advisories())
+            Vec\values($advisories()),
         );
     }
 

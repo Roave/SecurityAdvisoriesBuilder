@@ -38,9 +38,7 @@ use function strpos;
  */
 final class BoundaryTest extends TestCase
 {
-    /**
-     * @dataProvider invalidBoundaryStrings
-     */
+    /** @dataProvider invalidBoundaryStrings */
     public function testRejectsInvalidBoundaryStrings(string $boundaryString): void
     {
         $this->expectException(InvariantViolationException::class);
@@ -48,9 +46,7 @@ final class BoundaryTest extends TestCase
         Boundary::fromString($boundaryString);
     }
 
-    /**
-     * @dataProvider validBoundaryStrings
-     */
+    /** @dataProvider validBoundaryStrings */
     public function testValidBoundaryString(string $boundaryString, string $expectedNormalizedString): void
     {
         $boundary = Boundary::fromString($boundaryString);
@@ -59,20 +55,16 @@ final class BoundaryTest extends TestCase
         self::assertEquals($boundary, Boundary::fromString($boundary->getBoundaryString()));
     }
 
-    /**
-     * @dataProvider validBoundaryStrings
-     */
+    /** @dataProvider validBoundaryStrings */
     public function testLimitIncluded(string $boundaryString): void
     {
         self::assertSame(
             strpos($boundaryString, '=') !== false,
-            Boundary::fromString($boundaryString)->limitIncluded()
+            Boundary::fromString($boundaryString)->limitIncluded(),
         );
     }
 
-    /**
-     * @dataProvider validBoundaryStrings
-     */
+    /** @dataProvider validBoundaryStrings */
     public function testGetVersion(string $boundaryString): void
     {
         preg_match(Matchers::BOUNDARY_MATCHER, $boundaryString, $matches);
@@ -84,21 +76,17 @@ final class BoundaryTest extends TestCase
         $boundary = str_replace($matches['boundary'], '', $matches[0]);
 
         self::assertTrue(
-            Version::fromString($boundary)->equalTo(Boundary::fromString($boundaryString)->getVersion())
+            Version::fromString($boundary)->equalTo(Boundary::fromString($boundaryString)->getVersion()),
         );
     }
 
-    /**
-     * @dataProvider validBoundaryStrings
-     */
+    /** @dataProvider validBoundaryStrings */
     public function testBoundaryNotAdjacentToItself(string $boundaryString): void
     {
         self::assertFalse(Boundary::fromString($boundaryString)->adjacentTo(Boundary::fromString($boundaryString)));
     }
 
-    /**
-     * @dataProvider adjacentBoundaries
-     */
+    /** @dataProvider adjacentBoundaries */
     public function testAdjacentBoundaries(string $boundary1String, string $boundary2String): void
     {
         $boundary1 = Boundary::fromString($boundary1String);
@@ -108,9 +96,7 @@ final class BoundaryTest extends TestCase
         self::assertTrue($boundary2->adjacentTo($boundary1));
     }
 
-    /**
-     * @dataProvider nonAdjacentBoundaries
-     */
+    /** @dataProvider nonAdjacentBoundaries */
     public function testNonAdjacentBoundaries(string $boundary1String, string $boundary2String): void
     {
         $boundary1 = Boundary::fromString($boundary1String);

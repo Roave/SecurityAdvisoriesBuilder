@@ -24,9 +24,7 @@ use Roave\SecurityAdvisories\Advisory;
 
 final class RuleProviderFactory
 {
-    /**
-     * @psalm-return list<callable(Advisory): Advisory>
-     */
+    /** @psalm-return list<callable(Advisory): Advisory> */
     public function __invoke(): array
     {
         return [

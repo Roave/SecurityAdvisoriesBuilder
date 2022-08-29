@@ -25,9 +25,7 @@ use Roave\SecurityAdvisories\Advisory;
 
 final class GetAdvisoriesAdvisoryRuleDecorator implements GetAdvisories
 {
-    /**
-     * @psalm-param list<callable(Advisory): Advisory> $overwriteRuleProvider
-     */
+    /** @psalm-param list<callable(Advisory): Advisory> $overwriteRuleProvider */
     public function __construct(
         private GetAdvisories $source,
         private array $overwriteRuleProvider,

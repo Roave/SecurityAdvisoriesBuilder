@@ -55,21 +55,14 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
             }
         }';
 
-    private ClientInterface $client;
-
-    private string $token;
-
     public function __construct(
-        ClientInterface $client,
-        string $token
+        private ClientInterface $client,
+        private string $token,
     ) {
         Psl\invariant(
             ! Str\is_empty($token),
-            'Unable to proceed. Please make sure you have GITHUB_TOKEN environment variable set up.'
+            'Unable to proceed. Please make sure you have GITHUB_TOKEN environment variable set up.',
         );
-
-        $this->client = $client;
-        $this->token  = $token;
     }
 
     /**
@@ -93,7 +86,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                     [
                         'reference' => $item['node']['package']['name'],
                         'branches'  => [['versions' => $versions]],
-                    ]
+                    ],
                 );
             } catch (InvalidPackageName) {
                 // Sometimes, github advisories publish CVEs with malformed package names, and that
@@ -164,7 +157,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                 'Content-Type' => 'application/json',
                 'User-Agent' => 'Curl',
             ],
-            $this->queryWithCursor($cursor)
+            $this->queryWithCursor($cursor),
         );
     }
 

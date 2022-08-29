@@ -52,7 +52,7 @@ use const PHP_BINARY;
         static function (int $errorCode, string $message = '', string $file = '', int $line = 0): bool {
             throw new ErrorException($message, 0, $errorCode, $file, $line);
         },
-        E_STRICT | E_NOTICE | E_WARNING
+        E_STRICT | E_NOTICE | E_WARNING,
     );
 
     $token                     = Env\get_var('GITHUB_TOKEN') ?? '';
@@ -93,7 +93,7 @@ use const PHP_BINARY;
         Shell\execute('git', ['clone', $roaveAdvisoriesRepository, $buildDir . '/roave-security-advisories']);
         Shell\execute(
             'cp',
-            ['-r', $buildDir . '/roave-security-advisories', $buildDir . '/roave-security-advisories-original']
+            ['-r', $buildDir . '/roave-security-advisories', $buildDir . '/roave-security-advisories-original'],
         );
     };
 
@@ -149,13 +149,13 @@ use const PHP_BINARY;
             Shell\execute(
                 Type\non_empty_string()->assert(PHP_BINARY),
                 [__DIR__ . '/vendor/bin/composer', 'validate'],
-                Filesystem\get_directory($composerJsonPath)
+                Filesystem\get_directory($composerJsonPath),
             );
         };
 
     $copyGeneratedComposerJson = static function (
         string $sourceComposerJsonPath,
-        string $targetComposerJsonPath
+        string $targetComposerJsonPath,
     ): void {
         Shell\execute('cp', [$sourceComposerJsonPath, $targetComposerJsonPath]);
     };
@@ -167,7 +167,7 @@ use const PHP_BINARY;
             $originalHash     = Shell\execute(
                 'git',
                 ['rev-parse', 'HEAD'],
-                $workingDirectory . '/../security-advisories'
+                $workingDirectory . '/../security-advisories',
             );
             $originalHash     = Str\trim($originalHash);
 
@@ -175,12 +175,12 @@ use const PHP_BINARY;
 
             $message = Str\format(
                 'Committing generated "composer.json" file as per "%s"',
-                (new DateTime('now', new DateTimeZone('UTC')))->format(DateTime::W3C)
+                (new DateTime('now', new DateTimeZone('UTC')))->format(DateTime::W3C),
             );
 
             $message .= "\n" . Str\format(
                 'Original commit: "%s"',
-                'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash
+                'https://github.com/FriendsOfPHP/security-advisories/commit/' . $originalHash,
             );
 
             try {
@@ -213,17 +213,17 @@ use const PHP_BINARY;
             $baseComposerJson,
             $buildConflicts(
                 $buildComponents(
-                    $getAdvisories()
-                )
-            )
-        ) . "\n"
+                    $getAdvisories(),
+                ),
+            ),
+        ) . "\n",
     );
 
     $validateComposerJson(__DIR__ . '/build/composer.json');
 
     $copyGeneratedComposerJson(
         __DIR__ . '/build/composer.json',
-        __DIR__ . '/build/roave-security-advisories/composer.json'
+        __DIR__ . '/build/roave-security-advisories/composer.json',
     );
     $commitComposerJson(__DIR__ . '/build/roave-security-advisories/composer.json');
 })();

@@ -39,16 +39,11 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
 {
     private const ADVISORY_EXTENSION = 'yaml';
 
-    private string $advisoriesPath;
-
-    public function __construct(string $advisoriesPath)
+    public function __construct(private string $advisoriesPath)
     {
-        $this->advisoriesPath = $advisoriesPath;
     }
 
-    /**
-     * @return Generator<Advisory>
-     */
+    /** @return Generator<Advisory> */
     public function __invoke(): Generator
     {
         $advisoryDefinition = Type\shape([
@@ -64,7 +59,7 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
                 $definition = $advisoryDefinition->assert(Yaml::parse(
                     File\read(Type\non_empty_string()
                         ->assert($advisoryFile->getRealPath())),
-                    Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE
+                    Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE,
                 ));
 
                 return Advisory::fromArrayData($definition);
@@ -72,21 +67,19 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
         );
     }
 
-    /**
-     * @return iterable<SplFileInfo>
-     */
+    /** @return iterable<SplFileInfo> */
     private function getAdvisoryFiles(): iterable
     {
         return new CallbackFilterIterator(
             new RecursiveIteratorIterator(
                 $this->skipHiddenFilesAndDirectories(
-                    new RecursiveDirectoryIterator($this->advisoriesPath, FilesystemIterator::SKIP_DOTS)
+                    new RecursiveDirectoryIterator($this->advisoriesPath, FilesystemIterator::SKIP_DOTS),
                 ),
             ),
             static function (SplFileInfo $advisoryFile): bool {
                 return $advisoryFile->isFile()
                     && $advisoryFile->getExtension() === self::ADVISORY_EXTENSION;
-            }
+            },
         );
     }
 
@@ -99,7 +92,7 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
                     Type\instance_of(SplFileInfo::class)
                         ->assert($this->current())
                         ->getFilename(),
-                    '.'
+                    '.',
                 );
             }
         };

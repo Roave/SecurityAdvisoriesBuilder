@@ -90,7 +90,7 @@ final class VersionConstraintSortTest extends TestCase
                     VersionConstraint::fromString($entry[1]),
                     $entry[2],
                 ]
-            )
+            ),
         );
     }
 }

@@ -46,7 +46,7 @@ class GetAdvisoriesFromMultipleSourcesTest extends TestCase
                     'branches' => [['versions' => ['<1']]],
                 ]),
             ],
-            Vec\values($advisories())
+            Vec\values($advisories()),
         );
     }
 

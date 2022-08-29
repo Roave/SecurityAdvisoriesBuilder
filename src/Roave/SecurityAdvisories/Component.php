@@ -28,20 +28,15 @@ use Psl\Vec;
 /** @psalm-immutable */
 final class Component
 {
-    public PackageName $name;
-
     /** @var Advisory[] */
     private array $advisories;
 
-    public function __construct(PackageName $name, Advisory ...$advisories)
+    public function __construct(public PackageName $name, Advisory ...$advisories)
     {
-        $this->name       = $name;
         $this->advisories = $advisories;
     }
 
-    /**
-     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
-     */
+    /** @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130} */
     public function getConflictConstraint(): string
     {
         return Str\join(Vec\filter(Vec\map(
@@ -75,7 +70,7 @@ final class Component
                 static fn (VersionConstraint $carry, VersionConstraint $current) => $carry->canMergeWith($current)
                     ? $carry->mergeWith($current)
                     : $carry,
-                $item
+                $item,
             ),
         );
 

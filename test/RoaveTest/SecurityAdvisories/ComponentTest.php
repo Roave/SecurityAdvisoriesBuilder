@@ -198,7 +198,7 @@ final class ComponentTest extends TestCase
         string $reference,
         array $advisory1Branches,
         array $advisory2Branches,
-        string $expected
+        string $expected,
     ): void {
         $advisory1 = Advisory::fromArrayData([
             'reference' => $reference,

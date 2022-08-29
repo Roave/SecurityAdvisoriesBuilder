@@ -23,14 +23,11 @@ final class Boundary
         ['=', '>'],
     ];
 
-    private Version $version;
-
     /** @var string one of "<", "<=", "=", ">=", ">" */
     private string $limitType;
 
-    private function __construct(Version $version, string $limitType)
+    private function __construct(private Version $version, string $limitType)
     {
-        $this->version   = $version;
         $this->limitType = $limitType;
     }
 

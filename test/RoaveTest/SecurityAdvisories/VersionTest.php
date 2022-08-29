@@ -35,9 +35,7 @@ use Roave\SecurityAdvisories\Version;
  */
 final class VersionTest extends TestCase
 {
-    /**
-     * @dataProvider invalidVersionStringsProvider
-     */
+    /** @dataProvider invalidVersionStringsProvider */
     public function testVersionWillNotAllowInvalidFormats(string $versionString): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -45,22 +43,18 @@ final class VersionTest extends TestCase
         Version::fromString($versionString);
     }
 
-    /**
-     * @dataProvider validVersionStringProvider
-     */
+    /** @dataProvider validVersionStringProvider */
     public function testGetVersionWithValidVersion(string $versionString, string $normalisedExpectation): void
     {
         self::assertSame($normalisedExpectation, Version::fromString($versionString)->getVersion());
     }
 
-    /**
-     * @dataProvider greaterThanComparisonVersionsProvider
-     */
+    /** @dataProvider greaterThanComparisonVersionsProvider */
     public function testGreaterThanVersionWith(
         string $version1String,
         string $version2String,
         bool $v1GreaterThanV2,
-        bool $v2GreaterThanV1
+        bool $v2GreaterThanV1,
     ): void {
         $version1 = Version::fromString($version1String);
         $version2 = Version::fromString($version2String);
@@ -69,14 +63,12 @@ final class VersionTest extends TestCase
         self::assertSame($v2GreaterThanV1, $version2->isGreaterThan($version1));
     }
 
-    /**
-     * @dataProvider greaterOrEqualThanComparisonVersionsProvider
-     */
+    /** @dataProvider greaterOrEqualThanComparisonVersionsProvider */
     public function testGreaterOrEqualThanVersionWith(
         string $version1String,
         string $version2String,
         bool $v1GreaterOrEqualThanV2,
-        bool $v2GreaterOrEqualThanV1
+        bool $v2GreaterOrEqualThanV1,
     ): void {
         $version1 = Version::fromString($version1String);
         $version2 = Version::fromString($version2String);
@@ -85,9 +77,7 @@ final class VersionTest extends TestCase
         self::assertSame($v2GreaterOrEqualThanV1, $version2->isGreaterOrEqualThan($version1));
     }
 
-    /**
-     * @dataProvider equivalentVersionProvider
-     */
+    /** @dataProvider equivalentVersionProvider */
     public function testVersionEquivalence(string $version1String, string $version2String): void
     {
         $version1 = Version::fromString($version1String);
@@ -98,9 +88,7 @@ final class VersionTest extends TestCase
         self::assertTrue($version2->equalTo($version1));
     }
 
-    /**
-     * @dataProvider nonEquivalentVersionProvider
-     */
+    /** @dataProvider nonEquivalentVersionProvider */
     public function testVersionNonEquivalence(string $version1String, string $version2String): void
     {
         $version1 = Version::fromString($version1String);
@@ -111,14 +99,12 @@ final class VersionTest extends TestCase
         self::assertFalse($version2->equalTo($version1));
     }
 
-    /**
-     * @dataProvider stabilitiesToCompare
-     */
+    /** @dataProvider stabilitiesToCompare */
     public function testStabilityIsGreaterThan(
         string $version1String,
         string $version2String,
         bool $version1vs2Expected,
-        bool $version2vs1Expected
+        bool $version2vs1Expected,
     ): void {
         $version1 = Version::fromString($version1String);
         $version2 = Version::fromString($version2String);
@@ -129,7 +115,7 @@ final class VersionTest extends TestCase
 
     private function callIsStabilityGreaterThan(
         Version $version1,
-        Version $version2
+        Version $version2,
     ): bool {
         $method = new ReflectionMethod($version1, 'isStabilityGreaterThan');
 
@@ -138,9 +124,7 @@ final class VersionTest extends TestCase
         return Type\bool()->assert($method->invoke($version1, $version2));
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @return string[][] */
     public function validVersionStringProvider(): array
     {
         return [
@@ -249,7 +233,7 @@ final class VersionTest extends TestCase
                     return $versionData[0] . ' > ' . $versionData[1];
                 },
             ),
-            $versions
+            $versions,
         );
     }
 
@@ -325,13 +309,11 @@ final class VersionTest extends TestCase
                     return $versionData[0] . ' >= ' . $versionData[1];
                 },
             ),
-            $versions
+            $versions,
         );
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @return string[][] */
     public function invalidVersionStringsProvider(): array
     {
         return [
@@ -349,9 +331,7 @@ final class VersionTest extends TestCase
         ];
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @return string[][] */
     public function equivalentVersionProvider(): array
     {
         return [
@@ -366,9 +346,7 @@ final class VersionTest extends TestCase
         ];
     }
 
-    /**
-     * @return string[][]
-     */
+    /** @return string[][] */
     public function nonEquivalentVersionProvider(): array
     {
         return [

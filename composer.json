@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": "^8.1.7",
+        "php": "~8.1.0",
         "ext-json": "*",
         "ext-pcre": "*",
         "azjezz/psl": "^2.0.4",

@@ -20,7 +20,7 @@
         "ext-bcmath": "*",
         "ext-json": "*",
         "ext-pcre": "*",
-        "azjezz/psl": "^2.1.0",
+        "azjezz/psl": "^2.2.0",
         "composer/composer": "^2.4.4",
         "nyholm/psr7": "^1.5.1",
         "ocramius/package-versions": "^2.7.0",

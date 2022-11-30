@@ -83,9 +83,14 @@ final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
         );
     }
 
-    private function skipHiddenFilesAndDirectories(RecursiveIterator $files): RecursiveIterator
+    private function skipHiddenFilesAndDirectories(RecursiveDirectoryIterator $files): RecursiveIterator
     {
-        return new class ($files) extends RecursiveFilterIterator {
+        return new /**
+         * @template TKey
+         * @template TValue
+         * @template-extends RecursiveFilterIterator<TKey, TValue, RecursiveDirectoryIterator>
+         */
+        class ($files) extends RecursiveFilterIterator {
             public function accept(): bool
             {
                 return ! Str\starts_with(

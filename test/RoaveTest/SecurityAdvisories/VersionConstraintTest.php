@@ -485,7 +485,7 @@ final class VersionConstraintTest extends TestCase
             Vec\map(
                 $entries,
                 /**
-                 * @param array{0: non-empty-string, 1: non-empty-string} $entry
+                 * @param array{0: non-empty-string, 1: non-empty-string, ...} $entry
                  *
                  * @return non-empty-string
                  */

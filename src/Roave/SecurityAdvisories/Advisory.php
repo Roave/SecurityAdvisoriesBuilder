@@ -40,8 +40,9 @@ final class Advisory
 
     /**
      * @psalm-param array{
-     *     branches: array<array-key, array{versions: string|array<array-key, string>}>,
-     *     reference: string
+     *     branches: array<array-key, array{versions: string|array<array-key, string>, ...}>,
+     *     reference: string,
+     *     ...
      * } $config
      *
      * @return Advisory
@@ -57,7 +58,7 @@ final class Advisory
             PackageName::fromReferenceName($config['reference']),
             Vec\map(
                 $config['branches'],
-                /** @param array{versions: string|array<array-key, string>} $branchConfig */
+                /** @param array{versions: string|array<array-key, string>, ...} $branchConfig */
                 static fn (array $branchConfig): VersionConstraint => VersionConstraint::fromString(
                     Str\join(Vec\values((array) $branchConfig['versions']), ','),
                 )

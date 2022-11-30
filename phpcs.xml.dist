@@ -18,6 +18,8 @@
         <exclude name="SlevomatCodingStandard.TypeHints.TypeHintDeclaration.IncorrectReturnTypeHint"/>
         <!-- /build-conflict.php declares namespaced functions -->
         <exclude name="PSR1.Files.SideEffects.FoundWithSymbols"/>
+        <!-- many type declarations are too advanced for PHPCS, resulting in "undeclared array types" detected -->
+        <exclude name="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingTraversableTypeHintSpecification"/>
     </rule>
 
     <file>build-conflicts.php</file>

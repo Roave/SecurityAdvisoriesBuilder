@@ -25,6 +25,9 @@ use Psl\Iter;
 use Psl\Str;
 use Psl\Vec;
 
+use function array_map;
+use function array_merge;
+
 /** @psalm-immutable */
 final class Component
 {
@@ -40,9 +43,9 @@ final class Component
     public function getConflictConstraint(): string
     {
         return Str\join(Vec\filter(Vec\map(
-            $this->deDuplicateConstraints(Vec\concat([], ...Vec\map(
-                $this->advisories,
+            $this->deDuplicateConstraints(array_merge([], ...array_map(
                 static fn (Advisory $advisory) => $advisory->getVersionConstraints(),
+                $this->advisories,
             ))),
             static fn (VersionConstraint $versionConstraint) => $versionConstraint->getConstraintString(),
         )), '|');

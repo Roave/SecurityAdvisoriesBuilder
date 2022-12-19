@@ -11,6 +11,8 @@ use Psl\Regex;
 use Psl\Str;
 use Psl\Vec;
 
+use function explode;
+
 /**
  * A simple version constraint - naively assumes that it is only about ranges like ">=1.2.3,<4.5.6"
  *
@@ -39,7 +41,7 @@ final class VersionConstraint
         $instance         = new self();
 
         if (Regex\matches($constraintString, Matchers::CLOSED_RANGE_MATCHER)) {
-            [$left, $right] = Str\split($constraintString, ',');
+            [$left, $right] = explode(',', $constraintString);
 
             $instance->lowerBoundary = Boundary::fromString($left);
             $instance->upperBoundary = Boundary::fromString($right);

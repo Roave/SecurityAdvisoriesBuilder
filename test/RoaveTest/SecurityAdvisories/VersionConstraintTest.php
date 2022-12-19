@@ -640,16 +640,12 @@ final class VersionConstraintTest extends TestCase
     {
         $containsReflection = new ReflectionMethod($versionConstraint, 'contains');
 
-        $containsReflection->setAccessible(true);
-
         return Type\bool()->assert($containsReflection->invoke($versionConstraint, $other));
     }
 
     private function callOverlapsWith(VersionConstraint $versionConstraint, VersionConstraint $other): bool
     {
         $overlapsWithReflection = new ReflectionMethod($versionConstraint, 'overlapsWith');
-
-        $overlapsWithReflection->setAccessible(true);
 
         return Type\bool()->assert($overlapsWithReflection->invoke($versionConstraint, $other));
     }

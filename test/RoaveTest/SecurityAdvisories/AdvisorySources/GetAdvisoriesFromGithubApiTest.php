@@ -61,8 +61,6 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
 
         $overlapsWithReflection = new ReflectionMethod($githubAdvisories, 'queryWithCursor');
 
-        $overlapsWithReflection->setAccessible(true);
-
         $jsonEncodedQuery = Type\string()->assert($overlapsWithReflection->invoke($githubAdvisories, $cursor));
 
         $decodedQuery = Json\typed($jsonEncodedQuery, Type\shape([
@@ -332,7 +330,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         ];
     }
 
-    /** @psalm-return non-empty-list<list<ResponseInterface>> */
+    /** @psalm-return non-empty-list<array{ResponseInterface}> */
     public function responsesWithIncorrectRangesProvider(): array
     {
         $query = <<<'QUERY'

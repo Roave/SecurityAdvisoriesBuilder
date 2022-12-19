@@ -119,8 +119,6 @@ final class VersionTest extends TestCase
     ): bool {
         $method = new ReflectionMethod($version1, 'isStabilityGreaterThan');
 
-        $method->setAccessible(true);
-
         return Type\bool()->assert($method->invoke($version1, $version2));
     }
 

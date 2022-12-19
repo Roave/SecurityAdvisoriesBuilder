@@ -330,7 +330,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
         ];
     }
 
-    /** @psalm-return non-empty-list<list<ResponseInterface>> */
+    /** @psalm-return non-empty-list<array{ResponseInterface}> */
     public function responsesWithIncorrectRangesProvider(): array
     {
         $query = <<<'QUERY'

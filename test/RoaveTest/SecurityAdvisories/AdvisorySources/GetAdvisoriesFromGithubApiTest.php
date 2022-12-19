@@ -61,8 +61,6 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
 
         $overlapsWithReflection = new ReflectionMethod($githubAdvisories, 'queryWithCursor');
 
-        $overlapsWithReflection->setAccessible(true);
-
         $jsonEncodedQuery = Type\string()->assert($overlapsWithReflection->invoke($githubAdvisories, $cursor));
 
         $decodedQuery = Json\typed($jsonEncodedQuery, Type\shape([

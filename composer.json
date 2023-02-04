@@ -21,7 +21,7 @@
         "ext-json": "*",
         "ext-pcre": "*",
         "azjezz/psl": "^2.4.1",
-        "composer/composer": "^2.5.1",
+        "composer/composer": "^2.5.2",
         "nyholm/psr7": "^1.5.1",
         "ocramius/package-versions": "^2.7.0",
         "php-http/curl-client": "^2.2.1",
@@ -32,7 +32,7 @@
     "require-dev": {
         "doctrine/coding-standard": "^11.1.0",
         "php-standard-library/psalm-plugin": "^2.2.1",
-        "phpunit/phpunit": "^9.6.2",
+        "phpunit/phpunit": "^9.6.3",
         "psalm/plugin-phpunit": "^0.18.4",
         "roave/infection-static-analysis-plugin": "^1.28.0",
         "roave/no-leaks": "^1.4.0",

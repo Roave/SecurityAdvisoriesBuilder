@@ -32,7 +32,7 @@
     "require-dev": {
         "doctrine/coding-standard": "^11.1.0",
         "php-standard-library/psalm-plugin": "^2.2.1",
-        "phpunit/phpunit": "^9.6.1",
+        "phpunit/phpunit": "^9.6.2",
         "psalm/plugin-phpunit": "^0.18.4",
         "roave/infection-static-analysis-plugin": "^1.28.0",
         "roave/no-leaks": "^1.4.0",

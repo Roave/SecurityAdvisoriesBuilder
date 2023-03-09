@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": "~8.2.1",
+        "php": "~8.2.3",
         "ext-bcmath": "*",
         "ext-json": "*",
         "ext-pcre": "*",

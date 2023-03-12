@@ -66,6 +66,9 @@ use const PHP_BINARY;
         'description'   => 'Prevents installation of composer packages with known security vulnerabilities: '
             . 'no API, simply require it',
         'license'       => 'MIT',
+        // force install as dev-requirement via special keyword "dev"
+        // see https://getcomposer.org/doc/04-schema.md#keywords
+        'keywords'      => ['dev'],
         'authors'       => [
             [
                 'name'  => 'Marco Pivetta',

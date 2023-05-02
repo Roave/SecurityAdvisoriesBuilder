@@ -22,7 +22,7 @@
         "ext-pcre": "*",
         "azjezz/psl": "^2.5.0",
         "composer/composer": "^2.5.5",
-        "nyholm/psr7": "^1.7.0",
+        "nyholm/psr7": "^1.8.0",
         "ocramius/package-versions": "^2.7.0",
         "php-http/curl-client": "^2.3.0",
         "psr/http-client": "^1.0.2",

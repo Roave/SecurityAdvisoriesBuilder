@@ -27,7 +27,7 @@
         "php-http/curl-client": "^2.3.0",
         "psr/http-client": "^1.0.2",
         "psr/http-message": "^1.1.0",
-        "symfony/yaml": "^6.2.10"
+        "symfony/yaml": "^6.3.0"
     },
     "require-dev": {
         "doctrine/coding-standard": "^11.1.0",

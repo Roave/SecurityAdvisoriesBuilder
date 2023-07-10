@@ -24,28 +24,57 @@ use Roave\SecurityAdvisories\Advisory;
 
 final class RuleProviderFactory
 {
+    private const REPLACEMENTS = [
+        'https://github.com/advisories/GHSA-c9r9-3h38-r7vj has a buggy version name' => [
+            'package' => 'zencart/zencart',
+            'originalConstraint' => '< 1.5.5e',
+            'replacementConstraint' => '<1.5.8', // safe to use, no weird version naming
+        ],
+        'https://github.com/advisories/GHSA-38f9-4vhq-9cr8 has a buggy version name' => [
+            'package' => 'zencart/zencart',
+            'originalConstraint' => '<= 1.5.7b',
+            'replacementConstraint' => '<1.5.8', // safe to use, no weird version naming
+        ],
+        'https://github.com/advisories/GHSA-wxxx-2x6v-979f has a buggy version name' => [
+            'package' => 'zencart/zencart',
+            'originalConstraint' => '< 1.5.7a',
+            'replacementConstraint' => '<1.5.8', // safe to use, no weird version naming
+        ],
+        'too aggressive `laminas/laminas-form` affected range in published advisory' => [
+            'package' => 'laminas/laminas-form',
+            'originalConstraint' => '<2.17.2',
+            'replacementConstraint' => '<2.17.1',
+        ],
+    ];
+
     /** @psalm-return list<callable(Advisory): Advisory> */
     public function __invoke(): array
     {
         return [
             static function (Advisory $advisory): Advisory {
-                $packageName      = 'laminas/laminas-form';
-                $targetConstraint = '<2.17.2';
+                foreach (
+                    self::REPLACEMENTS as [
+                        'package' => $packageName,
+                        'originalConstraint' => $targetConstraint,
+                        'replacementConstraint' => $replacementConstraint,
+                    ]
+                ) {
+                    if (
+                        $advisory->package->packageName !== $packageName
+                        || $advisory->getConstraint() !== $targetConstraint
+                    ) {
+                        continue;
+                    }
 
-                if ($advisory->package->packageName !== $packageName) {
-                    return $advisory;
+                    return Advisory::fromArrayData([
+                        'reference' => $packageName,
+                        'branches' => [
+                            ['versions' => [$replacementConstraint]],
+                        ],
+                    ]);
                 }
 
-                if ($advisory->getConstraint() !== $targetConstraint) {
-                    return $advisory;
-                }
-
-                return Advisory::fromArrayData([
-                    'reference' => $packageName,
-                    'branches'  => [
-                        ['versions' => ['<2.17.1']],
-                    ],
-                ]);
+                return $advisory;
             },
         ];
     }

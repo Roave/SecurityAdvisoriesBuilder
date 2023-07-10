@@ -104,7 +104,7 @@ use const PHP_BINARY;
         /**
          * @param iterable<Advisory> $advisories
          *
-         * @return Component[]
+         * @return array<non-empty-lowercase-string, Component>
          */
         static function (iterable $advisories): array {
             $indexedAdvisories = [];

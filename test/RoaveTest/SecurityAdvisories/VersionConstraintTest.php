@@ -653,11 +653,10 @@ final class VersionConstraintTest extends TestCase
     private function callMergeWithOverlapping(
         VersionConstraint $versionConstraint,
         VersionConstraint $other,
-    ): VersionConstraint {
+    ): void {
         $mergeWithOverlappingReflection = new ReflectionMethod($versionConstraint, 'mergeWithOverlapping');
 
-        return Type\instance_of(VersionConstraint::class)
-            ->assert($mergeWithOverlappingReflection->invoke($versionConstraint, $other));
+        $mergeWithOverlappingReflection->invoke($versionConstraint, $other);
     }
 
     /** @psalm-return non-empty-list<array{non-empty-string}> */

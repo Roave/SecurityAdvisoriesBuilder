@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "327759d8e230b3e6ee3918090a720bfa",
+    "content-hash": "a100650f04ee778f465bd1c3c9876233",
     "packages": [
         {
             "name": "azjezz/psl",
@@ -4798,29 +4798,29 @@
         },
         {
             "name": "roave/no-leaks",
-            "version": "1.4.0",
+            "version": "1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/no-leaks.git",
-                "reference": "639a4b97905cce5a38ead709ff5b3a19e47518e0"
+                "reference": "ede929f4c02231f862fce798ad8dc7c7b2703094"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/no-leaks/zipball/639a4b97905cce5a38ead709ff5b3a19e47518e0",
-                "reference": "639a4b97905cce5a38ead709ff5b3a19e47518e0",
+                "url": "https://api.github.com/repos/Roave/no-leaks/zipball/ede929f4c02231f862fce798ad8dc7c7b2703094",
+                "reference": "ede929f4c02231f862fce798ad8dc7c7b2703094",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "php": "~8.1.0 || ~8.2.0",
-                "phpunit/phpunit": "^9.5.26"
+                "phpunit/phpunit": "^9.6.10"
             },
             "require-dev": {
-                "doctrine/coding-standard": "^10.0.0",
-                "psalm/plugin-phpunit": "^0.17.0",
-                "roave/infection-static-analysis-plugin": "^1.25.0",
-                "squizlabs/php_codesniffer": "^3.7.1",
-                "vimeo/psalm": "^4.29.0"
+                "doctrine/coding-standard": "^12.0.0",
+                "psalm/plugin-phpunit": "^0.18.4",
+                "roave/infection-static-analysis-plugin": "^1.32.0",
+                "squizlabs/php_codesniffer": "^3.7.2",
+                "vimeo/psalm": "^5.14.1"
             },
             "bin": [
                 "bin/roave-no-leaks"
@@ -4837,9 +4837,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Roave/no-leaks/issues",
-                "source": "https://github.com/Roave/no-leaks/tree/1.4.0"
+                "source": "https://github.com/Roave/no-leaks/tree/1.5.0"
             },
-            "time": "2022-10-31T21:22:45+00:00"
+            "time": "2023-08-02T18:55:03+00:00"
         },
         {
             "name": "sanmai/later",

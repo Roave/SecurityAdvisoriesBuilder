@@ -60,6 +60,7 @@ final class Component
      */
     private function deDuplicateConstraints(array $constraints): array
     {
+        // @TODO to be replaced by a single array_reduce
         $inputConstraintsByName = [];
 
         foreach ($constraints as $constraint) {
@@ -70,9 +71,7 @@ final class Component
             $inputConstraintsByName,
             static fn (VersionConstraint $item) => Iter\reduce(
                 $constraints,
-                static fn (VersionConstraint $carry, VersionConstraint $current) => $carry->canMergeWith($current)
-                    ? $carry->mergeWith($current)
-                    : $carry,
+                static fn (VersionConstraint $carry, VersionConstraint $current) => $carry->mergeWith($current),
                 $item,
             ),
         );
@@ -86,7 +85,7 @@ final class Component
         // All constraints were merged together
         if (Iter\count($inputConstraintsByName) === Iter\count($mergedConstraintsByName)) {
             /** @psalm-suppress ImpureFunctionCall this sorting function is operating in a pure manner */
-            return Vec\sort($merged, Closure::fromCallable(new VersionConstraintSort()));
+            return Vec\sort($merged, Closure::fromCallable([VersionConstraint::class, 'sort']));
         }
 
         // Recursion: one de-duplication did not suffice

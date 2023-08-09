@@ -75,6 +75,7 @@ final class Advisory
     /** @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130} */
     public function getConstraint(): string|null
     {
+        // @TODO possibly worth merging the constraints here
         // @TODO may want to escape this
         return Str\join(
             Vec\map(
@@ -94,6 +95,6 @@ final class Advisory
     private function sortVersionConstraints(array $versionConstraints): array
     {
         /** @psalm-suppress ImpureFunctionCall this sorting function is operating in a pure manner */
-        return Vec\sort($versionConstraints, Closure::fromCallable(new VersionConstraintSort()));
+        return Vec\sort($versionConstraints, Closure::fromCallable([VersionConstraint::class, 'sort']));
     }
 }

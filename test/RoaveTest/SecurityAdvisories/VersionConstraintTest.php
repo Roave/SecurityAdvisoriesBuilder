@@ -35,77 +35,10 @@ use Roave\SecurityAdvisories\VersionConstraint;
  */
 final class VersionConstraintTest extends TestCase
 {
-    /** @dataProvider closedRangesProvider */
-    public function testFromRange(string $stringConstraint): void
-    {
-        $constraint = VersionConstraint::fromString($stringConstraint);
-        $lowerBound = $constraint->getLowerBound();
-        $upperBound = $constraint->getUpperBound();
-
-        self::assertNotNull($lowerBound);
-        self::assertNotNull($upperBound);
-
-        $constraintAsString = $constraint->getConstraintString();
-
-//        self::assertSame(Regex\matches($stringConstraint, '/>=/'), $constraint->isLowerBoundIncluded());
-//        self::assertSame(Regex\matches($stringConstraint, '/<=/'), $constraint->isUpperBoundIncluded());
-//        self::assertStringMatchesFormat('%A' . $lowerBound->getVersion() . '%A', $constraintAsString);
-//        self::assertStringMatchesFormat('%A' . $upperBound->getVersion() . '%A', $constraintAsString);
-    }
-
     /** @dataProvider normalizableRangesProvider */
     public function testOperatesOnNormalizedRanges(string $originalRange, string $normalizedRange): void
     {
-        // @TODO this will not match, due to how versions are normalized separately
         self::assertSame($normalizedRange, VersionConstraint::fromString($originalRange)->getConstraintString());
-    }
-
-    /** @dataProvider leftOpenEndedRangeProvider */
-    public function testLeftOpenEndedRange(string $leftOpenedRange): void
-    {
-        $constraint = VersionConstraint::fromString($leftOpenedRange);
-
-        //self::assertSame($leftOpenedRange, $constraint->getConstraintString());
-        self::assertNull($constraint->getLowerBound());
-        self::assertInstanceOf(Version::class, $constraint->getUpperBound());
-        self::assertFalse($constraint->isLowerBoundIncluded());
-        self::assertFalse($constraint->isUpperBoundIncluded());
-    }
-
-    public function testRightOpenEndedRange(): void
-    {
-        $constraint = VersionConstraint::fromString('>1');
-
-        self::assertTrue($constraint->isSimpleRangeString());
-        self::assertSame('>1', $constraint->getConstraintString());
-        self::assertNull($constraint->getUpperBound());
-        self::assertInstanceOf(Version::class, $constraint->getLowerBound());
-        self::assertFalse($constraint->isLowerBoundIncluded());
-        self::assertFalse($constraint->isUpperBoundIncluded());
-    }
-
-    public function testLeftOpenEndedRangeBoundIncluded(): void
-    {
-        $constraint = VersionConstraint::fromString('<=1');
-
-        self::assertTrue($constraint->isSimpleRangeString());
-        self::assertSame('<=1', $constraint->getConstraintString());
-        self::assertNull($constraint->getLowerBound());
-        self::assertInstanceOf(Version::class, $constraint->getUpperBound());
-        self::assertFalse($constraint->isLowerBoundIncluded());
-        self::assertTrue($constraint->isUpperBoundIncluded());
-    }
-
-    public function testRightOpenEndedRangeBoundIncluded(): void
-    {
-        $constraint = VersionConstraint::fromString('>=1');
-
-        self::assertTrue($constraint->isSimpleRangeString());
-        self::assertSame('>=1', $constraint->getConstraintString());
-        self::assertNull($constraint->getUpperBound());
-        self::assertInstanceOf(Version::class, $constraint->getLowerBound());
-        self::assertTrue($constraint->isLowerBoundIncluded());
-        self::assertFalse($constraint->isUpperBoundIncluded());
     }
 
     /** @dataProvider complexRangesProvider */
@@ -116,79 +49,18 @@ final class VersionConstraintTest extends TestCase
         self::assertSame($expectedNormalization, $constraint->getConstraintString());
     }
 
-    public function testContainsWithMatchingRanges(): void
-    {
-        $constraint1 = VersionConstraint::fromString('>1.2.3,<4.5.6');
-        $constraint2 = VersionConstraint::fromString('>1.2.4,<4.5.5');
-
-        self::assertTrue($this->callContains($constraint1, $constraint2));
-        self::assertFalse($this->callContains($constraint2, $constraint1));
-
-        $constraint1 = VersionConstraint::fromString('>1.2.3-alpha.1,<4.5.6-beta.3.4');
-        $constraint2 = VersionConstraint::fromString('>1.2.4-rc,<4.5.5-patch.5.6.7.8');
-
-        self::assertTrue($this->callContains($constraint1, $constraint2));
-        self::assertFalse($this->callContains($constraint2, $constraint1));
-    }
-
-    public function testCannotCompareComplexRanges(): void
-    {
-        $constraint1 = VersionConstraint::fromString('1|2');
-        $constraint2 = VersionConstraint::fromString('1|2|3');
-
-        self::assertFalse($this->callContains($constraint1, $constraint2));
-        self::assertFalse($this->callContains($constraint2, $constraint1));
-    }
-
-    /** @dataProvider rangesForComparisonProvider */
-    public function testContainsWithRanges(
-        string $constraintString1,
-        string $constraintString2,
-        bool $constraint1ContainsConstraint2,
-        bool $constraint2ContainsConstraint1,
-    ): void {
-        $constraint1 = VersionConstraint::fromString($constraintString1);
-        $constraint2 = VersionConstraint::fromString($constraintString2);
-
-        self::assertSame($constraint1ContainsConstraint2, $this->callContains($constraint1, $constraint2));
-        self::assertSame($constraint2ContainsConstraint1, $this->callContains($constraint2, $constraint1));
-    }
-
-    /** @dataProvider mergeableRangesProvider */
-    public function testCanMergeWithContainedRanges(
-        string $constraintString1,
-        string $constraintString2,
-        bool $constraint1ContainsConstraint2,
-        bool $constraint2ContainsConstraint1,
-    ): void {
-        $constraint1 = VersionConstraint::fromString($constraintString1);
-        $constraint2 = VersionConstraint::fromString($constraintString2);
-        $expectation = $constraint2ContainsConstraint1 || $constraint1ContainsConstraint2;
-
-        self::assertSame($expectation, $constraint1->canMergeWith($constraint2));
-    }
-
     /** @dataProvider mergeableRangesProvider */
     public function testMergeWithMergeableRanges(
         string $constraintString1,
         string $constraintString2,
-        bool $constraint1ContainsConstraint2,
-        bool $constraint2ContainsConstraint1,
     ): void {
         $constraint1 = VersionConstraint::fromString($constraintString1);
         $constraint2 = VersionConstraint::fromString($constraintString2);
-
-        if (! ($constraint2ContainsConstraint1 || $constraint1ContainsConstraint2)) {
-            $this->expectException(LogicException::class);
-        }
 
         $merged1 = $constraint1->mergeWith($constraint2);
         $merged2 = $constraint2->mergeWith($constraint1);
 
         self::assertEquals($merged1, $merged2);
-
-        self::assertTrue($this->callContains($merged1, $constraint1));
-        self::assertTrue($this->callContains($merged1, $constraint2));
     }
 
     /** @dataProvider strictlyOverlappingRangesProvider */
@@ -206,44 +78,17 @@ final class VersionConstraintTest extends TestCase
     {
         $constraint1 = VersionConstraint::fromString($range1);
         $constraint2 = VersionConstraint::fromString($range2);
+        
+        $merged1 = $constraint1->mergeWith($constraint2)->getConstraintString();
+        $merged2 = $constraint2->mergeWith($constraint1)->getConstraintString();
+        
+        $normalized1 = $constraint1->getConstraintString();
+        $normalized2 = $constraint1->getConstraintString();
 
-        self::assertFalse($this->callOverlapsWith($constraint1, $constraint2));
-        self::assertFalse($this->callOverlapsWith($constraint2, $constraint1));
-
-        $this->expectException(LogicException::class);
-
-        $this->callMergeWithOverlapping($constraint1, $constraint2);
-    }
-
-    /** @psalm-return array<non-empty-string, array{non-empty-string}> */
-    public function closedRangesProvider(): array
-    {
-        $samples = [
-            ['>1.2.3,<4.5.6'],
-            ['>=1.2.3,<4.5.6'],
-            ['>1.2.3,<=4.5.6'],
-            ['>=1.2.3,<=4.5.6'],
-            ['>  1.2.3  , < 4.5.6'],
-            ['>=  1.2.3  , <4.5.6'],
-            ['> 1.2.3 , <=4.5.6'],
-            ['>=1.2.3, <=4.5.6'],
-            ['>11.22.33,<44.55.66'],
-            ['>1,<2'],
-            ['>1-stable.1.2,<1-rc.1.2'],
-        ];
-
-        return Dict\associate(
-            Vec\map(
-                $samples,
-                /**
-                 * @param array{0: non-empty-string} $sample
-                 *
-                 * @return non-empty-string
-                 */
-                static fn ($sample) => $sample[0]
-            ),
-            $samples,
-        );
+        self::assertNotEquals($normalized1, $merged1);
+        self::assertNotEquals($normalized1, $merged2);
+        self::assertNotEquals($normalized2, $merged1);
+        self::assertNotEquals($normalized2, $merged2);
     }
 
     /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string}> */
@@ -267,125 +112,13 @@ final class VersionConstraintTest extends TestCase
             Vec\map(
                 $samples,
                 /**
-                 * @param array{0: non-empty-string} $sample
+                 * @param array{non-empty-string, non-empty-string} $sample
                  *
                  * @return non-empty-string
                  */
-                static fn ($sample) => $sample[0]
+                static fn (array $sample) => $sample[0]
             ),
             $samples,
-        );
-    }
-
-    /**
-     * @return string[][]|bool[][]
-     *
-     *  - range1
-     *  - range2
-     *  - range1 contains range2
-     *  - range2 contains range1
-     * @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string, bool, bool}>
-     */
-    public function rangesForComparisonProvider(): array
-    {
-        $entries = [
-            ['>1,<2', '>1,<2', true, true],
-            ['>1,<2', '>1.1,<2', true, false],
-            ['>1,<2', '>3,<4', false, false],
-            ['>1.1,<2.1', '>1.2,<2', true, false],
-            ['>100,<200', '>1.0.0,<2.0.0', false, false],
-            ['>1.10,<2', '>1.100,<2', true, false],
-            ['>1,<2.10', '>1,<2.100', false, true],
-            ['>1.0,<2', '>1,<2', true, true],
-            ['>1,<2.0', '>1,<2', true, true],
-            ['>1.0.0,<2', '>1,<2', true, true],
-            ['>1,<2.0.0', '>1,<2', true, true],
-            ['>=1,<2', '>1,<2', true, false],
-            ['>=1,<2', '>=1,<2', true, true],
-            ['>1,<=2', '>1,<2', true, false],
-            ['>1,<=2', '>1,<=2', true, true],
-            ['>=1,<=2', '>1,<2', true, false],
-            ['>=1,<=2', '>=1,<=2', true, true],
-            ['>=1,<=2', '>=1,<=2', true, true],
-            ['>=1', '>=1,<2', true, false],
-            ['>=1', '>1,<2', true, false],
-            ['>1', '>=1,<2', false, false], // this is mergeable, but not updated in tests
-            ['<=2', '>1,<=2', true, false],
-            ['<=2', '>1,<2', true, false],
-            ['<2', '>1,<=2', false, false], // this is mergeable, but not updated in tests
-            ['<2', '<2', true, true],
-            ['<=2', '<=2', true, true],
-            ['<=2', '<2', true, false],
-            ['<=2', '<1', true, false],
-            ['<=2', '<3', false, true],
-            ['>2', '>2', true, true],
-            ['>=2', '>=2', true, true],
-            ['>=2', '>2', true, false],
-            ['>=2', '>1', false, true],
-            ['>=2', '>3', true, false],
-            // stabilities
-            ['>1-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
-            ['>1-beta.1,<2-beta.1', '>1.1-beta.1,<2-beta.1', true, false],
-            ['>1-beta.1,<2-beta.1', '>3-beta.1,<4-beta.1', false, false],
-            ['>1.1-beta.1,<2.1-beta.1', '>1.2-beta.1,<2-beta.1', true, false],
-            ['>100-beta.1,<200-beta.1', '>1.0.0-beta.1,<2.0.0-beta.1', false, false],
-            ['>1.10-beta.1,<2-beta.1', '>1.100-beta.1,<2-beta.1', true, false],
-            ['>1-beta.1,<2.10-beta.1', '>1-beta.1,<2.100-beta.1', false, true],
-            ['>1.0-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
-            ['>1-beta.1,<2.0-beta.1', '>1-beta.1,<2-beta.1', true, true],
-            ['>1.0.0-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, true],
-            ['>1-beta.1,<2.0.0-beta.1', '>1-beta.1,<2-beta.1', true, true],
-            ['>=1-beta.1,<2-beta.1', '>1-beta.1,<2-beta.1', true, false],
-            ['>=1-beta.1,<2-beta.1', '>=1-beta.1,<2-beta.1', true, true],
-            ['>1-beta.1,<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
-            ['>1-beta.1,<=2-beta.1', '>1-beta.1,<=2-beta.1', true, true],
-            ['>=1-beta.1,<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
-            ['>=1-beta.1,<=2-beta.1', '>=1-beta.1,<=2-beta.1', true, true],
-            ['>=1-beta.1,<=2-beta.1', '>=1-beta.1,<=2-beta.1', true, true],
-            ['>=1-beta.1', '>=1-beta.1,<2-beta.1', true, false],
-            ['>=1-beta.1', '>1-beta.1,<2-beta.1', true, false],
-            ['>1-beta.1', '>=1-beta.1,<2-beta.1', false, false],
-            ['<=2-beta.1', '>1-beta.1,<=2-beta.1', true, false],
-            ['<=2-beta.1', '>1-beta.1,<2-beta.1', true, false],
-            ['<2-beta.1', '>1-beta.1,<=2-beta.1', false, false],
-            ['<2-beta.1', '<2-beta.1', true, true],
-            ['<=2-beta.1', '<=2-beta.1', true, true],
-            ['<=2-beta.1', '<2-beta.1', true, false],
-            ['<=2-beta.1', '<1-beta.1', true, false],
-            ['<=2-beta.1', '<3-beta.1', false, true],
-            ['>2-beta.1', '>2-beta.1', true, true],
-            ['>=2-beta.1', '>=2-beta.1', true, true],
-            ['>=2-beta.1', '>2-beta.1', true, false],
-            ['>=2-beta.1', '>1-beta.1', false, true],
-            ['>=2-beta.1', '>3-beta.1', true, false],
-            ['>1-stable', '<1-stable', false, false],
-            ['>1-stable', '>1-stable', true, true],
-
-            ['>1-stable.1.2.3', '>1-stable.1.2.3.4', true, false],
-            ['>=1-stable.1.2.3', '>=1-stable.1.2.3.4', true, false],
-            ['>1-stable.1.2.3', '<1-stable.1.2.3.4', false, false],
-            ['>=1-stable.1.2.3', '<=1-stable.1.2.3.4', false, false],
-            ['<1-stable.1.2.3', '<1-stable.1.2.3.4', false, true],
-            ['<=1-stable.1.2.3', '<=1-stable.1.2.3.4', false, true],
-            ['<1-stable.1.2.3', '>1-stable.1.2.3.4', false, false],
-            ['<=1-stable.1.2.3', '>=1-stable.1.2.3.4', false, false],
-
-        ];
-
-        return Dict\associate(
-            Vec\map(
-                $entries,
-                /**
-                 * @param array{0: non-empty-string, 1: non-empty-string, 2: bool, 3: bool} $entry
-                 *
-                 * @return non-empty-string
-                 */
-                static function (array $entry) {
-                    return '(∀ x ∈ (' . $entry[0] . '): x ∈ (' . $entry[1] . ')) = '
-                        . Type\literal_scalar($entry[2])->toString();
-                },
-            ),
-            $entries,
         );
     }
 
@@ -498,6 +231,9 @@ final class VersionConstraintTest extends TestCase
     public function normalizableRangesProvider(): array
     {
         $samples = [
+            ['<1', '<1'],
+            ['<1-alpha', '<1.0.0.0-alpha'],
+            ['<1-alpha.1.2', '<1.0.0.0-alpha1.2'],
             ['>1.0,<2.0', '>1,<2'],
             ['>=1.0,<2.0', '>=1,<2'],
             ['>1.0,<=2.0', '>1,<=2'],
@@ -514,6 +250,19 @@ final class VersionConstraintTest extends TestCase
             ['>=1.0', '>=1'],
             ['<1.0', '<1'],
             ['<=1.0', '<=1'],
+            ['>1.2.3,<4.5.6', '>1.2.3,<4.5.6'],
+            ['>=1.2.3,<4.5.6', '>=1.2.3,<4.5.6'],
+            ['>1.2.3,<=4.5.6', '>1.2.3,<=4.5.6'],
+            ['>=1.2.3,<=4.5.6', '>=1.2.3,<=4.5.6'],
+            ['>  1.2.3  , < 4.5.6', '>1.2.3,<4.5.6'],
+            ['>=  1.2.3  , <4.5.6', '>=1.2.3,<4.5.6'],
+            ['> 1.2.3 , <=4.5.6', '>1.2.3,<=4.5.6'],
+            ['>=1.2.3, <=4.5.6', '>=1.2.3,<=4.5.6'],
+            ['>11.22.33,<44.55.66', '>11.22.33,<44.55.66'],
+            ['>1,<2', '>1,<2'],
+            ['>1-stable.1.2,<1.1-rc.1.2', '>1,<1.1.0.0-RC1.2-dev'],
+            ['>1,<4|>2,<3', '>1,<4'],
+            ['>1-alpha.1,<4-alpha.1|>2-beta.1,<3-beta.1', '>1.0.0.0-alpha1,<4.0.0.0-alpha1'],
         ];
 
         return Dict\associate(
@@ -598,7 +347,6 @@ final class VersionConstraintTest extends TestCase
             ['>2,<3', '>1,<=2'],
             ['>=2,<3', '>1,<2'],
             ['>=2,<3', '>1,<=2'],
-            ['>1,<4', '>2,<3'], // note: containing, not overlapping.
             ['>2-alpha.1,<3-alpha.1', '>3-alpha.1,<4-alpha.1'],
             ['>2-alpha.1,<3-alpha.1', '>=3-alpha.1,<4-alpha.1'],
             ['>2-alpha.1,<=3-alpha.1', '>3-alpha.1,<4-alpha.1'],
@@ -608,7 +356,6 @@ final class VersionConstraintTest extends TestCase
             ['>=2-alpha.1,<3-alpha.1', '>1-alpha.1,<2-alpha.1'],
             ['>=2-alpha.1,<3-alpha.1', '>1-alpha.1,<=2-alpha.1'],
             ['>1-p, <1-a', '>1-b,<1-rc'],
-            ['>1-alpha.1,<4-alpha.1', '>2-beta.1,<3-beta.1'], // note: containing, not overlapping.
         ];
 
         return Dict\associate(
@@ -625,39 +372,6 @@ final class VersionConstraintTest extends TestCase
             ),
             $entries,
         );
-    }
-
-    private function callContains(VersionConstraint $versionConstraint, VersionConstraint $other): bool
-    {
-        $containsReflection = new ReflectionMethod($versionConstraint, 'contains');
-
-        return Type\bool()->assert($containsReflection->invoke($versionConstraint, $other));
-    }
-
-    private function callOverlapsWith(VersionConstraint $versionConstraint, VersionConstraint $other): bool
-    {
-        $overlapsWithReflection = new ReflectionMethod($versionConstraint, 'overlapsWith');
-
-        return Type\bool()->assert($overlapsWithReflection->invoke($versionConstraint, $other));
-    }
-
-    private function callMergeWithOverlapping(
-        VersionConstraint $versionConstraint,
-        VersionConstraint $other,
-    ): void {
-        $mergeWithOverlappingReflection = new ReflectionMethod($versionConstraint, 'mergeWithOverlapping');
-
-        $mergeWithOverlappingReflection->invoke($versionConstraint, $other);
-    }
-
-    /** @psalm-return non-empty-list<array{non-empty-string}> */
-    public function leftOpenEndedRangeProvider(): array
-    {
-        return [
-            ['<1'],
-            ['<1-alpha'],
-            ['<1-alpha.1.2'],
-        ];
     }
 
     /** @dataProvider invalidRangesProvider */
@@ -681,5 +395,67 @@ final class VersionConstraintTest extends TestCase
             ['foo'],
             ['bar'],
         ];
+    }
+
+    /** @dataProvider comparedConstraints */
+    public function testSorting(VersionConstraint $a, VersionConstraint $b, int $result): void
+    {
+        self::assertSame($result, VersionConstraint::sort($a, $b));
+        self::assertSame($result * -1, VersionConstraint::sort($b, $a));
+    }
+
+    /** @psalm-return array<non-empty-string, array{VersionConstraint, VersionConstraint, -1|0|1}> */
+    public function comparedConstraints(): array
+    {
+        $constraints = [
+            ['>=1', '>=1', 0],
+            ['<=1', '<=1', 0],
+            ['>=1,<=2', '>=1,<=2', 0],
+            ['>=1,<=2', '>=3,<=4', -1],
+            ['>=3,<=4', '>=1,<=2', 1],
+            ['<=1', '<=2', -1],
+            ['<=2', '<=1', 1],
+            ['>=1', '<=1', -1],
+            ['>=1-dev', '<=1', -1],
+            ['>=2', '<=1', 1],
+            ['>=1', '<=2', -1],
+            ['>=1,<=2,>3', '>=1,<=2', 0],
+            ['>=1-alpha.9', '>=1-alpha.9', 0],
+            ['<=1-alpha.9', '<=1-alpha.9', 0],
+            ['>=1-alpha.9,<=2-alpha.9', '>=1-alpha.9,<=2-alpha.9', 0],
+            ['>=1-alpha.9,<=2-alpha.9', '>=3-alpha.9,<=4-alpha.9', -1],
+            ['>=3-alpha.9,<=4-alpha.9', '>=1-alpha.9,<=2-alpha.9', 1],
+            ['<=1-alpha.9', '<=2-alpha.9', -1],
+            ['<=2-alpha.9', '<=1-alpha.9', 1],
+            ['>=1-alpha.9', '<=1-alpha.9', 0],
+            ['>=2-alpha.9', '<=1-alpha.9', 1],
+            ['>=1-alpha.9', '<=2-alpha.9', -1],
+            ['>=1-alpha.9,<=2-alpha.9,>3-alpha.9', '>=1-alpha.9,<=2-alpha.9', 0],
+        ];
+
+        return Dict\associate(
+            Vec\map(
+                $constraints,
+                /**
+                 * @param array{0: non-empty-string, 1: non-empty-string, 2: -1|0|1} $entry
+                 *
+                 * @returns non-empty-string
+                 */
+                static fn (array $entry): string => '"' . $entry[0] . '" <=> "' . $entry[1] . '"'
+            ),
+            Vec\map(
+                $constraints,
+                /**
+                 * @param array{0: non-empty-string, 1: non-empty-string, 2: -1|0|1} $entry
+                 *
+                 * @returns array{0: VersionConstraint, 1: VersionConstraint, 2: -1|0|1}
+                 */
+                static fn (array $entry): array => [
+                    VersionConstraint::fromString($entry[0]),
+                    VersionConstraint::fromString($entry[1]),
+                    $entry[2],
+                ]
+            ),
+        );
     }
 }

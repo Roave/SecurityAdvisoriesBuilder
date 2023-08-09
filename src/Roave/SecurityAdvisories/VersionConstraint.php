@@ -4,12 +4,19 @@ declare(strict_types=1);
 
 namespace Roave\SecurityAdvisories;
 
+use Composer\Semver\Constraint\Constraint;
+use Composer\Semver\Constraint\ConstraintInterface;
+use Composer\Semver\Constraint\MatchNoneConstraint;
+use Composer\Semver\Constraint\MultiConstraint;
+use Composer\Semver\Intervals;
+use Composer\Semver\VersionParser;
 use InvalidArgumentException;
 use LogicException;
 use Psl;
 use Psl\Regex;
 use Psl\Str;
 use Psl\Vec;
+use Roave\SecurityAdvisories\Exception\InvalidVersionConstraint;
 
 use function explode;
 
@@ -26,7 +33,7 @@ final class VersionConstraint
 
     private Boundary|null $upperBoundary = null;
 
-    private function __construct()
+    private function __construct(private readonly ConstraintInterface $constraint)
     {
     }
 
@@ -37,8 +44,10 @@ final class VersionConstraint
      */
     public static function fromString(string $versionConstraint): self
     {
+        $parser = new VersionParser();
+        
         $constraintString = $versionConstraint;
-        $instance         = new self();
+        $instance         = new self(Intervals::compactConstraint($parser->parseConstraints($versionConstraint)));
 
         if (Regex\matches($constraintString, Matchers::CLOSED_RANGE_MATCHER)) {
             [$left, $right] = explode(',', $constraintString);
@@ -60,6 +69,15 @@ final class VersionConstraint
 
             return $instance;
         }
+        
+//        $parser = new VersionParser();
+//        
+//        $r = $parser->parseConstraints($constraintString);
+//        
+//        error_log(var_export($r, true));
+//
+//        throw InvalidVersionConstraint::from($constraintString);
+        // @TODO log here??
 
         $instance->constraintString = $constraintString;
 
@@ -73,6 +91,7 @@ final class VersionConstraint
 
     public function getConstraintString(): string
     {
+        return self::constraintToString($this->constraint);
         /** @psalm-suppress ImpureFunctionCall - conditional purity */
         return $this->constraintString ?? Str\join(
             Vec\map(
@@ -83,6 +102,32 @@ final class VersionConstraint
             ),
             ',',
         );
+    }
+    
+    private static function constraintToString(ConstraintInterface $constraint): string
+    {
+        if ($constraint instanceof MultiConstraint) {
+            return implode(
+                $constraint->isConjunctive()
+                    ? ','
+                    : '|',
+                array_map([self::class, 'constraintToString'], $constraint->getConstraints())
+            );
+        }
+
+        if ($constraint instanceof Constraint) {
+            return Psl\Regex\replace( 
+                Psl\Regex\replace($constraint->__toString(), '/((\.0)+(-dev)?)+$/', ''),
+                '/(\s)+/',
+                ''
+            );
+        }
+
+        if ($constraint instanceof MatchNoneConstraint) {
+            return '<999,>999'; // impossible constraint - same as a "match nothing"
+        }
+
+        return $constraint->__toString();
     }
 
     public function isLowerBoundIncluded(): bool
@@ -228,7 +273,11 @@ final class VersionConstraint
             ));
         }
 
-        $instance = new self();
+        $instance = new self(Intervals::compactConstraint(
+            self::fromString(
+                self::constraintToString($this->constraint) . '|' . self::constraintToString($other->constraint)
+            )->constraint
+        ));
 
         if ($this->strictlyContainsOtherBound($other->lowerBoundary)) {
             $instance->lowerBoundary = $this->lowerBoundary;
@@ -245,7 +294,11 @@ final class VersionConstraint
 
     private function mergeAdjacent(VersionConstraint $other): self
     {
-        $instance = new self();
+        $instance = new self(Intervals::compactConstraint(
+            self::fromString(
+                self::constraintToString($this->constraint) . '|' . self::constraintToString($other->constraint)
+            )->constraint
+        ));
 
         if (
             $this->upperBoundary !== null

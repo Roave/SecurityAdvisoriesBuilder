@@ -70,13 +70,16 @@ final class AdvisoryTest extends TestCase
         ]);
 
         self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
-        self::assertSame('>=1-beta.3.4,<1.1-alpha.4.5|>=2-rc.5,<2.1-rc.6', $advisory->getConstraint());
+        self::assertSame(
+            '>=1.0.0.0-beta3.4,<1.1.0.0-alpha4.5|>=2.0.0.0-RC5-dev,<2.1.0.0-RC6-dev',
+            $advisory->getConstraint()
+        );
 
         $constraints = $advisory->getVersionConstraints();
 
         self::assertCount(2, $constraints);
-        self::assertSame('>=1-beta.3.4,<1.1-alpha.4.5', $constraints[0]->getConstraintString());
-        self::assertSame('>=2-rc.5,<2.1-rc.6', $constraints[1]->getConstraintString());
+        self::assertSame('>=1.0.0.0-beta3.4,<1.1.0.0-alpha4.5', $constraints[0]->getConstraintString());
+        self::assertSame('>=2.0.0.0-RC5-dev,<2.1.0.0-RC6-dev', $constraints[1]->getConstraintString());
     }
 
     public function testFromArrayWithStringVersion(): void
@@ -110,13 +113,13 @@ final class AdvisoryTest extends TestCase
         ]);
 
         self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
-        self::assertSame('<1.1-beta.0.1|<2.1-beta.0.1', $advisory->getConstraint());
+        self::assertSame('<1.1.0.0-beta0.1|<2.1.0.0-beta0.1', $advisory->getConstraint());
 
         $constraints = $advisory->getVersionConstraints();
 
         self::assertCount(2, $constraints);
-        self::assertSame('<1.1-beta.0.1', $constraints[0]->getConstraintString());
-        self::assertSame('<2.1-beta.0.1', $constraints[1]->getConstraintString());
+        self::assertSame('<1.1.0.0-beta0.1', $constraints[0]->getConstraintString());
+        self::assertSame('<2.1.0.0-beta0.1', $constraints[1]->getConstraintString());
     }
 
     public function testFromArrayWithWrongPackageName(): void
@@ -179,17 +182,17 @@ final class AdvisoryTest extends TestCase
             [
                 ['<1.1-patch.5.6.0'],
                 ['>=2.0', '<2.1'],
-                '<1.1-patch.5.6|>=2,<2.1',
+                '<1.1.0.0-patch5.6|>=2,<2.1',
             ],
             [
                 ['<1.1'],
                 ['>=2.0-rc', '<2.1-beta.1'],
-                '<1.1|>=2-rc,<2.1-beta.1',
+                '<1.1|>=2.0.0.0-RC-dev,<2.1.0.0-beta1',
             ],
             [
                 ['>=2.0-a', '<2.1-a'],
                 ['>=2.0-b', '<2.1-b'],
-                '>=2-a,<2.1-a|>=2-b,<2.1-b',
+                '>=2.0.0.0-alpha,<2.1.0.0-alpha|>=2.0.0.0-beta,<2.1.0.0-beta',
             ],
         ];
     }

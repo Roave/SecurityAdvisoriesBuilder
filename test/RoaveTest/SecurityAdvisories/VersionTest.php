@@ -320,6 +320,7 @@ final class VersionTest extends TestCase
             ['1.1.1.alpha.7'],
             ['1.1.1alpha.7'],
             ['1.1.1_alpha.7'],
+            ['3.1.33-dev-4'],
             ['alpha'],
             ['beta'],
             ['1.2.a'],

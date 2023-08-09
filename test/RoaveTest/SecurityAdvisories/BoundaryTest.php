@@ -143,6 +143,8 @@ final class BoundaryTest extends TestCase
             ['>=beta'],
             ['>= beta'],
             ['>=.1'],
+            ['<3.1.33-dev-4'],
+            ['< 3.1.33-dev-4'],
         ];
     }
 

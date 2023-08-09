@@ -111,6 +111,7 @@ use const STDOUT;
          * @return array<non-empty-lowercase-string, Component>
          */
         static function (iterable $advisories): array {
+            /** @var array<non-empty-lowercase-string, non-empty-list<Advisory>> $indexedAdvisories */
             $indexedAdvisories = [];
             $components        = [];
 
@@ -119,7 +120,7 @@ use const STDOUT;
             }
 
             foreach ($indexedAdvisories as $componentName => $componentAdvisories) {
-                $components[$componentName] = new Component($componentAdvisories[0]->package, ...$componentAdvisories);
+                $components[$componentName] = new Component($componentAdvisories[0]->package, $componentAdvisories);
             }
 
             return $components;

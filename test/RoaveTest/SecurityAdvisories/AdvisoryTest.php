@@ -93,7 +93,7 @@ final class AdvisoryTest extends TestCase
         ]);
 
         self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
-        self::assertSame('<1.1|<2.1', $advisory->getConstraint());
+        self::assertSame('<2.1', $advisory->getConstraint());
 
         $constraints = $advisory->getVersionConstraints();
 
@@ -109,17 +109,19 @@ final class AdvisoryTest extends TestCase
             'branches'  => [
                 '1.0.x' => ['versions' => '<1.1-beta.0.1'],
                 '2.0.x' => ['versions' => '<2.1-beta.0.1'],
+                '1.1.x' => ['versions' => '<1.1-beta.0.1'],
             ],
         ]);
 
         self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
-        self::assertSame('<1.1.0.0-beta0.1|<2.1.0.0-beta0.1', $advisory->getConstraint());
+        self::assertSame('<2.1.0.0-beta0.1', $advisory->getConstraint());
 
         $constraints = $advisory->getVersionConstraints();
 
-        self::assertCount(2, $constraints);
+        self::assertCount(3, $constraints);
         self::assertSame('<1.1.0.0-beta0.1', $constraints[0]->getConstraintString());
-        self::assertSame('<2.1.0.0-beta0.1', $constraints[1]->getConstraintString());
+        self::assertSame('<1.1.0.0-beta0.1', $constraints[1]->getConstraintString());
+        self::assertSame('<2.1.0.0-beta0.1', $constraints[2]->getConstraintString());
     }
 
     public function testFromArrayWithWrongPackageName(): void
@@ -192,7 +194,7 @@ final class AdvisoryTest extends TestCase
             [
                 ['>=2.0-a', '<2.1-a'],
                 ['>=2.0-b', '<2.1-b'],
-                '>=2.0.0.0-alpha,<2.1.0.0-alpha|>=2.0.0.0-beta,<2.1.0.0-beta',
+                '>=2.0.0.0-alpha,<2.1.0.0-beta',
             ],
         ];
     }

@@ -21,74 +21,39 @@ declare(strict_types=1);
 namespace Roave\SecurityAdvisories;
 
 use Closure;
-use Psl\Iter;
-use Psl\Str;
 use Psl\Vec;
 
 use function array_map;
 use function array_merge;
+use function array_reduce;
+use function Psl\Type\instance_of;
+use function Psl\Type\non_empty_vec;
 
 /** @psalm-immutable */
 final class Component
 {
-    /** @var Advisory[] */
-    private array $advisories;
-
-    public function __construct(public PackageName $name, Advisory ...$advisories)
+    /** @param non-empty-list<Advisory> $advisories */
+    public function __construct(public readonly PackageName $name, private readonly array $advisories)
     {
-        $this->advisories = $advisories;
     }
 
     /** @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130} */
     public function getConflictConstraint(): string
     {
-        return Str\join(Vec\filter(Vec\map(
-            $this->deDuplicateConstraints(array_merge([], ...array_map(
-                static fn (Advisory $advisory) => $advisory->getVersionConstraints(),
-                $this->advisories,
-            ))),
-            static fn (VersionConstraint $versionConstraint) => $versionConstraint->getConstraintString(),
-        )), '|');
-    }
-
-    /**
-     * @param list<VersionConstraint> $constraints
-     *
-     * @return list<VersionConstraint>
-     *
-     * @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130}
-     */
-    private function deDuplicateConstraints(array $constraints): array
-    {
-        // @TODO to be replaced by a single array_reduce
-        $inputConstraintsByName = [];
-
-        foreach ($constraints as $constraint) {
-            $inputConstraintsByName[$constraint->getConstraintString()] = $constraint;
-        }
-
-        $merged = Vec\map(
-            $inputConstraintsByName,
-            static fn (VersionConstraint $item) => Iter\reduce(
-                $constraints,
-                static fn (VersionConstraint $carry, VersionConstraint $current) => $carry->mergeWith($current),
-                $item,
-            ),
+        /** @psalm-suppress ImpureFunctionCall,ImpureMethodCall sorting + assertions are operating in a pure manner */
+        $advisories = Vec\sort(
+            non_empty_vec(instance_of(VersionConstraint::class))
+                ->assert(array_merge([], ...array_map(
+                    static fn (Advisory $advisory): array => $advisory->getVersionConstraints(),
+                    $this->advisories,
+                ))),
+            Closure::fromCallable([VersionConstraint::class, 'sort']),
         );
 
-        $mergedConstraintsByName = [];
-
-        foreach ($merged as $constraint) {
-            $mergedConstraintsByName[$constraint->getConstraintString()] = $constraint;
-        }
-
-        // All constraints were merged together
-        if (Iter\count($inputConstraintsByName) === Iter\count($mergedConstraintsByName)) {
-            /** @psalm-suppress ImpureFunctionCall this sorting function is operating in a pure manner */
-            return Vec\sort($merged, Closure::fromCallable([VersionConstraint::class, 'sort']));
-        }
-
-        // Recursion: one de-duplication did not suffice
-        return $this->deDuplicateConstraints($merged);
+        return array_reduce(
+            Vec\slice($advisories, 1),
+            static fn (VersionConstraint $a, VersionConstraint $b): VersionConstraint => $a->mergeWith($b),
+            $advisories[0],
+        )->getConstraintString();
     }
 }

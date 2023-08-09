@@ -303,8 +303,8 @@ final class VersionConstraintTest extends TestCase
             ['>1-alpha.1,<2-alpha.1', '<=1-alpha.1', '<2.0.0.0-alpha1'],
             ['>=1-alpha.1,<2-alpha.1', '<1-alpha.1', '<2.0.0.0-alpha1'],
             // test overlapping of flags
-            //['>1-a,<1-rc', '>1-b,<1-stable', '>1-a,<1-stable'],
-            ['>1-a,<1-rc', '>1-b,<1-stable', '>1.0.0.0-alpha,<1.0.0.0-RC-dev'], // @TODO potential bug
+            ['>1-a,<1-rc', '>1-b,<1-stable', '>1.0.0.0-alpha,<1.0.0.0-RC-dev'],
+            ['>1-a,<1-rc', '>1-b,<1-stable', '>1.0.0.0-alpha,<1.0.0.0-RC-dev'],
             ['>1-b,<1-stable', '>1-rc,<1', '<999,>999'],
             ['>1-rc,<1', '>1-stable,<1-patch', '>1,<1.0.0.0-patch'],
             ['>1-a,<1-rc', '>1-beta,<1-rc', '>1.0.0.0-alpha,<1.0.0.0-RC-dev'],

@@ -24,6 +24,8 @@ use DateTime;
 use DateTimeZone;
 use ErrorException;
 use Http\Client\Curl\Client;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Psl\Dict;
 use Psl\Env;
 use Psl\File;
@@ -44,6 +46,7 @@ use const E_NOTICE;
 use const E_STRICT;
 use const E_WARNING;
 use const PHP_BINARY;
+use const STDOUT;
 
 (static function (): void {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -60,6 +63,7 @@ use const PHP_BINARY;
     $advisoriesRepository      = 'https://' . $authentication . 'github.com/FriendsOfPHP/security-advisories.git';
     $roaveAdvisoriesRepository = 'https://' . $authentication . 'github.com/Roave/SecurityAdvisories.git';
     $buildDir                  = __DIR__ . '/build';
+    $logger                    = new Logger('roave/security-advisories-builder', [new StreamHandler(STDOUT)]);
     $baseComposerJson          = [
         'name'          => 'roave/security-advisories',
         'type'          => 'metapackage',
@@ -204,6 +208,7 @@ use const PHP_BINARY;
             (new GetAdvisoriesFromGithubApi(
                 new Client(),
                 $token,
+                $logger,
             )),
         )),
         (new RuleProviderFactory())(),

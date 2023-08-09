@@ -31,6 +31,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\Exception\InvalidPackageName;
+use UnexpectedValueException;
 
 final class GetAdvisoriesFromGithubApi implements GetAdvisories
 {
@@ -88,9 +89,11 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                         'branches'  => [['versions' => $versions]],
                     ],
                 );
-            } catch (InvalidPackageName) {
+            } catch (InvalidPackageName | UnexpectedValueException) {
                 // Sometimes, github advisories publish CVEs with malformed package names, and that
                 // should not crash our entire pipeline.
+                // Also, the advisories in the github database have terrible version quality: skipping
+                // all advisories for which we couldn't parse a version.
                 // @TODO add logging here?
                 continue;
             }

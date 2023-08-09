@@ -26,6 +26,8 @@ use Psl\Type;
 use Psl\Vec;
 use Roave\SecurityAdvisories\Exception\InvalidPackageName;
 
+use function array_reduce;
+
 /** @psalm-immutable */
 final class Advisory
 {
@@ -75,14 +77,15 @@ final class Advisory
     /** @psalm-suppress ImpureFunctionCall - conditional purity {@see https://github.com/azjezz/psl/issues/130} */
     public function getConstraint(): string|null
     {
-        // @TODO may want to escape this
-        return Str\join(
-            Vec\map(
-                $this->branchConstraints,
-                static fn (VersionConstraint $versionConstraint) => $versionConstraint->getConstraintString()
-            ),
-            '|',
-        ) ?: null;
+        if ($this->branchConstraints === []) {
+            return null;
+        }
+
+        return array_reduce(
+            Vec\slice($this->branchConstraints, 1),
+            static fn (VersionConstraint $a, VersionConstraint $b): VersionConstraint => $a->mergeWith($b),
+            $this->branchConstraints[0],
+        )->getConstraintString();
     }
 
     /**
@@ -94,6 +97,6 @@ final class Advisory
     private function sortVersionConstraints(array $versionConstraints): array
     {
         /** @psalm-suppress ImpureFunctionCall this sorting function is operating in a pure manner */
-        return Vec\sort($versionConstraints, Closure::fromCallable(new VersionConstraintSort()));
+        return Vec\sort($versionConstraints, Closure::fromCallable([VersionConstraint::class, 'sort']));
     }
 }

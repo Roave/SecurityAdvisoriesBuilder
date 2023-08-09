@@ -57,10 +57,10 @@ final class ComponentTest extends TestCase
             ],
         ]);
 
-        $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2);
+        $component = new Component(PackageName::fromName('foo/bar'), [$advisory1, $advisory2]);
 
-        $expected = '>=1-beta.1.1,<1.1-beta.1.1|>=2-beta.1.1,<2.1-beta.1.1|' .
-            '>=3-beta.1.1,<3.1-beta.1.1|>=4-beta.1.1,<4.1-beta.1.1';
+        $expected = '>=1.0.0.0-beta1.1,<1.1.0.0-beta1.1|>=2.0.0.0-beta1.1,<2.1.0.0-beta1.1|'
+            . '>=3.0.0.0-beta1.1,<3.1.0.0-beta1.1|>=4.0.0.0-beta1.1,<4.1.0.0-beta1.1';
         self::assertSame($expected, $component->getConflictConstraint());
         self::assertEquals(PackageName::fromName('foo/bar'), $component->name);
     }
@@ -105,7 +105,7 @@ final class ComponentTest extends TestCase
             ],
         ]);
 
-        $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2, $advisory3);
+        $component = new Component(PackageName::fromName('foo/bar'), [$advisory1, $advisory2, $advisory3]);
 
         self::assertSame('>=1,<1.1|>=2,<2.1|>=3,<3.1', $component->getConflictConstraint());
         self::assertEquals(PackageName::fromName('foo/bar'), $component->name);
@@ -151,9 +151,9 @@ final class ComponentTest extends TestCase
             ],
         ]);
 
-        $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2, $advisory3);
+        $component = new Component(PackageName::fromName('foo/bar'), [$advisory1, $advisory2, $advisory3]);
 
-        $expected = '>=1-p.1.1.2,<1.1-b.1.1.3|>=2-rc,<2.1-p|>=3-stable.5,<3.1';
+        $expected = '>=1.0.0.0-patch1.1.2,<1.1.0.0-beta1.1.3|>=2.0.0.0-RC-dev,<2.1.0.0-patch|>=3,<3.1';
         self::assertSame($expected, $component->getConflictConstraint());
         self::assertEquals(PackageName::fromName('foo/bar'), $component->name);
     }
@@ -181,7 +181,7 @@ final class ComponentTest extends TestCase
             ],
         ]);
 
-        $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2, $advisory3);
+        $component = new Component(PackageName::fromName('foo/bar'), [$advisory1, $advisory2, $advisory3]);
 
         self::assertSame('>=3,<=3.0.11|>=3.1,<3.1.11', $component->getConflictConstraint());
     }
@@ -210,7 +210,7 @@ final class ComponentTest extends TestCase
             'branches' => $advisory2Branches,
         ]);
 
-        $component = new Component(PackageName::fromName('foo/bar'), $advisory1, $advisory2, $advisory3);
+        $component = new Component(PackageName::fromName('foo/bar'), [$advisory1, $advisory2, $advisory3]);
 
         self::assertSame($expected, $component->getConflictConstraint());
     }
@@ -241,7 +241,7 @@ final class ComponentTest extends TestCase
                         'versions' => ['>=2.1.0-beta1', '<2.1.3'],
                     ],
                 ],
-                '>=2.1-beta.1,<2.1.3',
+                '>=2.1,<2.1.3',
             ],
             'Case: magento/product-community-edition' => [
                 'composer://thelia/thelia',
@@ -267,7 +267,7 @@ final class ComponentTest extends TestCase
                         'versions' => ['>=2.3', '<2.3.2-p2'],
                     ],
                 ],
-                '>=2,<2.2.10|>=2.3,<2.3.2-p.2',
+                '>=2,<2.2.10|>=2.3,<2.3.2.0-patch2',
             ],
         ];
     }

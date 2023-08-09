@@ -32,20 +32,23 @@ use Psl\Vec;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use ReflectionException;
 use ReflectionMethod;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
+use UnexpectedValueException;
 
 class GetAdvisoriesFromGithubApiTest extends TestCase
 {
     public function testGithubAdvisoriesHasToken(): void
     {
         $client = $this->createMock(Client::class);
+        $logger = $this->createMock(LoggerInterface::class);
 
         $this->expectException(InvariantViolationException::class);
 
-        new GetAdvisoriesFromGithubApi($client, '');
+        new GetAdvisoriesFromGithubApi($client, '', $logger);
     }
 
     /**
@@ -56,8 +59,9 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     public function testGithubAdvisoriesQueryMethod(string $cursor, bool $shouldContainCursor): void
     {
         $client = $this->createMock(Client::class);
+        $logger = $this->createMock(LoggerInterface::class);
 
-        $githubAdvisories = new GetAdvisoriesFromGithubApi($client, 'token');
+        $githubAdvisories = new GetAdvisoriesFromGithubApi($client, 'token', $logger);
 
         $overlapsWithReflection = new ReflectionMethod($githubAdvisories, 'queryWithCursor');
 
@@ -84,25 +88,107 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     public function testGithubAdvisoriesIsAbleToProduceAdvisories(array $apiResponses): void
     {
         $client = $this->createMock(Client::class);
+        $logger = $this->createMock(LoggerInterface::class);
 
+        $logger->expects(self::exactly(2))
+            ->method('debug')
+            ->with('Sending request for cursor {cursor}', self::arrayHasKey('cursor'));
         $client->expects(self::exactly(2))
             ->method('sendRequest')
             ->willReturnOnConsecutiveCalls(...$apiResponses);
 
-        $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token');
+        $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token', $logger);
 
         self::assertEquals(
             [
                 Advisory::fromArrayData([
                     'reference' => 'enshrined/svg-sanitize',
-                    'branches'  => [['versions' => ['> 0.12.0, < 0.12.1 ']]],
+                    'branches' => [['versions' => ['> 0.12.0, < 0.12.1 ']]],
                 ]),
                 Advisory::fromArrayData([
                     'reference' => 'foo/bar',
-                    'branches'  => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
+                    'branches' => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
                 ]),
             ],
             Vec\values($advisories()),
+        );
+    }
+
+    public function testWillLogErrorsForAdvisoriesWithInvalidVersionConstraints(): void
+    {
+        $client = $this->createMock(Client::class);
+        $logger = $this->createMock(LoggerInterface::class);
+
+        $client->method('sendRequest')
+            ->willReturn(new Response(
+                200,
+                [],
+                <<<'JSON'
+                {
+                  "data": {
+                    "securityVulnerabilities": {
+                      "edges": [
+                        {
+                          "cursor": "Y3Vyc29yOnYyOpK5MjAyMC0wMS0wOFQxOToxNTowNiswMjowMM0LdA==",
+                          "node": {
+                            "vulnerableVersionRange": "haha",
+                            "package": {
+                              "name": "enshrined/svg-sanitize"
+                            },
+                            "advisory": {
+                              "ghsaId": "aaa-bbb",
+                              "withdrawnAt": null
+                            }
+                          }
+                        },
+                        {
+                          "cursor": "Y3Vyc29yOnYyOpK5MjAyMC0wMS0wOFQxOToxNTowNiswMjowMM0LdB==",
+                          "node": {
+                            "vulnerableVersionRange": "> 1.2.3, < 4.5.6 ",
+                            "package": {
+                              "name": "foo/bar"
+                            },
+                            "advisory": {
+                              "ghsaId": "ccc-ddd",
+                              "withdrawnAt": null
+                            }
+                          }
+                        }
+                      ],
+                      "pageInfo": {
+                        "hasNextPage": false,
+                        "endCursor": null
+                      }
+                    }
+                  }
+                }
+        JSON,
+            ));
+
+        $logger->expects(self::once())
+            ->method('error')
+            ->with(
+                'Error while processing advisory {githubSecurityAdvisoryId} for {package}: {exception}',
+                self::callback(static function (array $context): bool {
+                    self::assertArrayHasKey('githubSecurityAdvisoryId', $context);
+                    self::assertArrayHasKey('package', $context);
+                    self::assertArrayHasKey('exception', $context);
+                    self::assertSame('aaa-bbb', $context['githubSecurityAdvisoryId']);
+                    self::assertSame('enshrined/svg-sanitize', $context['package']);
+                    self::assertInstanceOf(UnexpectedValueException::class, $context['exception']);
+
+                    return true;
+                }),
+            );
+
+        self::assertEquals(
+            [
+                Advisory::fromArrayData([
+                    'reference' => 'foo/bar',
+                    'branches' => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
+                ]),
+            ],
+            Vec\values((new GetAdvisoriesFromGithubApi($client, 'some_token', $logger))()),
         );
     }
 
@@ -114,6 +200,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     public function testGithubAdvisoriesFailToCompileGettingIncorrectRanges(ResponseInterface $response): void
     {
         $client = $this->createMock(Client::class);
+        $logger = $this->createMock(LoggerInterface::class);
 
         $client->expects(self::once())
             ->method('sendRequest')
@@ -130,7 +217,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
 
         $this->expectException(AssertException::class);
 
-        (new GetAdvisoriesFromGithubApi($client, 'some_token'))()->next();
+        (new GetAdvisoriesFromGithubApi($client, 'some_token', $logger))()->next();
     }
 
     /** @psalm-return non-empty-list<array{list<ResponseInterface>}> */
@@ -150,6 +237,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "enshrined/svg-sanitize"
                             },
                             "advisory": {
+                              "ghsaId": "aaa-bbb",
                               "withdrawnAt": null
                             }
                           }
@@ -162,6 +250,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "foo/bar"
                             },
                             "advisory": {
+                              "ghsaId": "aaa-bbb",
                               "withdrawnAt": null
                             }
                           }
@@ -207,21 +296,22 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     public function testWillSkipAdvisoriesWithMalformedNames(ResponseInterface ...$responses): void
     {
         $client = $this->createMock(Client::class);
+        $logger = $this->createMock(LoggerInterface::class);
 
         $client->method('sendRequest')
             ->willReturnOnConsecutiveCalls(...$responses);
 
-        $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token');
+        $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token', $logger);
 
         self::assertEquals(
             [
                 Advisory::fromArrayData([
                     'reference' => 'aa/bb',
-                    'branches'  => [['versions' => ['> 0.12.0, < 0.12.1 ']]],
+                    'branches' => [['versions' => ['> 0.12.0, < 0.12.1 ']]],
                 ]),
                 Advisory::fromArrayData([
                     'reference' => 'dd/ee',
-                    'branches'  => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
+                    'branches' => [['versions' => ['> 1.2.3, < 4.5.6 ']]],
                 ]),
             ],
             Vec\values($advisories()),
@@ -236,11 +326,12 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     public function testWillSkipWithdrawnAdvisories(ResponseInterface ...$responses): void
     {
         $client = $this->createMock(Client::class);
+        $logger = $this->createMock(LoggerInterface::class);
 
         $client->method('sendRequest')
             ->willReturnOnConsecutiveCalls(...$responses);
 
-        $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token');
+        $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token', $logger);
 
         self::assertEquals([
             Advisory::fromArrayData([
@@ -267,6 +358,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "aa/bb"
                             },
                             "advisory": {
+                              "ghsaId": "aaa-bbb",
                               "withdrawnAt": null
                             }
                           }
@@ -279,6 +371,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "cc"
                             },
                             "advisory": {
+                              "ghsaId": "aaa-bbb",
                               "withdrawnAt": null
                             }
                           }
@@ -291,6 +384,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "dd/ee"
                             },
                             "advisory": {
+                              "ghsaId": "aaa-bbb",
                               "withdrawnAt": null
                             }
                           }
@@ -346,6 +440,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "enshrined/svg-sanitize"
                             },
                             "advisory": {
+                              "ghsaId": "aaa-bbb",
                               "withdrawnAt": null
                             }
                           }
@@ -392,6 +487,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "aa/bb"
                             },
                             "advisory": {
+                              "ghsaId": "aaa-bbb",
                               "withdrawnAt": "2021-11-17T15:54:51Z"
                             }
                           }
@@ -404,6 +500,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
                               "name": "aa/bb"
                             },
                             "advisory": {
+                              "ghsaId": "aaa-bbb",
                               "withdrawnAt": null
                             }
                           }

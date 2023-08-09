@@ -29,8 +29,11 @@ use Psl\Type;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
+use Psr\Log\LoggerInterface;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\Exception\InvalidPackageName;
+use SensitiveParameter;
+use UnexpectedValueException;
 
 final class GetAdvisoriesFromGithubApi implements GetAdvisories
 {
@@ -44,6 +47,7 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                             name
                         }
                         advisory {
+                            ghsaId
                             withdrawnAt
                         }
                     }
@@ -56,8 +60,10 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
         }';
 
     public function __construct(
-        private ClientInterface $client,
-        private string $token,
+        private readonly ClientInterface $client,
+        #[SensitiveParameter]
+        private readonly string $token,
+        private readonly LoggerInterface $logger,
     ) {
         Psl\invariant(
             ! Str\is_empty($token),
@@ -88,11 +94,15 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                         'branches'  => [['versions' => $versions]],
                     ],
                 );
-            } catch (InvalidPackageName) {
-                // Sometimes, github advisories publish CVEs with malformed package names, and that
-                // should not crash our entire pipeline.
-                // @TODO add logging here?
-                continue;
+            } catch (InvalidPackageName | UnexpectedValueException $error) {
+                $this->logger->error(
+                    'Error while processing advisory {githubSecurityAdvisoryId} for {package}: {exception}',
+                    [
+                        'githubSecurityAdvisoryId' => $item['node']['advisory']['ghsaId'],
+                        'package'                  => $item['node']['package']['name'],
+                        'exception'                => $error,
+                    ],
+                );
             }
         }
     }
@@ -108,7 +118,10 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
      *      node: array{
      *          vulnerableVersionRange: string,
      *          package: array{name: string},
-     *          advisory: array{withdrawnAt: string|null}
+     *          advisory: array{
+     *              withdrawnAt: string|null,
+     *              ghsaId: non-empty-string,
+     *          }
      *      }
      * }>
      *
@@ -119,6 +132,8 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
         $cursor = '';
 
         do {
+            $this->logger->debug('Sending request for cursor {cursor}', ['cursor' => $cursor]);
+
             $response        = $this->client->sendRequest($this->getRequest($cursor));
             $data            = Json\typed($response->getBody()->__toString(), Type\shape([
                 'data' => Type\shape([
@@ -128,7 +143,10 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
                             'node' => Type\shape([
                                 'vulnerableVersionRange' => Type\string(),
                                 'package' => Type\shape(['name' => Type\string()]),
-                                'advisory' => Type\shape(['withdrawnAt' => Type\nullable(Type\string())]),
+                                'advisory' => Type\shape([
+                                    'withdrawnAt' => Type\nullable(Type\string()),
+                                    'ghsaId'      => Type\non_empty_string(),
+                                ]),
                             ]),
                         ])),
                         'pageInfo' => Type\shape([

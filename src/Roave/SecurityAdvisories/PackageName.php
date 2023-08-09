@@ -19,7 +19,7 @@ use Roave\SecurityAdvisories\Exception\InvalidPackageName;
 final class PackageName
 {
     /** @param non-empty-lowercase-string $packageName */
-    private function __construct(public string $packageName)
+    private function __construct(public readonly string $packageName)
     {
     }
 

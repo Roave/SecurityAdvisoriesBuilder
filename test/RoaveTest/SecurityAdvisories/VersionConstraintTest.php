@@ -20,19 +20,13 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
-use LogicException;
 use PHPUnit\Framework\TestCase;
 use Psl\Dict;
-use Psl\Regex;
-use Psl\Type;
 use Psl\Vec;
-use ReflectionMethod;
-use Roave\SecurityAdvisories\Version;
 use Roave\SecurityAdvisories\VersionConstraint;
+use UnexpectedValueException;
 
-/**
- * @covers \Roave\SecurityAdvisories\VersionConstraint
- */
+/** @covers \Roave\SecurityAdvisories\VersionConstraint */
 final class VersionConstraintTest extends TestCase
 {
     /** @dataProvider normalizableRangesProvider */
@@ -78,10 +72,10 @@ final class VersionConstraintTest extends TestCase
     {
         $constraint1 = VersionConstraint::fromString($range1);
         $constraint2 = VersionConstraint::fromString($range2);
-        
+
         $merged1 = $constraint1->mergeWith($constraint2)->getConstraintString();
         $merged2 = $constraint2->mergeWith($constraint1)->getConstraintString();
-        
+
         $normalized1 = $constraint1->getConstraintString();
         $normalized2 = $constraint1->getConstraintString();
 
@@ -310,7 +304,7 @@ final class VersionConstraintTest extends TestCase
             ['>=1-alpha.1,<2-alpha.1', '<1-alpha.1', '<2.0.0.0-alpha1'],
             // test overlapping of flags
             //['>1-a,<1-rc', '>1-b,<1-stable', '>1-a,<1-stable'],
-            ['>1-a,<1-rc', '>1-b,<1-stable', '>1.0.0.0-alpha,<1.0.0.0-RC-dev'], // @TODO potential bug 
+            ['>1-a,<1-rc', '>1-b,<1-stable', '>1.0.0.0-alpha,<1.0.0.0-RC-dev'], // @TODO potential bug
             ['>1-b,<1-stable', '>1-rc,<1', '<999,>999'],
             ['>1-rc,<1', '>1-stable,<1-patch', '>1,<1.0.0.0-patch'],
             ['>1-a,<1-rc', '>1-beta,<1-rc', '>1.0.0.0-alpha,<1.0.0.0-RC-dev'],
@@ -377,7 +371,7 @@ final class VersionConstraintTest extends TestCase
     /** @dataProvider invalidRangesProvider */
     public function testWillRejectInvalidVersionConstraints(string $constraint): void
     {
-        $this->expectException(\UnexpectedValueException::class);
+        $this->expectException(UnexpectedValueException::class);
 
         VersionConstraint::fromString($constraint);
     }

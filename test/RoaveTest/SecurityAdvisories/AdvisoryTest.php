@@ -72,7 +72,7 @@ final class AdvisoryTest extends TestCase
         self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
         self::assertSame(
             '>=1.0.0.0-beta3.4,<1.1.0.0-alpha4.5|>=2.0.0.0-RC5-dev,<2.1.0.0-RC6-dev',
-            $advisory->getConstraint()
+            $advisory->getConstraint(),
         );
 
         $constraints = $advisory->getVersionConstraints();

@@ -15,7 +15,8 @@ use InvalidArgumentException;
 use LogicException;
 use Psl;
 
-use function explode;
+use function array_map;
+use function implode;
 
 /**
  * A simple version constraint - naively assumes that it is only about ranges like ">=1.2.3,<4.5.6"
@@ -52,20 +53,20 @@ final class VersionConstraint
                 $constraint->isConjunctive()
                     ? ','
                     : '|',
-                array_map([self::class, 'constraintToString'], $constraint->getConstraints())
+                array_map([self::class, 'constraintToString'], $constraint->getConstraints()),
             );
         }
 
         if ($constraint instanceof Constraint) {
             /** @psalm-suppress ImpureMethodCall besides memoization, {@see ConstraintInterface::__toString} is pure */
-            return Psl\Regex\replace( 
-                Psl\Regex\replace( 
+            return Psl\Regex\replace(
+                Psl\Regex\replace(
                     $constraint->__toString(),
                     '/((\.0)+(-dev)?)+$/',
-                    ''
+                    '',
                 ),
                 '/(\s)+/',
-                ''
+                '',
             );
         }
 
@@ -81,26 +82,26 @@ final class VersionConstraint
     public function mergeWith(self $other): self
     {
         return self::fromString(
-            self::constraintToString($this->constraint) 
+            self::constraintToString($this->constraint)
             . '|'
-            . self::constraintToString($other->constraint)
+            . self::constraintToString($other->constraint),
         );
     }
-    
-    /** 
+
+    /**
      * @return -1|0|1
      *
-     * @pure 
+     * @pure
      */
     public static function sort(self $a, self $b): int
     {
         return self::sortConstraint($a->constraint, $b->constraint);
     }
 
-    /** 
+    /**
      * @return -1|0|1
      *
-     * @pure 
+     * @pure
      */
     private static function sortConstraint(ConstraintInterface $a, ConstraintInterface $b): int
     {

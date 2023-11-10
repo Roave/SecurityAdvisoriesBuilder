@@ -30,7 +30,7 @@
         "psr/http-client": "^1.0.3",
         "psr/http-message": "^2.0.0",
         "psr/log": "^3.0.0",
-        "symfony/yaml": "^6.3.7"
+        "symfony/yaml": "^6.3.8"
     },
     "require-dev": {
         "doctrine/coding-standard": "^12.0.0",

@@ -40,7 +40,7 @@
         "roave/infection-static-analysis-plugin": "^1.33.0",
         "roave/no-leaks": "^1.5.0",
         "squizlabs/php_codesniffer": "^3.7.2",
-        "vimeo/psalm": "^5.15.0"
+        "vimeo/psalm": "^5.16.0"
     },
     "replace": {
         "symfony/polyfill-ctype": "*",

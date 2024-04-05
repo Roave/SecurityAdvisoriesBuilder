@@ -20,7 +20,7 @@
         "ext-bcmath": "*",
         "ext-json": "*",
         "ext-pcre": "*",
-        "azjezz/psl": "^2.9.0",
+        "azjezz/psl": "^2.9.1",
         "composer/composer": "^2.7.2",
         "composer/semver": "^3.4.0",
         "monolog/monolog": "^3.5.0",
@@ -35,7 +35,7 @@
     "require-dev": {
         "doctrine/coding-standard": "^12.0.0",
         "php-standard-library/psalm-plugin": "^2.3.0",
-        "phpunit/phpunit": "^9.6.18",
+        "phpunit/phpunit": "^9.6.19",
         "psalm/plugin-phpunit": "^0.19.0",
         "roave/infection-static-analysis-plugin": "^1.35.0",
         "roave/no-leaks": "^1.5.0",

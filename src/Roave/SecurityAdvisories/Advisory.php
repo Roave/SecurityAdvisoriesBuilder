@@ -63,7 +63,7 @@ final class Advisory
                 /** @param array{versions: string|array<array-key, string>, ...} $branchConfig */
                 static fn (array $branchConfig): VersionConstraint => VersionConstraint::fromString(
                     Str\join(Vec\values((array) $branchConfig['versions']), ','),
-                )
+                ),
             ),
         );
     }

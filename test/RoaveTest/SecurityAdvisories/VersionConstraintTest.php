@@ -110,7 +110,7 @@ final class VersionConstraintTest extends TestCase
                  *
                  * @return non-empty-string
                  */
-                static fn (array $sample) => $sample[0]
+                static fn (array $sample) => $sample[0],
             ),
             $samples,
         );
@@ -267,7 +267,7 @@ final class VersionConstraintTest extends TestCase
                  *
                  * @return non-empty-string
                  */
-                static fn ($sample) => $sample[0]
+                static fn ($sample) => $sample[0],
             ),
             $samples,
         );
@@ -435,7 +435,7 @@ final class VersionConstraintTest extends TestCase
                  *
                  * @returns non-empty-string
                  */
-                static fn (array $entry): string => '"' . $entry[0] . '" <=> "' . $entry[1] . '"'
+                static fn (array $entry): string => '"' . $entry[0] . '" <=> "' . $entry[1] . '"',
             ),
             Vec\map(
                 $constraints,
@@ -448,7 +448,7 @@ final class VersionConstraintTest extends TestCase
                     VersionConstraint::fromString($entry[0]),
                     VersionConstraint::fromString($entry[1]),
                     $entry[2],
-                ]
+                ],
             ),
         );
     }

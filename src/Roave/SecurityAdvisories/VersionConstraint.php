@@ -53,7 +53,7 @@ final class VersionConstraint
                 $constraint->isConjunctive()
                     ? ','
                     : '|',
-                array_map([self::class, 'constraintToString'], $constraint->getConstraints()),
+                array_map(self::constraintToString(...), $constraint->getConstraints()),
             );
         }
 

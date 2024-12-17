@@ -16,31 +16,31 @@
         }
     ],
     "require": {
-        "php": "~8.2.3",
+        "php": "~8.4.1",
         "ext-bcmath": "*",
         "ext-json": "*",
         "ext-pcre": "*",
-        "azjezz/psl": "^3.0.0",
-        "composer/composer": "^2.7.7",
-        "composer/semver": "^3.4.0",
-        "monolog/monolog": "^3.6.0",
-        "nyholm/psr7": "^1.8.1",
-        "ocramius/package-versions": "^2.8.0",
-        "php-http/curl-client": "^2.3.2",
+        "azjezz/psl": "^3.1.0",
+        "composer/composer": "^2.8.4",
+        "composer/semver": "^3.4.3",
+        "monolog/monolog": "^3.8.1",
+        "nyholm/psr7": "^1.8.2",
+        "ocramius/package-versions": "^2.9.0",
+        "php-http/curl-client": "^2.3.3",
         "psr/http-client": "^1.0.3",
         "psr/http-message": "^2.0.0",
-        "psr/log": "^3.0.0",
-        "symfony/yaml": "^7.0.7"
+        "psr/log": "^3.0.2",
+        "symfony/yaml": "^7.2.0"
     },
     "require-dev": {
         "doctrine/coding-standard": "^12.0.0",
         "php-standard-library/psalm-plugin": "^2.3.0",
-        "phpunit/phpunit": "^9.6.19",
+        "phpunit/phpunit": "^9.6.22",
         "psalm/plugin-phpunit": "^0.19.0",
         "roave/infection-static-analysis-plugin": "^1.35.0",
         "roave/no-leaks": "^1.5.0",
-        "squizlabs/php_codesniffer": "^3.9.2",
-        "vimeo/psalm": "^5.23.1"
+        "squizlabs/php_codesniffer": "^3.11.2",
+        "vimeo/psalm": "^5.26.1"
     },
     "replace": {
         "symfony/polyfill-ctype": "*",

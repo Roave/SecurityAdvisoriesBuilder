@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "78c4dc4f918df5b10aec87da1f80f30b",
+    "content-hash": "d7cd3b439d22c257fe460080b9c5dd99",
     "packages": [
         {
             "name": "azjezz/psl",
@@ -4915,51 +4915,6 @@
             "time": "2024-03-10T11:55:48+00:00"
         },
         {
-            "name": "roave/no-leaks",
-            "version": "1.5.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Roave/no-leaks.git",
-                "reference": "ede929f4c02231f862fce798ad8dc7c7b2703094"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Roave/no-leaks/zipball/ede929f4c02231f862fce798ad8dc7c7b2703094",
-                "reference": "ede929f4c02231f862fce798ad8dc7c7b2703094",
-                "shasum": ""
-            },
-            "require": {
-                "ext-json": "*",
-                "php": "~8.1.0 || ~8.2.0",
-                "phpunit/phpunit": "^9.6.10"
-            },
-            "require-dev": {
-                "doctrine/coding-standard": "^12.0.0",
-                "psalm/plugin-phpunit": "^0.18.4",
-                "roave/infection-static-analysis-plugin": "^1.32.0",
-                "squizlabs/php_codesniffer": "^3.7.2",
-                "vimeo/psalm": "^5.14.1"
-            },
-            "bin": [
-                "bin/roave-no-leaks"
-            ],
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Roave\\NoLeaks\\PHPUnit\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "support": {
-                "issues": "https://github.com/Roave/no-leaks/issues",
-                "source": "https://github.com/Roave/no-leaks/tree/1.5.0"
-            },
-            "time": "2023-08-02T18:55:03+00:00"
-        },
-        {
             "name": "sanmai/later",
             "version": "0.1.4",
             "source": {
@@ -6628,7 +6583,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "~8.2.3",
+        "php": "~8.3.1",
         "ext-bcmath": "*",
         "ext-json": "*",
         "ext-pcre": "*"

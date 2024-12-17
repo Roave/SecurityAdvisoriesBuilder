@@ -38,7 +38,6 @@
         "phpunit/phpunit": "^9.6.22",
         "psalm/plugin-phpunit": "^0.19.0",
         "roave/infection-static-analysis-plugin": "^1.35.0",
-        "roave/no-leaks": "^1.5.0",
         "squizlabs/php_codesniffer": "^3.11.2",
         "vimeo/psalm": "^5.26.1"
     },

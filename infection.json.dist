@@ -18,6 +18,6 @@
         "UnwrapArrayFilter": false,
         "UnwrapArrayValues": false
     },
-    "minMsi": 94.7,
+    "minMsi": 100,
     "minCoveredMsi": 100
 }

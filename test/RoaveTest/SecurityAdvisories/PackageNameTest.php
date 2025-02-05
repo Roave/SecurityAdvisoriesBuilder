@@ -20,13 +20,15 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psl\Str;
 use Psl\Vec;
 use Roave\SecurityAdvisories\Exception\InvalidPackageName;
 use Roave\SecurityAdvisories\PackageName;
 
-/** @covers \Roave\SecurityAdvisories\PackageName */
+#[CoversClass(PackageName::class)]
 final class PackageNameTest extends TestCase
 {
     /**
@@ -34,6 +36,7 @@ final class PackageNameTest extends TestCase
      *
      * @dataProvider validPackageNames
      */
+    #[DataProvider('validPackageNames')]
     public function testStoresValidPackageName(string $name, string $expected): void
     {
         self::assertSame($expected, PackageName::fromName($name)->packageName);
@@ -58,6 +61,7 @@ final class PackageNameTest extends TestCase
      *
      * @dataProvider validReferenceNames
      */
+    #[DataProvider('validReferenceNames')]
     public function testStoresValidPackageFromReferenceName(string $reference, string $expected): void
     {
         self::assertSame($expected, PackageName::fromReferenceName($reference)->packageName);
@@ -92,6 +96,7 @@ final class PackageNameTest extends TestCase
     }
 
     /** @dataProvider invalidPackageNames */
+    #[DataProvider('invalidPackageNames')]
     public function testWillRejectInvalidPackageName(string $invalidName): void
     {
         $this->expectException(InvalidPackageName::class);
@@ -100,6 +105,7 @@ final class PackageNameTest extends TestCase
     }
 
     /** @dataProvider invalidPackageNames */
+    #[DataProvider('invalidPackageNames')]
     public function testWillRejectInvalidReference(string $invalidName): void
     {
         $this->expectException(InvalidPackageName::class);

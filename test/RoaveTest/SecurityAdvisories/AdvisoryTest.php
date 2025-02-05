@@ -20,15 +20,13 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\PackageName;
 
-/**
- * Tests for {@see \Roave\SecurityAdvisories\Advisory}
- *
- * @covers \Roave\SecurityAdvisories\Advisory
- */
+#[CoversClass(Advisory::class)]
 final class AdvisoryTest extends TestCase
 {
     public function testFromArrayWithValidConfig(): void
@@ -140,6 +138,7 @@ final class AdvisoryTest extends TestCase
      *
      * @dataProvider unsortedBranchesProvider
      */
+    #[DataProvider('unsortedBranchesProvider')]
     public function testFromArrayGeneratesSortedResult(
         array $versionConstraint1,
         array $versionConstraint2,

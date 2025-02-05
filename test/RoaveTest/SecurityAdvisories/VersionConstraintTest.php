@@ -20,22 +20,26 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psl\Dict;
 use Psl\Vec;
 use Roave\SecurityAdvisories\VersionConstraint;
 use UnexpectedValueException;
 
-/** @covers \Roave\SecurityAdvisories\VersionConstraint */
+#[CoversClass(VersionConstraint::class)]
 final class VersionConstraintTest extends TestCase
 {
     /** @dataProvider normalizableRangesProvider */
+    #[DataProvider('normalizableRangesProvider')]
     public function testOperatesOnNormalizedRanges(string $originalRange, string $normalizedRange): void
     {
         self::assertSame($normalizedRange, VersionConstraint::fromString($originalRange)->getConstraintString());
     }
 
     /** @dataProvider complexRangesProvider */
+    #[DataProvider('complexRangesProvider')]
     public function testFromRangeWithComplexRanges(string $stringConstraint, string $expectedNormalization): void
     {
         $constraint = VersionConstraint::fromString($stringConstraint);
@@ -44,6 +48,7 @@ final class VersionConstraintTest extends TestCase
     }
 
     /** @dataProvider mergeableRangesProvider */
+    #[DataProvider('mergeableRangesProvider')]
     public function testMergeWithMergeableRanges(
         string $constraintString1,
         string $constraintString2,
@@ -58,6 +63,7 @@ final class VersionConstraintTest extends TestCase
     }
 
     /** @dataProvider strictlyOverlappingRangesProvider */
+    #[DataProvider('strictlyOverlappingRangesProvider')]
     public function testCanMergeWithMergeableRanges(string $range1, string $range2, string $expected): void
     {
         $constraint1 = VersionConstraint::fromString($range1);
@@ -68,6 +74,7 @@ final class VersionConstraintTest extends TestCase
     }
 
     /** @dataProvider nonStrictlyOverlappingRangesProvider */
+    #[DataProvider('nonStrictlyOverlappingRangesProvider')]
     public function testNonMergeableRanges(string $range1, string $range2): void
     {
         $constraint1 = VersionConstraint::fromString($range1);
@@ -369,6 +376,7 @@ final class VersionConstraintTest extends TestCase
     }
 
     /** @dataProvider invalidRangesProvider */
+    #[DataProvider('invalidRangesProvider')]
     public function testWillRejectInvalidVersionConstraints(string $constraint): void
     {
         $this->expectException(UnexpectedValueException::class);
@@ -392,6 +400,7 @@ final class VersionConstraintTest extends TestCase
     }
 
     /** @dataProvider comparedConstraints */
+    #[DataProvider('comparedConstraints')]
     public function testSorting(VersionConstraint $a, VersionConstraint $b, int $result): void
     {
         self::assertSame($result, VersionConstraint::sort($a, $b));

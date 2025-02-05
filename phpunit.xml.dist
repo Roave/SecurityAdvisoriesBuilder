@@ -4,14 +4,18 @@
     xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
     bootstrap="./vendor/autoload.php"
     colors="true"
-    verbose="true"
+    failOnEmptyTestSuite="true"
+    failOnDeprecation="true"
+    failOnWarning="true"
+    failOnPhpunitDeprecation="true"
+    failOnNotice="true"
 >
     <testsuite name="Roave\SecurityAdvisories tests">
         <directory>./test</directory>
     </testsuite>
-    <coverage>
+    <source>
         <include>
             <directory suffix=".php">./src</directory>
         </include>
-    </coverage>
+    </source>
 </phpunit>

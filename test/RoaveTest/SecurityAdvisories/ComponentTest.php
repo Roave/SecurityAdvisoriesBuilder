@@ -225,7 +225,7 @@ final class ComponentTest extends TestCase
      *     }
      * >
      */
-    public function complexRealAdvisoriesProvider()
+    public static function complexRealAdvisoriesProvider()
     {
         return [
             'Case: thelia/thelia' => [

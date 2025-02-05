@@ -162,7 +162,7 @@ final class AdvisoryTest extends TestCase
      *      non-empty-string
      * }>
      */
-    public function unsortedBranchesProvider(): array
+    public static function unsortedBranchesProvider(): array
     {
         return [
             [

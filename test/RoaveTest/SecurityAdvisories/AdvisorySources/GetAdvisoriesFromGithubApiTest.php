@@ -225,7 +225,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @psalm-return non-empty-list<array{list<ResponseInterface>}> */
-    public function correctResponsesSequenceDataProvider(): array
+    public static function correctResponsesSequenceDataProvider(): array
     {
         $responseBodies = [
             <<<'F'
@@ -368,7 +368,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @psalm-return non-empty-list<list<ResponseInterface>> */
-    public function correctResponsesWithInvalidAdvisoryNames(): array
+    public static function correctResponsesWithInvalidAdvisoryNames(): array
     {
         $responseBodies = [
             <<<'F'
@@ -451,7 +451,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @psalm-return non-empty-list<array{ResponseInterface}> */
-    public function responsesWithIncorrectRangesProvider(): array
+    public static function responsesWithIncorrectRangesProvider(): array
     {
         $query = <<<'QUERY'
                 {
@@ -498,7 +498,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @psalm-return non-empty-list<list<ResponseInterface>> */
-    public function correctResponseWithWithdrawnAdvisories(): array
+    public static function correctResponseWithWithdrawnAdvisories(): array
     {
         $query = <<<'QUERY'
                 {
@@ -545,7 +545,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @psalm-return non-empty-list<list<ResponseInterface>> */
-    public function correctResponseWithIgnoredAdvisories(): array
+    public static function correctResponseWithIgnoredAdvisories(): array
     {
         $query = <<<'QUERY'
                 {
@@ -605,7 +605,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @psalm-return non-empty-list<array{string, bool}> */
-    public function cursorProvider(): array
+    public static function cursorProvider(): array
     {
         return [
             [

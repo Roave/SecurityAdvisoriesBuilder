@@ -93,7 +93,7 @@ final class VersionConstraintTest extends TestCase
     }
 
     /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string}> */
-    public function complexRangesProvider(): array
+    public static function complexRangesProvider(): array
     {
         $samples = [
             ['>1.2.3,<4.5.6,<7.8.9', '>1.2.3,<4.5.6'],
@@ -124,7 +124,7 @@ final class VersionConstraintTest extends TestCase
     }
 
     /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string, bool, bool}> */
-    public function mergeableRangesProvider(): array
+    public static function mergeableRangesProvider(): array
     {
         $entries = [
             ['>1,<2', '>1,<2', true, true],
@@ -229,7 +229,7 @@ final class VersionConstraintTest extends TestCase
     }
 
     /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string}> */
-    public function normalizableRangesProvider(): array
+    public static function normalizableRangesProvider(): array
     {
         $samples = [
             ['<1', '<1'],
@@ -281,7 +281,7 @@ final class VersionConstraintTest extends TestCase
     }
 
     /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string, non-empty-string}> */
-    public function strictlyOverlappingRangesProvider(): array
+    public static function strictlyOverlappingRangesProvider(): array
     {
         $entries = [
             ['>2,<3', '>2.1,<4', '>2,<4'],
@@ -337,7 +337,7 @@ final class VersionConstraintTest extends TestCase
     }
 
     /** @psalm-return array<non-empty-string, array{non-empty-string, non-empty-string}> */
-    public function nonStrictlyOverlappingRangesProvider(): array
+    public static function nonStrictlyOverlappingRangesProvider(): array
     {
         $entries = [
             ['>2,<3', '>3,<4'],
@@ -385,7 +385,7 @@ final class VersionConstraintTest extends TestCase
     }
 
     /** @psalm-return non-empty-list<array{non-empty-string}> */
-    public function invalidRangesProvider(): array
+    public static function invalidRangesProvider(): array
     {
         return [
             ['<3.1.33-dev-4'],
@@ -408,7 +408,7 @@ final class VersionConstraintTest extends TestCase
     }
 
     /** @psalm-return array<non-empty-string, array{VersionConstraint, VersionConstraint, -1|0|1}> */
-    public function comparedConstraints(): array
+    public static function comparedConstraints(): array
     {
         $constraints = [
             ['>=1', '>=1', 0],

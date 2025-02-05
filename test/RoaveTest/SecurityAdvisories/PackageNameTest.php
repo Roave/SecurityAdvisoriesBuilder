@@ -43,7 +43,7 @@ final class PackageNameTest extends TestCase
     }
 
     /** @return non-empty-list<array{string, non-empty-lowercase-string}> */
-    public function validPackageNames(): array
+    public static function validPackageNames(): array
     {
         return [
             ['foo/bar', 'foo/bar'],
@@ -68,9 +68,9 @@ final class PackageNameTest extends TestCase
     }
 
     /** @return list<array{string, non-empty-lowercase-string}> */
-    public function validReferenceNames(): array
+    public static function validReferenceNames(): array
     {
-        $references = $this->validPackageNames();
+        $references = self::validPackageNames();
 
         return Vec\concat(
             $references,
@@ -114,7 +114,7 @@ final class PackageNameTest extends TestCase
     }
 
     /** @return non-empty-list<array{string}> */
-    public function invalidPackageNames(): array
+    public static function invalidPackageNames(): array
     {
         return [
             [''],

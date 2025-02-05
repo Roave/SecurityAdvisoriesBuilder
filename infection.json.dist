@@ -12,11 +12,7 @@
         }
     },
     "mutators": {
-        "@default": true,
-        "IdenticalEqual": false,
-        "NotIdenticalNotEqual": false,
-        "UnwrapArrayFilter": false,
-        "UnwrapArrayValues": false
+        "@default": true
     },
     "minMsi": 100,
     "minCoveredMsi": 100

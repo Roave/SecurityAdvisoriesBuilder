@@ -20,10 +20,11 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories\Exception;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Exception\InvalidPackageName;
 
-/** @covers \Roave\SecurityAdvisories\Exception\InvalidPackageName */
+#[CoversClass(InvalidPackageName::class)]
 final class InvalidPackageNameTest extends TestCase
 {
     public function testF(): void

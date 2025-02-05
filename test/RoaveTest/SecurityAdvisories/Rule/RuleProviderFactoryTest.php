@@ -20,17 +20,14 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories\Rule;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\Rule\RuleProviderFactory;
 
 use function current;
 
-/**
- * Tests for {@see \Roave\SecurityAdvisories\Rule\RuleProviderFactory}
- *
- * @covers \Roave\SecurityAdvisories\Rule\RuleProviderFactory
- */
+#[CoversClass(RuleProviderFactory::class)]
 final class RuleProviderFactoryTest extends TestCase
 {
     public function testProviderProvidesRules(): void

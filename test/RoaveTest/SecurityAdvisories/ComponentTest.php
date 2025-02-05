@@ -20,16 +20,14 @@ declare(strict_types=1);
 
 namespace RoaveTest\SecurityAdvisories;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\Component;
 use Roave\SecurityAdvisories\PackageName;
 
-/**
- * Tests for {@see \Roave\SecurityAdvisories\Component}
- *
- * @covers \Roave\SecurityAdvisories\Component
- */
+#[CoversClass(Component::class)]
 final class ComponentTest extends TestCase
 {
     public function testFromMultipleAdvisories(): void
@@ -194,6 +192,7 @@ final class ComponentTest extends TestCase
      *
      * @dataProvider complexRealAdvisoriesProvider
      */
+    #[DataProvider('complexRealAdvisoriesProvider')]
     public function testSortComplexAdvisoriesWithRealCase(
         string $reference,
         array $advisory1Branches,
@@ -226,7 +225,7 @@ final class ComponentTest extends TestCase
      *     }
      * >
      */
-    public function complexRealAdvisoriesProvider()
+    public static function complexRealAdvisoriesProvider()
     {
         return [
             'Case: thelia/thelia' => [

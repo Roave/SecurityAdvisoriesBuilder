@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 
 use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psl\Vec;
 use Roave\SecurityAdvisories\Advisory;
@@ -31,11 +32,7 @@ use function assert;
 use function count;
 use function method_exists;
 
-/**
- * Tests for {@see \Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesAdvisoryRuleDecorator}
- *
- * @covers \Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesAdvisoryRuleDecorator
- */
+#[CoversClass(GetAdvisoriesAdvisoryRuleDecorator::class)]
 class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
 {
     public function testThatAdvisoriesAreDecoratedAfterBuiltFromYamlFilesAndConstraintIsChanged(): void

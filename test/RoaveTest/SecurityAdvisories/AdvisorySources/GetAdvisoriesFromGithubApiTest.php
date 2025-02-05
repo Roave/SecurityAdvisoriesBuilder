@@ -22,6 +22,7 @@ namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 
 use Http\Client\Curl\Client;
 use Nyholm\Psr7\Response;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psl\Exception\InvariantViolationException;
 use Psl\Json;
@@ -56,6 +57,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
      *
      * @dataProvider cursorProvider
      */
+    #[DataProvider('cursorProvider')]
     public function testGithubAdvisoriesQueryMethod(string $cursor, bool $shouldContainCursor): void
     {
         $client = $this->createMock(Client::class);
@@ -85,6 +87,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
      *
      * @dataProvider correctResponsesSequenceDataProvider
      */
+    #[DataProvider('correctResponsesSequenceDataProvider')]
     public function testGithubAdvisoriesIsAbleToProduceAdvisories(array $apiResponses): void
     {
         $client = $this->createMock(Client::class);
@@ -197,6 +200,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
      *
      * @dataProvider responsesWithIncorrectRangesProvider
      */
+    #[DataProvider('responsesWithIncorrectRangesProvider')]
     public function testGithubAdvisoriesFailToCompileGettingIncorrectRanges(ResponseInterface $response): void
     {
         $client = $this->createMock(Client::class);
@@ -221,7 +225,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @psalm-return non-empty-list<array{list<ResponseInterface>}> */
-    public function correctResponsesSequenceDataProvider(): array
+    public static function correctResponsesSequenceDataProvider(): array
     {
         $responseBodies = [
             <<<'F'
@@ -293,6 +297,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @dataProvider correctResponsesWithInvalidAdvisoryNames */
+    #[DataProvider('correctResponsesWithInvalidAdvisoryNames')]
     public function testWillSkipAdvisoriesWithMalformedNames(ResponseInterface ...$responses): void
     {
         $client = $this->createMock(Client::class);
@@ -323,6 +328,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
      *
      * @dataProvider correctResponseWithWithdrawnAdvisories
      */
+    #[DataProvider('correctResponseWithWithdrawnAdvisories')]
     public function testWillSkipWithdrawnAdvisories(ResponseInterface ...$responses): void
     {
         $client = $this->createMock(Client::class);
@@ -342,6 +348,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @dataProvider correctResponseWithIgnoredAdvisories */
+    #[DataProvider('correctResponseWithIgnoredAdvisories')]
     public function testWillSkipIgnoredAdvisories(ResponseInterface ...$responses): void
     {
         $client = $this->createMock(Client::class);
@@ -361,7 +368,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @psalm-return non-empty-list<list<ResponseInterface>> */
-    public function correctResponsesWithInvalidAdvisoryNames(): array
+    public static function correctResponsesWithInvalidAdvisoryNames(): array
     {
         $responseBodies = [
             <<<'F'
@@ -444,7 +451,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @psalm-return non-empty-list<array{ResponseInterface}> */
-    public function responsesWithIncorrectRangesProvider(): array
+    public static function responsesWithIncorrectRangesProvider(): array
     {
         $query = <<<'QUERY'
                 {
@@ -491,7 +498,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @psalm-return non-empty-list<list<ResponseInterface>> */
-    public function correctResponseWithWithdrawnAdvisories(): array
+    public static function correctResponseWithWithdrawnAdvisories(): array
     {
         $query = <<<'QUERY'
                 {
@@ -538,7 +545,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @psalm-return non-empty-list<list<ResponseInterface>> */
-    public function correctResponseWithIgnoredAdvisories(): array
+    public static function correctResponseWithIgnoredAdvisories(): array
     {
         $query = <<<'QUERY'
                 {
@@ -598,7 +605,7 @@ class GetAdvisoriesFromGithubApiTest extends TestCase
     }
 
     /** @psalm-return non-empty-list<array{string, bool}> */
-    public function cursorProvider(): array
+    public static function cursorProvider(): array
     {
         return [
             [

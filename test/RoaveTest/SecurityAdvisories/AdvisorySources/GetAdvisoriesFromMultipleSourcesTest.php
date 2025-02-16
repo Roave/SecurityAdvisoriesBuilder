@@ -21,13 +21,15 @@ declare(strict_types=1);
 namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 
 use Generator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psl\Vec;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisories;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
 
-class GetAdvisoriesFromMultipleSourcesTest extends TestCase
+#[CoversClass(GetAdvisoriesFromMultipleSources::class)]
+final class GetAdvisoriesFromMultipleSourcesTest extends TestCase
 {
     public function testMultipleAdvisoriesSources(): void
     {

@@ -22,6 +22,7 @@ namespace RoaveTest\SecurityAdvisories\AdvisorySources;
 
 use Http\Client\Curl\Client;
 use Nyholm\Psr7\Response;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psl\Exception\InvariantViolationException;
@@ -40,7 +41,8 @@ use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use UnexpectedValueException;
 
-class GetAdvisoriesFromGithubApiTest extends TestCase
+#[CoversClass(GetAdvisoriesFromGithubApi::class)]
+final class GetAdvisoriesFromGithubApiTest extends TestCase
 {
     public function testGithubAdvisoriesHasToken(): void
     {

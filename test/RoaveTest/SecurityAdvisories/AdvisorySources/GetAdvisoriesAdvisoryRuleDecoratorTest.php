@@ -33,7 +33,7 @@ use function count;
 use function method_exists;
 
 #[CoversClass(GetAdvisoriesAdvisoryRuleDecorator::class)]
-class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
+final class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
 {
     public function testThatAdvisoriesAreDecoratedAfterBuiltFromYamlFilesAndConstraintIsChanged(): void
     {

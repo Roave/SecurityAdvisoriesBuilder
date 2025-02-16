@@ -25,7 +25,7 @@ use Psl\Vec;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 
-class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
+final class GetAdvisoriesFromFriendsOfPhpTest extends TestCase
 {
     public function testThatAdvisoriesAreBuiltFromYamlFiles(): void
     {

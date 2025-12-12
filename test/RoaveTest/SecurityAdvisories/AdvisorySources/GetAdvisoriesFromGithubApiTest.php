@@ -46,8 +46,8 @@ final class GetAdvisoriesFromGithubApiTest extends TestCase
 {
     public function testGithubAdvisoriesHasToken(): void
     {
-        $client = $this->createMock(Client::class);
-        $logger = $this->createMock(LoggerInterface::class);
+        $client = $this->createStub(Client::class);
+        $logger = $this->createStub(LoggerInterface::class);
 
         $this->expectException(InvariantViolationException::class);
 
@@ -62,8 +62,8 @@ final class GetAdvisoriesFromGithubApiTest extends TestCase
     #[DataProvider('cursorProvider')]
     public function testGithubAdvisoriesQueryMethod(string $cursor, bool $shouldContainCursor): void
     {
-        $client = $this->createMock(Client::class);
-        $logger = $this->createMock(LoggerInterface::class);
+        $client = $this->createStub(Client::class);
+        $logger = $this->createStub(LoggerInterface::class);
 
         $githubAdvisories = new GetAdvisoriesFromGithubApi($client, 'token', $logger);
 
@@ -121,7 +121,7 @@ final class GetAdvisoriesFromGithubApiTest extends TestCase
 
     public function testWillLogErrorsForAdvisoriesWithInvalidVersionConstraints(): void
     {
-        $client = $this->createMock(Client::class);
+        $client = $this->createStub(Client::class);
         $logger = $this->createMock(LoggerInterface::class);
 
         $client->method('sendRequest')
@@ -206,7 +206,7 @@ final class GetAdvisoriesFromGithubApiTest extends TestCase
     public function testGithubAdvisoriesFailToCompileGettingIncorrectRanges(ResponseInterface $response): void
     {
         $client = $this->createMock(Client::class);
-        $logger = $this->createMock(LoggerInterface::class);
+        $logger = $this->createStub(LoggerInterface::class);
 
         $client->expects(self::once())
             ->method('sendRequest')
@@ -302,8 +302,8 @@ final class GetAdvisoriesFromGithubApiTest extends TestCase
     #[DataProvider('correctResponsesWithInvalidAdvisoryNames')]
     public function testWillSkipAdvisoriesWithMalformedNames(ResponseInterface ...$responses): void
     {
-        $client = $this->createMock(Client::class);
-        $logger = $this->createMock(LoggerInterface::class);
+        $client = $this->createStub(Client::class);
+        $logger = $this->createStub(LoggerInterface::class);
 
         $client->method('sendRequest')
             ->willReturnOnConsecutiveCalls(...$responses);
@@ -333,8 +333,8 @@ final class GetAdvisoriesFromGithubApiTest extends TestCase
     #[DataProvider('correctResponseWithWithdrawnAdvisories')]
     public function testWillSkipWithdrawnAdvisories(ResponseInterface ...$responses): void
     {
-        $client = $this->createMock(Client::class);
-        $logger = $this->createMock(LoggerInterface::class);
+        $client = $this->createStub(Client::class);
+        $logger = $this->createStub(LoggerInterface::class);
 
         $client->method('sendRequest')
             ->willReturnOnConsecutiveCalls(...$responses);
@@ -353,8 +353,8 @@ final class GetAdvisoriesFromGithubApiTest extends TestCase
     #[DataProvider('correctResponseWithIgnoredAdvisories')]
     public function testWillSkipIgnoredAdvisories(ResponseInterface ...$responses): void
     {
-        $client = $this->createMock(Client::class);
-        $logger = $this->createMock(LoggerInterface::class);
+        $client = $this->createStub(Client::class);
+        $logger = $this->createStub(LoggerInterface::class);
 
         $client->method('sendRequest')
             ->willReturnOnConsecutiveCalls(...$responses);

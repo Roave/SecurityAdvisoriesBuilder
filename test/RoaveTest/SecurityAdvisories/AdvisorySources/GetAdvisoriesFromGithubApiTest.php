@@ -40,6 +40,7 @@ use ReflectionMethod;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use UnexpectedValueException;
+use function array_values;
 
 #[CoversClass(GetAdvisoriesFromGithubApi::class)]
 final class GetAdvisoriesFromGithubApiTest extends TestCase
@@ -100,7 +101,7 @@ final class GetAdvisoriesFromGithubApiTest extends TestCase
             ->with('Sending request for cursor {cursor}', self::arrayHasKey('cursor'));
         $client->expects(self::exactly(2))
             ->method('sendRequest')
-            ->willReturnOnConsecutiveCalls(...$apiResponses);
+            ->willReturnOnConsecutiveCalls(...array_values($apiResponses));
 
         $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token', $logger);
 
@@ -306,7 +307,7 @@ final class GetAdvisoriesFromGithubApiTest extends TestCase
         $logger = $this->createStub(LoggerInterface::class);
 
         $client->method('sendRequest')
-            ->willReturnOnConsecutiveCalls(...$responses);
+            ->willReturnOnConsecutiveCalls(...array_values($responses));
 
         $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token', $logger);
 
@@ -337,7 +338,7 @@ final class GetAdvisoriesFromGithubApiTest extends TestCase
         $logger = $this->createStub(LoggerInterface::class);
 
         $client->method('sendRequest')
-            ->willReturnOnConsecutiveCalls(...$responses);
+            ->willReturnOnConsecutiveCalls(...array_values($responses));
 
         $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token', $logger);
 
@@ -357,7 +358,7 @@ final class GetAdvisoriesFromGithubApiTest extends TestCase
         $logger = $this->createStub(LoggerInterface::class);
 
         $client->method('sendRequest')
-            ->willReturnOnConsecutiveCalls(...$responses);
+            ->willReturnOnConsecutiveCalls(...array_values($responses));
 
         $advisories = new GetAdvisoriesFromGithubApi($client, 'some_token', $logger);
 

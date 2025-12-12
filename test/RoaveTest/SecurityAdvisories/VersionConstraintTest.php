@@ -52,8 +52,8 @@ final class VersionConstraintTest extends TestCase
     public function testMergeWithMergeableRanges(
         string $constraintString1,
         string $constraintString2,
-        bool $ignored1,
-        bool $ignored2,
+        bool $_,
+        bool $__,
     ): void {
         $constraint1 = VersionConstraint::fromString($constraintString1);
         $constraint2 = VersionConstraint::fromString($constraintString2);

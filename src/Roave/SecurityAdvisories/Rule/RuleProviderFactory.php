@@ -24,7 +24,7 @@ use Roave\SecurityAdvisories\Advisory;
 
 final class RuleProviderFactory
 {
-    private const REPLACEMENTS = [
+    private const array REPLACEMENTS = [
         'https://github.com/advisories/GHSA-c9r9-3h38-r7vj has a buggy version name' => [
             'package' => 'zencart/zencart',
             'originalConstraint' => '< 1.5.5e',

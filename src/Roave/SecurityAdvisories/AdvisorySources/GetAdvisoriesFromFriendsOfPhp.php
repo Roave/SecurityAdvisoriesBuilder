@@ -37,7 +37,7 @@ use Symfony\Component\Yaml\Yaml;
 
 final class GetAdvisoriesFromFriendsOfPhp implements GetAdvisories
 {
-    private const ADVISORY_EXTENSION = 'yaml';
+    private const string ADVISORY_EXTENSION = 'yaml';
 
     public function __construct(private string $advisoriesPath)
     {

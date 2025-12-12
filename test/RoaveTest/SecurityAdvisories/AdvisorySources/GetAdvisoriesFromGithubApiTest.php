@@ -40,6 +40,7 @@ use ReflectionMethod;
 use Roave\SecurityAdvisories\Advisory;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use UnexpectedValueException;
+
 use function array_values;
 
 #[CoversClass(GetAdvisoriesFromGithubApi::class)]

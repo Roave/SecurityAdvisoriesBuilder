@@ -204,14 +204,14 @@ use const STDOUT;
     $cloneRoaveAdvisories();
 
     $getAdvisories = new GetAdvisoriesAdvisoryRuleDecorator(
-        (new GetAdvisoriesFromMultipleSources(
-            (new GetAdvisoriesFromFriendsOfPhp($buildDir . '/security-advisories')),
-            (new GetAdvisoriesFromGithubApi(
+        new GetAdvisoriesFromMultipleSources(
+            new GetAdvisoriesFromFriendsOfPhp($buildDir . '/security-advisories'),
+            new GetAdvisoriesFromGithubApi(
                 new Client(),
                 $token,
                 $logger,
-            )),
-        )),
+            ),
+        ),
         (new RuleProviderFactory())(),
     );
 

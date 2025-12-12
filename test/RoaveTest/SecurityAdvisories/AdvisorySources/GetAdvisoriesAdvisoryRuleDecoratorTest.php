@@ -125,10 +125,10 @@ final class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
         // Arrange
         $advisories = $this->getTempProvideGetAdvisories();
 
-        $decoratedAdvisories = (new GetAdvisoriesAdvisoryRuleDecorator(
+        $decoratedAdvisories = new GetAdvisoriesAdvisoryRuleDecorator(
             $advisories,
             [],
-        ));
+        );
 
         // Act
         $notDecoratedAdvisories = $advisories();
@@ -165,10 +165,10 @@ final class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
 
         $getAdvisories = $this->getTempProvideGetAdvisories();
 
-        $decoratedAdvisories = (new GetAdvisoriesAdvisoryRuleDecorator(
+        $decoratedAdvisories = new GetAdvisoriesAdvisoryRuleDecorator(
             $getAdvisories,
             [$ruleToChangeLowerVersionConstraintRule],
-        ));
+        );
 
         // Act
         $decoratedAdvisories = $decoratedAdvisories();
@@ -243,10 +243,10 @@ final class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
             ]),
         );
 
-        $decoratedAdvisories = (new GetAdvisoriesAdvisoryRuleDecorator(
+        $decoratedAdvisories = new GetAdvisoriesAdvisoryRuleDecorator(
             $getAdvisories,
             [$ruleToFixLaminasFormConstraint],
-        ));
+        );
 
         // Act
         $decoratedAdvisories = $decoratedAdvisories();
@@ -339,10 +339,10 @@ final class GetAdvisoriesAdvisoryRuleDecoratorTest extends TestCase
             ]),
         );
 
-        $decoratedAdvisories = (new GetAdvisoriesAdvisoryRuleDecorator(
+        $decoratedAdvisories = new GetAdvisoriesAdvisoryRuleDecorator(
             $getAdvisories,
             [$ruleToFixLaminasFormConstraint],
-        ));
+        );
 
         // Act
         $decoratedAdvisories = $decoratedAdvisories();

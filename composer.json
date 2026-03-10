@@ -20,7 +20,7 @@
         "ext-bcmath": "*",
         "ext-json": "*",
         "ext-pcre": "*",
-        "azjezz/psl": "^4.2.0",
+        "azjezz/psl": "^5.4.0",
         "composer/composer": "^2.9.2",
         "composer/semver": "^3.4.4",
         "monolog/monolog": "^3.9.0",

@@ -21,7 +21,7 @@
         "ext-json": "*",
         "ext-pcre": "*",
         "azjezz/psl": "^6.1.0",
-        "composer/composer": "^2.9.2",
+        "composer/composer": "^2.9.6",
         "composer/semver": "^3.4.4",
         "monolog/monolog": "^3.9.0",
         "nyholm/psr7": "^1.8.2",

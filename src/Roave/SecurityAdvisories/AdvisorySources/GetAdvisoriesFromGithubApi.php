@@ -45,6 +45,10 @@ final class GetAdvisoriesFromGithubApi implements GetAdvisories
         // @see https://github.com/github/advisory-database/pull/5047, advisory is for the tarball version only
         'GHSA-j5g2-q29x-cw3h',
         'GHSA-f626-677r-j5vq', // @see https://github.com/nette/database/issues/314
+        // @see https://github.com/Roave/SecurityAdvisories/issues/150 — GitHub advisory over-widens
+        // the affected range to all phpunit/phpunit versions below 12.5.22 (and 13.0 through 13.1.5),
+        // while the upstream FriendsOfPHP YAML correctly scopes this to only 12.5.21 and 13.1.5.
+        'GHSA-qrr6-mg7r-m243',
     ];
     private const string GRAPHQL_QUERY     = 'query {
             securityVulnerabilities(ecosystem: COMPOSER, first: 100 %s) {

@@ -35,7 +35,7 @@
     "require-dev": {
         "doctrine/coding-standard": "^14.0.0",
         "php-standard-library/psalm-plugin": "^2.3.0",
-        "phpunit/phpunit": "^12.5.3",
+        "phpunit/phpunit": "^13.1.10",
         "psalm/plugin-phpunit": "^0.19.5",
         "roave/infection-static-analysis-plugin": "^1.42.0",
         "squizlabs/php_codesniffer": "^4.0.1",

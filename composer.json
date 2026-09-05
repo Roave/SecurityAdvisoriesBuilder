@@ -16,30 +16,30 @@
         }
     ],
     "require": {
-        "php": "~8.4.1",
+        "php": "~8.5.10",
         "ext-bcmath": "*",
         "ext-json": "*",
         "ext-pcre": "*",
-        "azjezz/psl": "^6.1.0",
-        "composer/composer": "^2.9.2",
+        "azjezz/psl": "^6.2.1",
+        "composer/composer": "^2.10.3",
         "composer/semver": "^3.4.4",
-        "monolog/monolog": "^3.9.0",
+        "monolog/monolog": "^3.11.0",
         "nyholm/psr7": "^1.8.2",
-        "ocramius/package-versions": "^2.11.0",
+        "ocramius/package-versions": "^2.12.0",
         "php-http/curl-client": "^2.4.0",
         "psr/http-client": "^1.0.3",
         "psr/http-message": "^2.0.0",
         "psr/log": "^3.0.2",
-        "symfony/yaml": "^8.0.1"
+        "symfony/yaml": "^8.1.6"
     },
     "require-dev": {
         "doctrine/coding-standard": "^14.0.0",
-        "php-standard-library/psalm-plugin": "^2.3.0",
-        "phpunit/phpunit": "^13.1.10",
-        "psalm/plugin-phpunit": "^0.19.5",
-        "roave/infection-static-analysis-plugin": "^1.42.0",
-        "squizlabs/php_codesniffer": "^4.0.1",
-        "vimeo/psalm": "^6.14.2"
+        "php-standard-library/psalm-plugin": "^2.4.0",
+        "phpunit/phpunit": "^13.3.2",
+        "psalm/plugin-phpunit": "^0.20.2",
+        "roave/infection-static-analysis-plugin": "^1.44.0",
+        "squizlabs/php_codesniffer": "^4.0.4",
+        "vimeo/psalm": "^6.16.1"
     },
     "replace": {
         "symfony/polyfill-ctype": "*",

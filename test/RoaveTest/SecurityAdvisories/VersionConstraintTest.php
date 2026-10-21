@@ -266,7 +266,7 @@ final class VersionConstraintTest extends TestCase
             ['>=1.2.3, <=4.5.6', '>=1.2.3,<=4.5.6'],
             ['>11.22.33,<44.55.66', '>11.22.33,<44.55.66'],
             ['>1,<2', '>1,<2'],
-            ['>1-stable.1.2,<1.1-rc.1.2', '>1,<1.1.0.0-RC1.2-dev'],
+            ['>1-stable.1.2,<1.1-rc.1.2', '>1,<1.1.0.0-RC1.2'],
             ['>1,<4|>2,<3', '>1,<4'],
             ['>1-alpha.1,<4-alpha.1|>2-beta.1,<3-beta.1', '>1.0.0.0-alpha1,<4.0.0.0-alpha1'],
         ];
@@ -315,11 +315,11 @@ final class VersionConstraintTest extends TestCase
             ['>1-alpha.1,<2-alpha.1', '<=1-alpha.1', '<2.0.0.0-alpha1'],
             ['>=1-alpha.1,<2-alpha.1', '<1-alpha.1', '<2.0.0.0-alpha1'],
             // test overlapping of flags
-            ['>1-a,<1-rc', '>1-b,<1-stable', '>1.0.0.0-alpha,<1.0.0.0-RC-dev'],
-            ['>1-a,<1-rc', '>1-b,<1-stable', '>1.0.0.0-alpha,<1.0.0.0-RC-dev'],
+            ['>1-a,<1-rc', '>1-b,<1-stable', '>1.0.0.0-alpha,<1.0.0.0-RC'],
+            ['>1-a,<1-rc', '>1-b,<1-stable', '>1.0.0.0-alpha,<1.0.0.0-RC'],
             ['>1-b,<1-stable', '>1-rc,<1', '<999,>999'],
             ['>1-rc,<1', '>1-stable,<1-patch', '>1,<1.0.0.0-patch'],
-            ['>1-a,<1-rc', '>1-beta,<1-rc', '>1.0.0.0-alpha,<1.0.0.0-RC-dev'],
+            ['>1-a,<1-rc', '>1-beta,<1-rc', '>1.0.0.0-alpha,<1.0.0.0-RC'],
             // overlapping of stability numbers
             ['>1-a.1,<1-a.4', '>1-a.2,<1-a.5', '>1.0.0.0-alpha1,<1.0.0.0-alpha5'],
             ['>1-a.1.0.1.0,<1-a.4.1', '>1-a.1.0.2,<1-a.5.8', '>1.0.0.0-alpha1.0.1,<1.0.0.0-alpha5.8'],

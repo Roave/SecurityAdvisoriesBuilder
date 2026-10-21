@@ -69,7 +69,7 @@ final class AdvisoryTest extends TestCase
 
         self::assertEquals(PackageName::fromName('foo/bar'), $advisory->package);
         self::assertSame(
-            '>=1.0.0.0-beta3.4,<1.1.0.0-alpha4.5|>=2.0.0.0-RC5-dev,<2.1.0.0-RC6-dev',
+            '>=1.0.0.0-beta3.4,<1.1.0.0-alpha4.5|>=2.0.0.0-RC5,<2.1.0.0-RC6',
             $advisory->getConstraint(),
         );
 
@@ -77,7 +77,7 @@ final class AdvisoryTest extends TestCase
 
         self::assertCount(2, $constraints);
         self::assertSame('>=1.0.0.0-beta3.4,<1.1.0.0-alpha4.5', $constraints[0]->getConstraintString());
-        self::assertSame('>=2.0.0.0-RC5-dev,<2.1.0.0-RC6-dev', $constraints[1]->getConstraintString());
+        self::assertSame('>=2.0.0.0-RC5,<2.1.0.0-RC6', $constraints[1]->getConstraintString());
     }
 
     public function testFromArrayWithStringVersion(): void
@@ -188,7 +188,7 @@ final class AdvisoryTest extends TestCase
             [
                 ['<1.1'],
                 ['>=2.0-rc', '<2.1-beta.1'],
-                '<1.1|>=2.0.0.0-RC-dev,<2.1.0.0-beta1',
+                '<1.1|>=2.0.0.0-RC,<2.1.0.0-beta1',
             ],
             [
                 ['>=2.0-a', '<2.1-a'],

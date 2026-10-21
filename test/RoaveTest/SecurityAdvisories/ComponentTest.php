@@ -151,7 +151,7 @@ final class ComponentTest extends TestCase
 
         $component = new Component(PackageName::fromName('foo/bar'), [$advisory1, $advisory2, $advisory3]);
 
-        $expected = '>=1.0.0.0-patch1.1.2,<1.1.0.0-beta1.1.3|>=2.0.0.0-RC-dev,<2.1.0.0-patch|>=3,<3.1';
+        $expected = '>=1.0.0.0-patch1.1.2,<1.1.0.0-beta1.1.3|>=2.0.0.0-RC,<2.1.0.0-patch|>=3,<3.1';
         self::assertSame($expected, $component->getConflictConstraint());
         self::assertEquals(PackageName::fromName('foo/bar'), $component->name);
     }

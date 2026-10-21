@@ -38,6 +38,7 @@ use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesAdvisoryRuleDecorator;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromFriendsOfPhp;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromGithubApi;
 use Roave\SecurityAdvisories\AdvisorySources\GetAdvisoriesFromMultipleSources;
+use Roave\SecurityAdvisories\PhpVersionSources\GetInsecurePhpVersionsFromPhpNet;
 use Roave\SecurityAdvisories\Rule\RuleProviderFactory;
 
 use function set_error_handler;
@@ -132,8 +133,13 @@ use const STDOUT;
          *
          * @return array<non-empty-string, non-empty-string>
          */
-        static function (array $components): array {
+        static function (array $components, VersionConstraint $insecurePhpVersions): array {
             $conflicts = [];
+
+            $phpConstraint = $insecurePhpVersions->getConstraintString();
+            if ($phpConstraint !== '') {
+                $conflicts['php'] = $phpConstraint;
+            }
 
             foreach ($components as $component) {
                 $constraint = $component->getConflictConstraint();
@@ -215,6 +221,8 @@ use const STDOUT;
         (new RuleProviderFactory())(),
     );
 
+    $getInsecurePhpVersions = new GetInsecurePhpVersionsFromPhpNet(new Client());
+
     // actual work:
     File\write(
         __DIR__ . '/build/composer.json',
@@ -224,6 +232,7 @@ use const STDOUT;
                 $buildComponents(
                     $getAdvisories(),
                 ),
+                $getInsecurePhpVersions(),
             ),
         ) . "\n",
     );
